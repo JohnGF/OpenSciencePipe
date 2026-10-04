@@ -3,13 +3,29 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import polars as pl
 import pandas as pd
-from typing import Optional
+import numpy as np
+from typing import Optional, List, Dict, Any, Tuple
+
 
 
 class Visualization:
     def __init__(self, style: str = "whitegrid"):
         sns.set_style(style)
         plt.rcParams["figure.figsize"] = (12, 7)
+
+    @staticmethod
+    def _world_geojson_path() -> Optional[str]:
+        """Resolve world.geojson: settings/templates/maps/ first, src/templates/ legacy fallback."""
+        import os
+        here = os.path.dirname(os.path.abspath(__file__))
+        repo_root = os.path.abspath(os.path.join(here, "..", ".."))
+        for cand in (
+            os.path.join(repo_root, "settings", "templates", "maps", "world.geojson"),
+            os.path.join(here, "..", "templates", "world.geojson"),
+        ):
+            if os.path.exists(cand):
+                return cand
+        return None
 
     def plot_yearly_growth(
         self,
@@ -273,10 +289,8 @@ class Visualization:
         country_totals["Country"] = country_totals["Country"].replace(aliases)
         country_totals = country_totals.groupby("Country")["Count"].sum().reset_index()
 
-        geojson_path = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), "..", "templates", "world.geojson")
-        )
-        if not os.path.exists(geojson_path):
+        geojson_path = self._world_geojson_path()
+        if not geojson_path:
             logger.warning("world.geojson not found; skipping choropleth map.")
             return
 
@@ -335,7 +349,7 @@ class Visualization:
         title_suffix: str = "Research Topics",
         save_path: Optional[str] = None,
     ):
-        """
+        r"""
         Plots a horizontal Diverging Bar Chart showing the Market Share Delta (\Delta Share %)
         between baseline vs modern epochs.
         """
@@ -406,6 +420,118 @@ class Visualization:
             png_path = save_path.replace(".pdf", ".png")
             plt.savefig(png_path, dpi=300, bbox_inches="tight")
             logger.info(f"Saved temporal delta chart to {save_path} and {png_path}")
+        plt.close()
+
+    def plot_annual_share_trajectories(
+        self,
+        trajectory_df: pd.DataFrame,
+        category_col: str = "Category",
+        year_col: str = "Year",
+        share_col: str = "Market_Share_Pct",
+        title_suffix: str = "Technique",
+        save_path: Optional[str] = None,
+    ):
+        """
+        Plots annual market share trajectories (%) over time for key categories.
+        """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        if (
+            trajectory_df.empty
+            or category_col not in trajectory_df.columns
+            or year_col not in trajectory_df.columns
+            or share_col not in trajectory_df.columns
+        ):
+            logger.warning("Invalid DataFrame for annual trajectory plot.")
+            return
+
+        plt.figure(figsize=(12, 7))
+        categories = trajectory_df[category_col].unique()
+
+        palette = sns.color_palette("tab10", len(categories))
+        for idx, cat in enumerate(categories):
+            cat_df = trajectory_df[trajectory_df[category_col] == cat].sort_values(year_col)
+            plt.plot(
+                cat_df[year_col],
+                cat_df[share_col],
+                marker="o",
+                linewidth=2.2,
+                label=str(cat),
+                color=palette[idx % len(palette)],
+            )
+
+        plt.title(
+            f"Annual Market Share Evolution (%): {title_suffix}",
+            fontsize=15,
+            pad=15,
+            fontweight="bold",
+        )
+        plt.xlabel("Year", fontsize=11, fontweight="bold")
+        plt.ylabel("Annual Market Share (%)", fontsize=11, fontweight="bold")
+        plt.grid(True, linestyle="--", alpha=0.5)
+        plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left", frameon=True)
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            png_path = save_path.replace(".pdf", ".png")
+            plt.savefig(png_path, dpi=300, bbox_inches="tight")
+            logger.info(f"Saved annual share trajectories to {save_path} and {png_path}")
+        plt.close()
+
+    def plot_faceted_crosstab_heatmap(
+        self,
+        epoch_matrices: Dict[str, pd.DataFrame],
+        title_prefix: str = "Methodology vs Application Evolution",
+        save_path: Optional[str] = None,
+    ):
+        """
+        Plots side-by-side faceted heatmaps across multiple epochs.
+        """
+        import logging
+
+        logger = logging.getLogger(__name__)
+
+        if not epoch_matrices:
+            logger.warning("No epoch matrices provided for faceted heatmap.")
+            return
+
+        n_epochs = len(epoch_matrices)
+        fig, axes = plt.subplots(1, n_epochs, figsize=(max(12, 6 * n_epochs), 6), sharey=True)
+        if n_epochs == 1:
+            axes = [axes]
+
+        max_val = max((m.values.max() for m in epoch_matrices.values() if not m.empty), default=10.0)
+        vmax = max(10.0, float(max_val))
+
+        for ax, (epoch_label, matrix) in zip(axes, epoch_matrices.items()):
+            sns.heatmap(
+                matrix,
+                annot=True,
+                fmt=".1f",
+                cmap="Blues",
+                vmin=0,
+                vmax=vmax,
+                cbar=(ax == axes[-1]),
+                ax=ax,
+            )
+            ax.set_title(f"Epoch: {epoch_label}", fontsize=12, fontweight="bold")
+            ax.set_xlabel("Application Field", fontsize=10, fontweight="bold")
+            if ax == axes[0]:
+                ax.set_ylabel("Methodology / Technique", fontsize=10, fontweight="bold")
+            else:
+                ax.set_ylabel("")
+
+        plt.suptitle(title_prefix, fontsize=14, fontweight="bold", y=1.02)
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300, bbox_inches="tight")
+            png_path = save_path.replace(".pdf", ".png")
+            plt.savefig(png_path, dpi=300, bbox_inches="tight")
+            logger.info(f"Saved faceted crosstab heatmap to {save_path} and {png_path}")
         plt.close()
 
     def plot_llm_noise_paradigm(
@@ -489,7 +615,7 @@ class Visualization:
             autotext.set_weight("bold")
             autotext.set_fontsize(11)
 
-        ax.set_title("Ollama LLM Taxonomy", fontsize=15, pad=15, fontweight="bold")
+        ax.set_title("Deterministic Keyword-Rule Paradigm Taxonomy", fontsize=15, pad=15, fontweight="bold")
         plt.tight_layout()
 
         if save_path:
@@ -1404,8 +1530,19 @@ class Visualization:
             plt.close()
         return fig
 
-    def plot_funnel(self, df: pd.DataFrame, effect_col=None, var_col="v_i", save_path: str = None):
-        """Generates a Funnel Plot for publication bias evaluation."""
+    def plot_funnel(
+        self,
+        df: pd.DataFrame,
+        effect_col: Optional[str] = None,
+        var_col: str = "v_i",
+        show_contours: bool = True,
+        save_path: Optional[str] = None
+    ):
+        """
+        Generates a Contour-Enhanced Funnel Plot for publication bias evaluation.
+        Renders statistical significance contour zones (p < 0.01, 0.05, 0.10) and
+        distinguishes observed studies from trim-and-fill imputed studies.
+        """
         if df.empty:
             return None
 
@@ -1417,32 +1554,54 @@ class Visualization:
         if var_col not in df.columns:
             return None
 
-        fig, ax = plt.subplots(figsize=(8, 6))
+        fig, ax = plt.subplots(figsize=(9, 7))
 
         effects = pd.to_numeric(df[actual_eff_col], errors='coerce').values
         variances = pd.to_numeric(df[var_col], errors='coerce').fillna(0.1).values
         se = __import__('numpy').sqrt(variances)
 
-        # Plot studies
-        ax.scatter(effects, se, alpha=0.6, color='blue', edgecolors='black')
-
-        # Plot pseudo 95% confidence limits based on pooled estimate
         weights = 1.0 / variances
-        pooled_effect = __import__('numpy').average(effects, weights=weights)
+        pooled_effect = float(__import__('numpy').average(effects, weights=weights))
+        max_se = float(__import__('numpy').max(se) * 1.15) if len(se) > 0 else 1.0
 
-        max_se = __import__('numpy').max(se) * 1.1 if len(se) > 0 else 1.0
-        y_vals = __import__('numpy').linspace(0, max_se, 100)
+        y_vals = __import__('numpy').linspace(0.001, max_se, 200)
+
+        # Statistical significance contours centered at null effect (0.0)
+        if show_contours:
+            # 90% contour (p < 0.10 -> z = 1.645)
+            # 95% contour (p < 0.05 -> z = 1.960)
+            # 99% contour (p < 0.01 -> z = 2.576)
+            x_min = min(float(effects.min()) - 1.0, -3.0 * max_se)
+            x_max = max(float(effects.max()) + 1.0, 3.0 * max_se)
+
+            ax.fill_betweenx(y_vals, -2.576 * y_vals, 2.576 * y_vals, color='#D3D3D3', alpha=0.4, label='p > 0.01 (White/Gray)')
+            ax.fill_betweenx(y_vals, -1.960 * y_vals, 1.960 * y_vals, color='#E8E8E8', alpha=0.6, label='p > 0.05')
+            ax.fill_betweenx(y_vals, -1.645 * y_vals, 1.645 * y_vals, color='#F8F8F8', alpha=0.8, label='p > 0.10')
+
+        # Pseudo 95% confidence limits based on pooled estimate
         x_left = pooled_effect - 1.96 * y_vals
         x_right = pooled_effect + 1.96 * y_vals
 
-        ax.plot(x_left, y_vals, 'k--', alpha=0.7)
-        ax.plot(x_right, y_vals, 'k--', alpha=0.7)
-        ax.axvline(pooled_effect, color='black', linestyle='-', alpha=0.8)
+        ax.plot(x_left, y_vals, 'k--', alpha=0.8, label='Pseudo 95% CI (Pooled)')
+        ax.plot(x_right, y_vals, 'k--', alpha=0.8)
+        ax.axvline(pooled_effect, color='red', linestyle='-', linewidth=1.5, alpha=0.9, label=f'Pooled Estimate ({pooled_effect:.2f})')
+        ax.axvline(0, color='gray', linestyle=':', alpha=0.7)
 
-        ax.set_ylim(max_se, 0)  # Invert y-axis (0 SE at top)
-        ax.set_xlabel('Standardized Effect Size (d)')
-        ax.set_ylabel('Standard Error')
-        ax.set_title('Funnel Plot with Pseudo 95% Confidence Limits')
+        # Plot observed vs imputed studies
+        is_imputed = df["is_imputed"].values if "is_imputed" in df.columns else [False] * len(df)
+        obs_mask = [not x for x in is_imputed]
+        imp_mask = [bool(x) for x in is_imputed]
+
+        if any(obs_mask):
+            ax.scatter(effects[obs_mask], se[obs_mask], color='#1f77b4', s=45, alpha=0.8, edgecolors='black', label='Observed Studies', zorder=4)
+        if any(imp_mask):
+            ax.scatter(effects[imp_mask], se[imp_mask], color='#ff7f0e', s=55, marker='D', alpha=0.9, edgecolors='black', label='Imputed Studies (Trim & Fill)', zorder=5)
+
+        ax.set_ylim(max_se, 0)  # Invert y-axis
+        ax.set_xlabel('Standardized Effect Size (d)', fontsize=11, fontweight='bold')
+        ax.set_ylabel('Standard Error (SE)', fontsize=11, fontweight='bold')
+        ax.set_title('Contour-Enhanced Funnel Plot', fontsize=13, fontweight='bold', pad=15)
+        ax.legend(loc='upper right', fontsize=9, framealpha=0.9)
 
         plt.tight_layout()
         if save_path:
@@ -1503,3 +1662,239 @@ class Visualization:
             plt.savefig(png_path, dpi=300)
             plt.close()
         return fig
+
+    def plot_evidence_gap_map(
+        self,
+        df: pd.DataFrame,
+        intervention_col: str = "intervention",
+        outcome_col: str = "outcome",
+        effect_dir_col: Optional[str] = "effect_direction",
+        save_path: Optional[str] = None
+    ):
+        """
+        Generates a 2D Evidence Gap Map (EGM) Bubble Grid Matrix.
+        X-axis: Intervention Categories / Study Methods
+        Y-axis: Measured Outcome Domains
+        Bubble Size: Study Count (density of evidence)
+        Bubble Color: Dominant Finding / Effect Direction
+        """
+        if df.empty or intervention_col not in df.columns or outcome_col not in df.columns:
+            logger.warning("Dataframe lacks required columns for Evidence Gap Map.")
+            return None
+
+        clean_df = df.dropna(subset=[intervention_col, outcome_col]).copy()
+        if clean_df.empty:
+            return None
+
+        # Aggregate counts and directions
+        grouped = clean_df.groupby([intervention_col, outcome_col]).size().reset_index(name="count")
+        
+        # Color mapping if effect direction is present
+        color_map = {}
+        if effect_dir_col and effect_dir_col in clean_df.columns:
+            dir_summary = clean_df.groupby([intervention_col, outcome_col])[effect_dir_col].agg(
+                lambda s: s.value_counts().index[0] if not s.dropna().empty else "neutral"
+            ).reset_index()
+            merged = pd.merge(grouped, dir_summary, on=[intervention_col, outcome_col], how="left")
+        else:
+            merged = grouped
+            merged["effect_direction"] = "neutral"
+
+        interventions = sorted(clean_df[intervention_col].unique())
+        outcomes = sorted(clean_df[outcome_col].unique())
+
+        fig, ax = plt.subplots(figsize=(max(8, len(interventions) * 1.5), max(6, len(outcomes) * 1.2)))
+
+        # Background grid
+        ax.set_xticks(range(len(interventions)))
+        ax.set_yticks(range(len(outcomes)))
+        ax.set_xticklabels([str(i).replace('_', ' ').title() for i in interventions], rotation=30, ha="right", fontsize=11, fontweight="bold")
+        ax.set_yticklabels([str(o).replace('_', ' ').title() for o in outcomes], fontsize=11, fontweight="bold")
+
+        ax.grid(True, linestyle="--", alpha=0.5, color="gray")
+
+        # Color palette for evidence directions
+        palette = {
+            "positive": "#2ca02c",  # green
+            "negative": "#d62728",  # red
+            "mixed": "#ff7f0e",     # orange
+            "neutral": "#1f77b4"    # blue
+        }
+
+        x_map = {name: idx for idx, name in enumerate(interventions)}
+        y_map = {name: idx for idx, name in enumerate(outcomes)}
+
+        max_count = merged["count"].max() if not merged.empty else 1
+
+        for _, row in merged.iterrows():
+            x = x_map[row[intervention_col]]
+            y = y_map[row[outcome_col]]
+            cnt = row["count"]
+            direction = str(row.get("effect_direction", "neutral")).lower()
+            col = palette.get(direction, "#1f77b4")
+            size = 150 + (cnt / max_count) * 1200
+
+            ax.scatter(x, y, s=size, color=col, alpha=0.75, edgecolors="black", linewidth=1.5, zorder=3)
+            ax.text(x, y, str(cnt), ha="center", va="center", color="white" if direction in ["positive", "negative"] else "black",
+                    fontsize=10, fontweight="bold", zorder=4)
+
+        # Set bounds
+        ax.set_xlim(-0.6, len(interventions) - 0.4)
+        ax.set_ylim(-0.6, len(outcomes) - 0.4)
+
+        # Legend
+        from matplotlib.lines import Line2D
+        legend_elements = [
+            Line2D([0], [0], marker='o', color='w', label='Positive Finding', markerfacecolor='#2ca02c', markersize=10, markeredgecolor='k'),
+            Line2D([0], [0], marker='o', color='w', label='Negative Finding', markerfacecolor='#d62728', markersize=10, markeredgecolor='k'),
+            Line2D([0], [0], marker='o', color='w', label='Mixed / Neutral', markerfacecolor='#1f77b4', markersize=10, markeredgecolor='k'),
+        ]
+        ax.legend(handles=legend_elements, loc="upper right", bbox_to_anchor=(1.25, 1.0), title="Finding Direction")
+
+        ax.set_title("Evidence Gap Map (EGM): Interventions vs. Outcome Domains", fontsize=14, fontweight="bold", pad=20)
+        plt.tight_layout()
+
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+            png_path = save_path.replace('.pdf', '.png')
+            plt.savefig(png_path, dpi=300)
+            plt.close()
+        return fig
+
+    def plot_burst_table_timeline(
+        self,
+        burst_df: pd.DataFrame,
+        top_n: int = 15,
+        save_path: Optional[str] = None
+    ):
+        """
+        Renders a CiteSpace-style Citation / Keyword Burst Timeline.
+        Displays top burst terms sorted by burst strength, with blue baseline timelines
+        and thick red spans indicating active surge intervals.
+        """
+        if burst_df.empty:
+            return None
+
+        plot_df = burst_df.sort_values(by=["Weight", "Start_Year"], ascending=[False, False]).head(top_n).copy()
+        plot_df = plot_df.sort_values(by="Start_Year", ascending=True).reset_index(drop=True)
+
+        min_year = int(plot_df["Start_Year"].min()) - 1
+        max_year = int(plot_df["End_Year"].max()) + 1
+
+        fig, ax = plt.subplots(figsize=(10, max(4, len(plot_df) * 0.45 + 1.5)))
+
+        y_positions = list(range(len(plot_df)))
+
+        for idx, row in plot_df.iterrows():
+            term = row["Term"]
+            weight = row["Weight"]
+            start_yr = int(row["Start_Year"])
+            end_yr = int(row["End_Year"])
+
+            # Baseline line (entire study span)
+            ax.plot([min_year, max_year], [idx, idx], color="#b0bec5", linewidth=2.5, zorder=1)
+
+            # Burst interval in thick red
+            ax.plot([start_yr, end_yr], [idx, idx], color="#d32f2f", linewidth=6.5, solid_capstyle='round', zorder=2)
+
+        ax.set_yticks(y_positions)
+        labels = [f"{row['Term']} (w={row['Weight']:.1f})" for _, row in plot_df.iterrows()]
+        ax.set_yticklabels(labels, fontsize=10, fontweight="bold")
+        ax.set_xlim(min_year - 0.5, max_year + 0.5)
+        ax.set_xticks(range(min_year, max_year + 1, max(1, (max_year - min_year) // 8)))
+        ax.set_xlabel("Year", fontsize=11, fontweight="bold")
+        ax.set_title("Top Keyword / Citation Surges (Kleinberg's Burst Detection)", fontsize=13, fontweight="bold", pad=15)
+        ax.grid(axis='x', linestyle='--', alpha=0.5)
+        ax.invert_yaxis()  # Top to bottom
+
+        from matplotlib.lines import Line2D
+        custom_legend = [
+            Line2D([0], [0], color='#d32f2f', lw=5, label='Active Surge (Burst State)'),
+            Line2D([0], [0], color='#b0bec5', lw=2, label='Baseline Period')
+        ]
+        ax.legend(handles=custom_legend, loc="lower right", framealpha=0.9)
+
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+            png_path = save_path.replace('.pdf', '.png')
+            plt.savefig(png_path, dpi=300)
+            plt.close()
+        return fig
+
+    def plot_thematic_evolution_sankey(
+        self,
+        df: pd.DataFrame,
+        epoch_col: str = "Epoch",
+        theme_col: str = "Theme",
+        save_path: Optional[str] = None
+    ):
+        """
+        Renders a Multi-Epoch Thematic Evolution Flowchart (Bibliometrix / Alluvial style).
+        Visualizes how research themes across temporal epochs migrate, split, and merge.
+        """
+        if df.empty or epoch_col not in df.columns or theme_col not in df.columns:
+            return None
+
+        clean = df.dropna(subset=[epoch_col, theme_col]).copy()
+        epochs = sorted(clean[epoch_col].unique())
+        if len(epochs) < 2:
+            return None
+
+        fig, ax = plt.subplots(figsize=(11, 7))
+
+        # Node positions per epoch
+        epoch_themes = {}
+        for ep in epochs:
+            counts = clean[clean[epoch_col] == ep][theme_col].value_counts()
+            epoch_themes[ep] = counts
+
+        x_coords = {ep: idx * 3.0 for idx, ep in enumerate(epochs)}
+        palette = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f", "#bcbd22", "#17becf"]
+
+        # Render theme nodes per epoch
+        node_pos = {}
+        for ep_idx, ep in enumerate(epochs):
+            x = x_coords[ep]
+            counts = epoch_themes[ep]
+            total = counts.sum()
+            y_curr = 0.0
+
+            for t_idx, (theme, cnt) in enumerate(counts.items()):
+                height = (cnt / total) * 5.0
+                color = palette[t_idx % len(palette)]
+                rect = plt.Rectangle((x - 0.25, y_curr), 0.5, height, facecolor=color, edgecolor='black', alpha=0.85, zorder=3)
+                ax.add_patch(rect)
+                ax.text(x, y_curr + height / 2.0, f"{str(theme)[:18]}\n({cnt})", ha='center', va='center', fontsize=9, fontweight='bold', color='white', zorder=4)
+                node_pos[(ep, theme)] = (x, y_curr, height, color)
+                y_curr += height + 0.35
+
+        # Render alluvial transition ribbons between consecutive epochs
+        for ep_i in range(len(epochs) - 1):
+            ep_from = epochs[ep_i]
+            ep_to = epochs[ep_i + 1]
+            
+            # Simple overlap simulation / transition curves
+            for (t_from, (x1, y1, h1, col1)) in [(t, node_pos[(ep_from, t)]) for t in epoch_themes[ep_from].index]:
+                for (t_to, (x2, y2, h2, _)) in [(t, node_pos[(ep_to, t)]) for t in epoch_themes[ep_to].index]:
+                    # Curve between nodes
+                    x_span = np.linspace(x1 + 0.25, x2 - 0.25, 50)
+                    y_top = y1 + h1 + (y2 + h2 - (y1 + h1)) * (0.5 - 0.5 * np.cos(np.pi * (x_span - (x1 + 0.25)) / (x2 - x1 - 0.5)))
+                    y_bot = y1 + (y2 - y1) * (0.5 - 0.5 * np.cos(np.pi * (x_span - (x1 + 0.25)) / (x2 - x1 - 0.5)))
+                    ax.fill_between(x_span, y_bot, y_top, color=col1, alpha=0.15, zorder=2)
+
+        ax.set_xticks([x_coords[ep] for ep in epochs])
+        ax.set_xticklabels([f"Epoch: {ep}" for ep in epochs], fontsize=11, fontweight='bold')
+        ax.set_yticks([])
+        ax.axis('off')
+        ax.set_title("Thematic Evolution Flow Across Epochs (Bibliometrix Sankey Mapping)", fontsize=13, fontweight='bold', pad=15)
+
+        plt.tight_layout()
+        if save_path:
+            plt.savefig(save_path, dpi=300)
+            png_path = save_path.replace('.pdf', '.png')
+            plt.savefig(png_path, dpi=300)
+            plt.close()
+        return fig
+
+

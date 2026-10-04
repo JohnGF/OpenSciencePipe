@@ -28,27 +28,33 @@ def export_temporal_table(output_dir: str = "pipeline_results", force: bool = Fa
             from src.core.temporal_delta import TemporalDeltaAnalysis
             tda = TemporalDeltaAnalysis()
             if "Author Keywords" in df.columns and "Year" in df.columns:
+                import re
                 records = []
-                for _, r in df.dropna(subset=["Author Keywords", "Year"]).iterrows():
+                for idx, r in df.dropna(subset=["Author Keywords", "Year"]).iterrows():
                     yr = int(r["Year"])
                     kws = str(r["Author Keywords"]).split(";")
+                    paper_id = r.get("DOI", r.get("doi", r.get("Title", idx)))
                     for k in kws:
                         k_clean = k.strip().lower()
-                        if k_clean:
-                            records.append({"Keyword": k_clean, "Year": yr})
+                        # Clean parenthetical Wikidata disambiguations like "(linguistics)", "(evolution)"
+                        k_clean = re.sub(r"\s*\([^)]*\)", "", k_clean).strip()
+                        if k_clean and k_clean not in ["key", "lock", "nan", "none"]:
+                            records.append({"Keyword": k_clean, "Year": yr, "Paper_ID": paper_id})
                 kdf = pd.DataFrame(records)
-                delta_df = tda.compute_temporal_deltas(kdf, category_col="Keyword", year_col="Year")
+                delta_df = tda.compute_temporal_deltas(
+                    kdf, category_col="Keyword", year_col="Year", paper_id_col="Paper_ID"
+                )
                 if not delta_df.empty:
                     tex = []
-                    tex.append("\\subsection{Scientific Temporal Dynamics \\& Market Share Deltas ($\\Delta$)}")
+                    tex.append("\\subsection{Scientific Temporal Dynamics \\& Author Keywords Market Share Deltas ($\\Delta$)}")
                     tex.append("\\begin{table}[htbp]")
-                    tex.append("\\caption{Temporal Paradigm Shifts: Baseline vs Modern Epoch Market Share Deltas}")
+                    tex.append("\\caption{Author Keyword Temporal Dynamics: Baseline ($T_1$) vs Modern ($T_2$) Relative Share Deltas}")
                     tex.append("\\label{tab:temporal_deltas}")
                     tex.append("\\small")
                     tex.append("\\setlength{\\tabcolsep}{4pt}")
-                    tex.append("\\begin{tabular}{p{0.22\\linewidth} r r r r p{0.17\\linewidth}}")
+                    tex.append("\\begin{tabular}{p{0.26\\linewidth} r r r r p{0.18\\linewidth}}")
                     tex.append("\\toprule")
-                    tex.append("\\textbf{Research Focus} & \\textbf{$T_1$ (\\%)} & \\textbf{$T_2$ (\\%)} & \\textbf{$\\Delta$ (\\%)} & \\textbf{Fold} & \\textbf{Trajectory} \\\\")
+                    tex.append("\\textbf{Author Keyword} & \\textbf{$T_1$ (\\%)} & \\textbf{$T_2$ (\\%)} & \\textbf{$\\Delta$ (\\%)} & \\textbf{Fold} & \\textbf{Trajectory} \\\\")
                     tex.append("\\midrule")
                     for _, r in delta_df.head(15).iterrows():
                         cat = str(r["Category"]).replace("_", "\\_").replace("&", "\\&")
@@ -57,8 +63,9 @@ def export_temporal_table(output_dir: str = "pipeline_results", force: bool = Fa
                         delta = float(r["Delta_Share_Pct"])
                         fold = float(r["Fold_Change"])
                         traj = str(r["Trajectory"])
-                        tex.append(f"{cat[:25]} & {st1:.1f}\\% & {st2:.1f}\\% & {delta:+.2f}\\% & {fold:.1f}x & {traj} \\\\")
+                        tex.append(f"{cat[:28]} & {st1:.1f}\\% & {st2:.1f}\\% & {delta:+.2f}\\% & {fold:.1f}x & {traj} \\\\")
                     tex.append("\\bottomrule")
+                    tex.append("\\multicolumn{6}{p{0.95\\linewidth}}{\\scriptsize \\textit{Note: Metric reflects the multi-label paper penetration rate (\\% of publications in each epoch specifying the author keyword).}} \\\\")
                     tex.append("\\end{tabular}")
                     tex.append("\\end{table}")
                     with open(fpath, "w", encoding="utf-8") as f:

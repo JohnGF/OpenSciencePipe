@@ -26,13 +26,15 @@ app.add_middleware(
 )
 
 # Shared state
-pipeline = PipelineManager(output_dir="pipeline_results")
+pipeline = PipelineManager(output_dir="outputs/pipeline_results")
 collector = UnifiedCollector()
 active_tasks = {}
 
 # Static files for results and data
-os.makedirs("pipeline_results", exist_ok=True)
-app.mount("/api/results", StaticFiles(directory="pipeline_results"), name="results")
+os.makedirs("outputs/pipeline_results", exist_ok=True)
+os.makedirs("outputs", exist_ok=True)
+app.mount("/api/results", StaticFiles(directory="outputs/pipeline_results"), name="results")
+app.mount("/api/outputs", StaticFiles(directory="outputs"), name="outputs")
 os.makedirs("data", exist_ok=True)
 app.mount("/api/data", StaticFiles(directory="data"), name="data")
 
@@ -84,13 +86,27 @@ WORKSPACE_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "
 def list_folders():
     """Lists directories in the workspace containing CSV, Parquet, or output files."""
     folders = []
+    
+    # Check direct workspace folders
     for item in os.listdir(WORKSPACE_ROOT):
         full_p = os.path.join(WORKSPACE_ROOT, item)
-        if os.path.isdir(full_p) and not item.startswith(".") and item not in ["frontend", "src", "node_modules", ".venv", "__pycache__"]:
-            # Check if directory has data or result files
-            files = os.listdir(full_p)
-            if any(f.endswith((".csv", ".parquet", ".pdf", ".png")) for f in files):
-                folders.append(item)
+        if os.path.isdir(full_p) and not item.startswith(".") and item not in ["frontend", "src", "node_modules", ".venv", "__pycache__", "outputs"]:
+            try:
+                files = os.listdir(full_p)
+                if any(f.endswith((".csv", ".parquet", ".pdf", ".png")) for f in files):
+                    folders.append(item)
+            except Exception:
+                pass
+
+    # Check runs inside outputs/
+    outputs_dir = os.path.join(WORKSPACE_ROOT, "outputs")
+    if os.path.isdir(outputs_dir):
+        for item in os.listdir(outputs_dir):
+            full_p = os.path.join(outputs_dir, item)
+            if os.path.isdir(full_p):
+                rel_path = os.path.join("outputs", item)
+                folders.append(rel_path)
+
     return {"folders": sorted(folders)}
 
 @app.get("/api/list-data")
@@ -100,7 +116,8 @@ def list_data():
 
 @app.get("/api/list-results")
 def list_results():
-    files = [f for f in os.listdir("pipeline_results") if os.path.isfile(os.path.join("pipeline_results", f))] if os.path.exists("pipeline_results") else []
+    res_dir = "outputs/pipeline_results" if os.path.exists("outputs/pipeline_results") else "pipeline_results"
+    files = [f for f in os.listdir(res_dir) if os.path.isfile(os.path.join(res_dir, f))] if os.path.exists(res_dir) else []
     return {"results": files}
 
 @app.get("/api/list-files/{folder_path:path}")

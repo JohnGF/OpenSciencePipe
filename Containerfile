@@ -1,5 +1,6 @@
-# Use official stable RAPIDS release with CUDA 12.0 (compatible with host CUDA drivers)
-FROM nvcr.io/nvidia/rapidsai/base:24.12-cuda12.0-py3.11
+# RAPIDS 25.06 / CUDA 12.8 (host driver 615.x; RAPIDS 24.12 segfaults in
+# UCX teardown against this driver — see paper-3 GPU notes)
+FROM nvcr.io/nvidia/rapidsai/base:25.06-cuda12.8-py3.11
 
 # Install uv for fast dependency management
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvbin/uv
@@ -11,10 +12,12 @@ COPY pyproject.toml uv.lock README.md ./
 COPY src/ ./src
 
 # Install project dependencies
-# We explicitly use cu124 index and pin to cu12 to prevent pulling in CUDA 13
+# Torch trio from the pinned cu124 index (CUDA 12.x forward-compatible with
+# the 12.8 runtime); the RAPIDS 25.06 base is what fixes the UCX teardown crash.
 RUN /uvbin/uv pip install --system --no-cache \
-    --extra-index-url https://download.pytorch.org/whl/cu124 \
-    "torch<2.6.0" \
+    "torch>=2.5.1,<2.7" \
+    "torchvision>=0.20.1,<0.22" \
+    "torchaudio>=2.5.1,<2.8" \
     "nvidia-cuda-runtime-cu12" \
     "nvidia-cudnn-cu12" \
     "nvidia-cublas-cu12" \

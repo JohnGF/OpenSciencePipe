@@ -23,6 +23,13 @@ def organize_output_directory(output_dir="pipeline_results_37k"):
         "paper_scaffold.log",
         "paper_scaffold.out",
         "IEEEtran.cls",
+        "elsarticle.cls",
+        "elsarticle-num.bst",
+        "elsarticle-harv.bst",
+        "elsarticle-num-names.bst",
+        "elsevier_paper_scaffold.tex",
+        "elsevier_meta_paper_scaffold.tex",
+        "meta_paper_scaffold.tex",
         "Makefile"
     }
 

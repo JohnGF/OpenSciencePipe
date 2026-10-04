@@ -10,7 +10,7 @@ class OpenAlexCollector:
     BASE_URL = "https://api.openalex.org/works"
 
     def __init__(self, email: Optional[str] = None):
-        self.headers = {}
+        self.headers = {"User-Agent": f"BibliometricPipeline/1.0 (mailto:{email or 'john@example.com'})"}
         if email:
             self.headers["mailto"] = email
 
@@ -133,16 +133,32 @@ class OpenAlexCollector:
             logger.error(f"Error fetching DOI {doi} from OpenAlex: {e}")
             return None
 
-    @retry(
-        stop=stop_after_attempt(5),
-        wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type((httpx.HTTPStatusError, httpx.RequestError)),
-        reraise=True
-    )
     def _make_request(self, params: Dict) -> Dict:
-        response = httpx.get(self.BASE_URL, params=params, headers=self.headers, timeout=30.0)
-        response.raise_for_status()
-        return response.json()
+        import time
+        max_retries = 5
+        base_delay = 2.0
+        for attempt in range(max_retries):
+            try:
+                response = httpx.get(self.BASE_URL, params=params, headers=self.headers, timeout=30.0)
+                if response.status_code == 429:
+                    raw_after = response.headers.get("Retry-After")
+                    try:
+                        retry_after = min(float(raw_after), 10.0) if raw_after else base_delay * (2 ** attempt)
+                    except ValueError:
+                        retry_after = base_delay * (2 ** attempt)
+                    retry_after = min(retry_after, 10.0)
+                    logger.warning(f"OpenAlex rate limited (429). Throttling for {retry_after:.1f}s (Attempt {attempt+1}/{max_retries})...")
+                    time.sleep(retry_after)
+                    continue
+                response.raise_for_status()
+                # Polite throttle between requests
+                time.sleep(0.3)
+                return response.json()
+            except (httpx.HTTPStatusError, httpx.RequestError) as e:
+                if attempt == max_retries - 1:
+                    raise e
+                time.sleep(min(base_delay * (2 ** attempt), 10.0))
+        return {}
 
     def _reconstruct_abstract(self, inverted_index: Optional[Dict]) -> str:
         if not inverted_index:
@@ -156,7 +172,22 @@ class OpenAlexCollector:
     def _to_dataframe(self, results: List[Dict]) -> pd.DataFrame:
         rows = []
         for res in results:
-            authors = [a.get("author", {}).get("display_name", "") for a in res.get("authorships", [])]
+            authors = []
+            for a in res.get("authorships", []):
+                auth_obj = a.get("author", {})
+                name = auth_obj.get("display_name", "")
+                if not name:
+                    continue
+                orcid = auth_obj.get("orcid")
+                auth_id = auth_obj.get("id")
+                if orcid:
+                    clean_orcid = re.sub(r"^https?://orcid\.org/", "", str(orcid)).strip()
+                    authors.append(f"{name} (orcid:{clean_orcid})")
+                elif auth_id:
+                    clean_id = re.sub(r"^https?://openalex\.org/", "", str(auth_id)).strip()
+                    authors.append(f"{name} ({clean_id})")
+                else:
+                    authors.append(name)
             institutions = []
             for a in res.get("authorships", []):
                 for inst in a.get("institutions", []):

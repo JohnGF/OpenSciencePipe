@@ -55,6 +55,7 @@ pipeline_*_results/
 outputs/
 output/
 test_output/
+zenodo_bundle/
 *.parquet
 *.log
 *.csv
@@ -67,6 +68,10 @@ test_output/
 *.jpeg
 *.svg
 *.html
+
+# Allow figures in manuscripts
+!manuscripts/**/figures/*
+
 
 # ==========================================
 # Jupyter Notebooks & Outputs
@@ -100,3 +105,9 @@ tmp/
 temp/
 *.tmp
 *.bak
+*.aux
+*.out
+*.toc
+*.synctex.gz
+*.blg
+*.spl

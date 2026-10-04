@@ -2,8 +2,38 @@ import os
 import sys
 import pandas as pd
 import logging
+import ast
+import re
 
 logger = logging.getLogger(__name__)
+
+def _clean_keywords(r, tid):
+    raw_rep = r.get("Representation", None)
+    if pd.notna(raw_rep) and str(raw_rep).strip().startswith("["):
+        try:
+            terms = ast.literal_eval(str(raw_rep))
+            if isinstance(terms, list) and terms:
+                clean_terms = [str(t).replace("_", " ").replace("&", r"\&").strip() for t in terms[:4] if str(t).strip()]
+                return ", ".join(clean_terms)
+        except Exception:
+            pass
+    raw_name = str(r.get("Name", "")).lower()
+    raw_name = re.sub(rf"^{tid}_", "", raw_name)
+    parts = [p.strip().replace("&", r"\&") for p in raw_name.split("_") if p.strip()]
+    return ", ".join(parts[:4])
+
+def _infer_meta_theme(name: str) -> str:
+    name_l = name.lower()
+    if any(w in name_l for w in ["artifact", "ica", "wavelet", "noise", "tms", "emg", "filter", "electrode", "kalman", "memd", "ceemdan", "afe", "amplifier"]):
+        return "Advanced Artifact Suppression"
+    elif any(w in name_l for w in ["bci", "motor", "mi", "ssvep", "cca", "intent", "imagery", "p300"]):
+        return "Brain-Computer Interface Systems"
+    elif any(w in name_l for w in ["diffusion", "gan", "generative", "gcn", "transformer", "deep learning", "neural"]):
+        return "Machine Learning Frontiers"
+    elif any(w in name_l for w in ["aperiodic", "1/f", "timescale", "complexity", "entropy", "criticality"]):
+        return "Neural Dynamics \\& Complexity"
+    else:
+        return "Clinical \\& Biological Applications"
 
 def export_bertopic_table(output_dir: str = "pipeline_results", force: bool = False):
     """Generates annex_bertopic_details.tex containing BERTopic Meta-Theme Taxonomy."""
@@ -22,33 +52,55 @@ def export_bertopic_table(output_dir: str = "pipeline_results", force: bool = Fa
     if os.path.exists(topic_csv):
         try:
             df = pd.read_csv(topic_csv)
-            valid = df[df["Topic"] != -1].head(15) if "Topic" in df.columns else df.head(15)
+            valid = df[df["Topic"] != -1] if "Topic" in df.columns else df
+            if len(valid) == 0:
+                valid = df
+
             tex = []
             tex.append("\\subsection{AI-Driven Content Analysis \\& BERTopic Taxonomy}")
             tex.append("\\begin{table}[htbp]")
-            tex.append("\\caption{BERTopic Clusters Consolidated into Meta-Theme Taxonomy}")
+            tex.append("\\caption{BERTopic Thematic Decomposition: Foundational Macro-Themes and Emergent Frontier Micro-Clusters}")
             tex.append("\\label{tab:bertopic_clusters}")
             tex.append("\\scriptsize")
             tex.append("\\setlength{\\tabcolsep}{4pt}")
-            tex.append("\\begin{tabular}{r p{0.32\\linewidth} p{0.30\\linewidth} r}")
+            tex.append("\\begin{tabular}{r p{0.32\\linewidth} p{0.38\\linewidth} r}")
             tex.append("\\toprule")
-            tex.append("\\textbf{\\#} & \\textbf{Consolidated Meta-Theme} & \\textbf{BERTopic Keywords} & \\textbf{Papers} \\\\")
+            tex.append("\\textbf{\\#} & \\textbf{Consolidated Meta-Theme} & \\textbf{c-TF-IDF Representative Keywords} & \\textbf{Papers} \\\\")
             tex.append("\\midrule")
-            for _, r in valid.iterrows():
-                tid = int(r.get("Topic", 0))
-                raw_name = str(r.get("Name", r.get("Representation", ""))).lower()
 
-                # Infer Meta-Theme from keywords
-                if any(w in raw_name for w in ["artifact", "ica", "wavelet", "noise", "tms", "emg", "filter", "electrode"]):
-                    theme = "Advanced Artifact Suppression"
-                elif any(w in raw_name for w in ["bci", "motor", "mi", "ssvep", "cca", "intent", "imagery"]):
-                    theme = "Brain-Computer Interface Systems"
-                else:
-                    theme = "Clinical \\& Biological Applications"
+            if len(valid) > 15:
+                # Two-panel structure
+                panel_a = valid.head(10)
+                # Select diverse micro-clusters with Count >= 10 from beyond top 15
+                candidates = valid.iloc[10:]
+                panel_b = candidates[candidates["Count"] >= 10].tail(12) if len(candidates[candidates["Count"] >= 10]) >= 12 else candidates.tail(12)
 
-                clean_kw = raw_name.replace(f"{tid}_", "").replace("_", ", ").replace("&", "\\&")[:45]
-                cnt = int(r.get("Count", 0))
-                tex.append(f"T{tid} & {theme} & {clean_kw} & {cnt:,} \\\\")
+                tex.append("\\multicolumn{4}{l}{\\textit{\\textbf{Panel A: Foundational Macro-Clusters (High-Volume Pillars)}}} \\\\")
+                tex.append("\\midrule")
+                for _, r in panel_a.iterrows():
+                    tid = int(r.get("Topic", 0))
+                    theme = _infer_meta_theme(str(r.get("Name", "")))
+                    clean_kw = _clean_keywords(r, tid)
+                    cnt = int(r.get("Count", 0))
+                    tex.append(f"T{tid} & {theme} & {clean_kw} & {cnt:,} \\\\")
+
+                tex.append("\\midrule")
+                tex.append("\\multicolumn{4}{l}{\\textit{\\textbf{Panel B: Emergent Frontier Micro-Clusters (Fine-Grained Specializations)}}} \\\\")
+                tex.append("\\midrule")
+                for _, r in panel_b.iterrows():
+                    tid = int(r.get("Topic", 0))
+                    theme = _infer_meta_theme(str(r.get("Name", "")))
+                    clean_kw = _clean_keywords(r, tid)
+                    cnt = int(r.get("Count", 0))
+                    tex.append(f"T{tid} & {theme} & {clean_kw} & {cnt:,} \\\\")
+            else:
+                for _, r in valid.iterrows():
+                    tid = int(r.get("Topic", 0))
+                    theme = _infer_meta_theme(str(r.get("Name", "")))
+                    clean_kw = _clean_keywords(r, tid)
+                    cnt = int(r.get("Count", 0))
+                    tex.append(f"T{tid} & {theme} & {clean_kw} & {cnt:,} \\\\")
+
             tex.append("\\bottomrule")
             tex.append("\\end{tabular}")
             tex.append("\\end{table}")

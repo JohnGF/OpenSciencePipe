@@ -95,6 +95,16 @@ class UnifiedCollector:
                     logger.error(f"Failed to get result for {src_name}: {e}")
 
         if not all_dfs:
+            warning_msg = (
+                "\n" + "!" * 80 + "\n"
+                "[API RATE LIMIT / QUOTA WARNING]\n"
+                "All scientific data sources (OpenAlex, Crossref, Semantic Scholar) returned 0 records or encountered rate limits.\n"
+                "You may have exceeded the daily API request quota (e.g. OpenAlex 100k daily credits).\n"
+                "Please wait for rate limits to reset (typically within 24 hours), verify your email configuration, or check network connectivity.\n"
+                + "!" * 80 + "\n"
+            )
+            logger.warning(warning_msg)
+            print(warning_msg)
             return pd.DataFrame()
 
         merged_df = pd.concat(all_dfs, ignore_index=True)

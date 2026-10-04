@@ -14,7 +14,7 @@ The project is a modular, schema-driven Python pipeline for bibliometric researc
 - **`src/pipeline.py`**: Orchestration layer with CLI support.
 - **`src/ui/app.py`**: Flet-based GUI for autonomous collection and pipeline execution.
 
-### Expected Output Directory Structure (`pipeline_results_37k/`)
+### Expected Output Directory Structure (`outputs/<run_name>/`, e.g., `outputs/pipeline_results/`)
 - **`figures/`**: PDF and PNG visual plots (`Figure_1.pdf` through `Figure_25.pdf`).
 - **`tables/`**: Formatted LaTeX `.tex` table snippets (`tab_top_references_pagerank.tex`, `annex_*.tex`).
 - **`data/`**: Intermediate CSV raw data files (`network_nodes.csv`, `topic_info.csv`, `keywords_cagr.csv`).

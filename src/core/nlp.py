@@ -84,11 +84,12 @@ class BERTopicPipeline:
         logging.info(f"BERTopic: Fitting model using {device} (RAPIDS accelerated: {HAS_RAPIDS_CUML})")
         
         from sklearn.feature_extraction.text import CountVectorizer
-        vectorizer_model = CountVectorizer(stop_words="english", min_df=2, ngram_range=(1, 2))
+        min_df_val = 2 if len(docs) > 50 else 1
+        vectorizer_model = CountVectorizer(stop_words="english", min_df=min_df_val, ngram_range=(1, 2))
 
         if HAS_RAPIDS_CUML:
-            # RAPIDS-accelerated pipeline
-            umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0)
+            # RAPIDS-accelerated pipeline with fixed deterministic seed
+            umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0, random_state=42)
             hdbscan_model = HDBSCAN(min_cluster_size=10, prediction_data=True)
             self.topic_model = BERTopic(
                 embedding_model=self.model_name, 
@@ -98,9 +99,15 @@ class BERTopicPipeline:
                 calculate_probabilities=True
             )
         else:
-            # Standard CPU pipeline (BERTopic handles default UMAP/HDBSCAN)
+            # Standard CPU pipeline with explicit deterministic UMAP
+            from umap import UMAP as CPU_UMAP
+            from hdbscan import HDBSCAN as CPU_HDBSCAN
+            umap_model = CPU_UMAP(n_components=5, n_neighbors=15, min_dist=0.0, metric="cosine", random_state=42)
+            hdbscan_model = CPU_HDBSCAN(min_cluster_size=10, metric="euclidean", cluster_selection_method="eom", prediction_data=True)
             self.topic_model = BERTopic(
                 embedding_model=self.model_name,
+                umap_model=umap_model,
+                hdbscan_model=hdbscan_model,
                 vectorizer_model=vectorizer_model,
                 calculate_probabilities=True
             )
@@ -208,3 +215,155 @@ class BERTopicPipeline:
         except Exception as e:
             logging.error(f"Failed to generate research lines: {e}")
             return pd.DataFrame()
+
+
+def detect_bursts_kleinberg(
+    df: pd.DataFrame,
+    term_col: str = "keyword",
+    year_col: str = "Year",
+    s: float = 2.0,
+    gamma: float = 1.0,
+    min_burst_weight: float = 1.0
+) -> pd.DataFrame:
+    """
+    Implements Kleinberg's 2-state burst detection automaton over discrete annual counts.
+    Identifies sudden surges in scientific term adoption across years (CiteSpace style).
+    
+    Parameters:
+        df: DataFrame with term occurrences and publication years.
+        term_col: Column containing the scientific term or keyword.
+        year_col: Column containing the publication year.
+        s: State transition multiplier (rate scaling parameter, typical 2.0).
+        gamma: Transition cost scaling parameter (typical 1.0).
+        min_burst_weight: Minimum weight threshold to retain burst.
+    """
+    if df.empty or term_col not in df.columns or year_col not in df.columns:
+        return pd.DataFrame()
+
+    clean = df.dropna(subset=[term_col, year_col]).copy()
+    clean[year_col] = pd.to_numeric(clean[year_col], errors="coerce")
+    clean = clean.dropna(subset=[year_col])
+    clean[year_col] = clean[year_col].astype(int)
+
+    all_years = sorted(clean[year_col].unique())
+    if len(all_years) < 3:
+        return pd.DataFrame()
+
+    total_per_year = clean.groupby(year_col).size().to_dict()
+    total_docs = sum(total_per_year.values())
+    if total_docs == 0:
+        return pd.DataFrame()
+
+    bursts = []
+    terms = clean[term_col].value_counts()
+    top_terms = terms[terms >= 3].index.tolist()
+
+    for term in top_terms:
+        term_df = clean[clean[term_col] == term]
+        term_counts = term_df.groupby(year_col).size().to_dict()
+
+        # Vectors of occurrences (r_t) and total trials (d_t) per year
+        r = np.array([term_counts.get(y, 0) for y in all_years], dtype=float)
+        d = np.array([total_per_year.get(y, 1) for y in all_years], dtype=float)
+        n_years = len(all_years)
+
+        # Baseline probability p0 and burst probability p1
+        p0 = float(sum(r)) / float(sum(d)) if sum(d) > 0 else 1e-6
+        p0 = min(max(p0, 1e-6), 0.99)
+        p1 = min(p0 * s, 0.999)
+
+        if p1 <= p0:
+            continue
+
+        # Dynamic programming / Viterbi decoding over 2 states: 0 (baseline), 1 (burst)
+        # Cost matrix: cost of emitting r[t] given state q in {0, 1}
+        # Binomial log-likelihood loss
+        def emit_cost(q, k, n):
+            p = p1 if q == 1 else p0
+            # negative log-likelihood: - (k*log(p) + (n-k)*log(1-p))
+            k_clamped = min(k, n)
+            return - (k_clamped * np.log(p) + (n - k_clamped) * np.log(1.0 - p))
+
+        # Transition cost tau(q_prev, q_curr)
+        # 0 -> 1: gamma * log(n_years), 1 -> 0: 0, 0 -> 0: 0, 1 -> 1: 0
+        trans_cost_01 = gamma * np.log(n_years) if n_years > 1 else 0.0
+
+        dp = np.zeros((n_years, 2))
+        path = np.zeros((n_years, 2), dtype=int)
+
+        dp[0, 0] = emit_cost(0, r[0], d[0])
+        dp[0, 1] = emit_cost(1, r[0], d[0]) + trans_cost_01
+
+        for t in range(1, n_years):
+            # State 0 at t
+            c00 = dp[t-1, 0]
+            c10 = dp[t-1, 1]
+            if c00 <= c10:
+                dp[t, 0] = c00 + emit_cost(0, r[t], d[t])
+                path[t, 0] = 0
+            else:
+                dp[t, 0] = c10 + emit_cost(0, r[t], d[t])
+                path[t, 0] = 1
+
+            # State 1 at t
+            c01 = dp[t-1, 0] + trans_cost_01
+            c11 = dp[t-1, 1]
+            if c01 <= c11:
+                dp[t, 1] = c01 + emit_cost(1, r[t], d[t])
+                path[t, 1] = 0
+            else:
+                dp[t, 1] = c11 + emit_cost(1, r[t], d[t])
+                path[t, 1] = 1
+
+        # Traceback best state sequence
+        best_state = 0 if dp[-1, 0] <= dp[-1, 1] else 1
+        states = [best_state]
+        for t in range(n_years - 1, 0, -1):
+            best_state = path[t, best_state]
+            states.append(best_state)
+        states.reverse()
+
+        # Identify contiguous burst spans (state == 1)
+        in_burst = False
+        start_idx = 0
+        for idx, st in enumerate(states):
+            if st == 1 and not in_burst:
+                in_burst = True
+                start_idx = idx
+            elif st == 0 and in_burst:
+                in_burst = False
+                end_idx = idx - 1
+                # Calculate burst weight / strength
+                burst_r = sum(r[start_idx:end_idx+1])
+                burst_d = sum(d[start_idx:end_idx+1])
+                expected = burst_d * p0
+                weight = max(0.0, burst_r - expected)
+                if weight >= min_burst_weight:
+                    bursts.append({
+                        "Term": term,
+                        "Weight": round(weight, 2),
+                        "Start_Year": all_years[start_idx],
+                        "End_Year": all_years[end_idx],
+                        "Duration": all_years[end_idx] - all_years[start_idx] + 1
+                    })
+
+        if in_burst:
+            end_idx = n_years - 1
+            burst_r = sum(r[start_idx:end_idx+1])
+            burst_d = sum(d[start_idx:end_idx+1])
+            expected = burst_d * p0
+            weight = max(0.0, burst_r - expected)
+            if weight >= min_burst_weight:
+                bursts.append({
+                    "Term": term,
+                    "Weight": round(weight, 2),
+                    "Start_Year": all_years[start_idx],
+                    "End_Year": all_years[end_idx],
+                    "Duration": all_years[end_idx] - all_years[start_idx] + 1
+                })
+
+    res_df = pd.DataFrame(bursts)
+    if not res_df.empty:
+        res_df = res_df.sort_values(by=["Weight", "Start_Year"], ascending=[False, False]).reset_index(drop=True)
+    return res_df
+

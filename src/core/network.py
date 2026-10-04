@@ -1,5 +1,6 @@
 import polars as pl
 import pandas as pd
+import re
 from collections import Counter
 from typing import Tuple, List, Dict
 import logging
@@ -8,11 +9,6 @@ import logging
 try:
     import cudf
     import cugraph
-    import rmm
-    # Enable CUDA Managed Memory so GPU memory allocations spill over into System RAM safely
-    rmm.reinitialize(managed_memory=True)
-    import cupy
-    cupy.cuda.Device(0).use()
     HAS_GPU = True
 except Exception as e:
     logging.warning(f"GPU RAPIDS initialization skipped ({e}). Using CPU network engine.")
@@ -97,17 +93,7 @@ class NetworkAnalysis:
         gpu_success = False
         if self.use_gpu:
             try:
-                import cupy
-                free_mem, total_mem = cupy.cuda.Device(0).mem_info
-                logging.info(f"[GPU DIAGNOSTIC] VRAM Available: {free_mem / 1e9:.2f} GB free / {total_mem / 1e9:.2f} GB total")
-                logging.info(f"[GPU DIAGNOSTIC] Graph Size: {len(unique_authors):,} author nodes, {len(edges_pdf):,} co-authorship edges")
-                est_bytes = (len(unique_authors) + len(edges_pdf)) * 64
-                logging.info(f"[GPU DIAGNOSTIC] Estimated Memory required for cuGraph buffers: ~{est_bytes / 1e6:.2f} MB")
-            except Exception as e:
-                logging.warning(f"Could not query GPU memory info: {e}")
-
-            try:
-                logging.info("NetworkAnalysis: Running GPU-accelerated co-authorship analysis (cuGraph/cuDF)...")
+                logging.info(f"NetworkAnalysis: Running GPU-accelerated co-authorship analysis on {len(unique_authors):,} authors with cuGraph...")
                 edges_gdf = cudf.from_pandas(edges_pdf[['source_id', 'dest_id', 'weight']])
                 self.graph = cugraph.Graph()
                 self.graph.from_cudf_edgelist(edges_gdf, source='source_id', destination='dest_id', edge_attr='weight')
@@ -158,7 +144,7 @@ class NetworkAnalysis:
             edges_pdf_cpu = edges_pdf[['source_id', 'dest_id', 'weight']]
             nx_graph = nx.from_pandas_edgelist(edges_pdf_cpu, source='source_id', target='dest_id', edge_attr='weight')
             self.graph = nx_graph
-            partition_dict = community_louvain.best_partition(nx_graph)
+            partition_dict = community_louvain.best_partition(nx_graph, random_state=42)
             pagerank_dict = nx.pagerank(nx_graph, weight='weight')
             
             # For CPU performance, sample k nodes if graph is large
@@ -198,7 +184,10 @@ class NetworkAnalysis:
         ])
         
         # Correctly aggregate unique non-empty affiliations
-        affiliations = ap_df.filter(pl.col('affiliation') != "").group_by('author_name').agg([
+        aff_flat = ap_df.explode('affiliation').filter(
+            (pl.col('affiliation').is_not_null()) & (pl.col('affiliation') != "")
+        )
+        affiliations = aff_flat.group_by('author_name').agg([
             pl.col('affiliation').unique().sort().alias('affiliation_list')
         ]).with_columns([
             pl.col('affiliation_list').list.join("; ").alias('affiliations_str')
@@ -215,10 +204,11 @@ class NetworkAnalysis:
         node_meta_pl = node_meta_pl.join(id_mapping, on='author_name').drop('affiliation_list')
         
         node_meta_pd = node_meta_pl.to_pandas()
-        if self.use_gpu:
-            self.node_metadata = partition.to_pandas().merge(node_meta_pd, on='vertex', how='left')
+        if hasattr(partition, "to_pandas"):
+            partition_pd = partition.to_pandas()
         else:
-            self.node_metadata = partition.merge(node_meta_pd, on='vertex', how='left')
+            partition_pd = partition
+        self.node_metadata = partition_pd.merge(node_meta_pd, on='vertex', how='left')
 
         return edges_pdf, self.node_metadata
 
@@ -378,7 +368,104 @@ class NetworkAnalysis:
         else:
             edges_pdf_cpu = edges_pdf[['source_id', 'dest_id', 'weight']]
             nx_graph = nx.from_pandas_edgelist(edges_pdf_cpu, source='source_id', target='dest_id', edge_attr='weight')
-            partition_dict = community_louvain.best_partition(nx_graph)
+            partition_dict = community_louvain.best_partition(nx_graph, random_state=42)
+            pagerank_dict = nx.pagerank(nx_graph, weight='weight')
+
+            part_df = pd.DataFrame([{'vertex': k, 'partition': v, 'pagerank': pagerank_dict[k]} for k, v in partition_dict.items()])
+            node_meta_df = node_meta_df.merge(part_df, on='vertex', how='left')
+
+        return edges_pdf, node_meta_df
+
+    @staticmethod
+    def extract_institutions(affiliation: str) -> List[str]:
+        """
+        Heuristic extraction of institutional names from raw affiliation strings.
+        """
+        if not affiliation or not isinstance(affiliation, str):
+            return []
+        entries = re.split(r";", affiliation)
+        insts = []
+        keywords = [
+            "univ", "hospital", "institute", "college", "school", "center", "centre",
+            "academy", "clinic", "inserm", "cnrs", "nih", "politecnico", "polytechnic", "charite", "mayo"
+        ]
+        for e in entries:
+            parts = [p.strip() for p in e.split(",") if p.strip()]
+            for p in parts:
+                p_lower = p.lower()
+                if any(k in p_lower for k in keywords):
+                    if len(p) > 4 and not any(p_lower == k for k in ["university", "hospital", "institute"]):
+                        insts.append(p)
+                        break
+        return list(set(insts))
+
+    def build_institution_collaboration_graph(self, df: pl.DataFrame, min_papers: int = 1) -> Tuple[pd.DataFrame, pd.DataFrame]:
+        """
+        Builds an institution-to-institution undirected network where edges represent co-authorship.
+        Identifies cross-institutional alliances via Louvain community detection and key hubs via PageRank.
+        """
+        logging.info("Building institutional collaboration network...")
+
+        edges = Counter()
+        node_counts = Counter()
+
+        for row in df.to_dicts():
+            affil = row.get("Affiliations")
+            if not affil or not isinstance(affil, str):
+                continue
+
+            institutions = self.extract_institutions(affil)
+            if not institutions:
+                continue
+
+            for inst in institutions:
+                node_counts[inst] += 1
+
+            institutions = sorted(list(set(institutions)))
+            for i in range(len(institutions)):
+                for j in range(i + 1, len(institutions)):
+                    edges[(institutions[i], institutions[j])] += 1
+
+        edges_list = [{'source': k[0], 'destination': k[1], 'weight': v} for k, v in edges.items()]
+        if not edges_list:
+            logging.warning("No institutional collaboration edges found.")
+            return pd.DataFrame(), pd.DataFrame()
+
+        edges_pdf = pd.DataFrame(edges_list)
+        unique_insts = sorted(list(set(edges_pdf['source']) | set(edges_pdf['destination'])))
+        inst_to_id = {name: i for i, name in enumerate(unique_insts)}
+
+        edges_pdf['source_id'] = edges_pdf['source'].map(inst_to_id)
+        edges_pdf['dest_id'] = edges_pdf['destination'].map(inst_to_id)
+
+        node_meta_list = []
+        for inst, iid in inst_to_id.items():
+            node_meta_list.append({
+                "vertex": iid,
+                "institution": inst,
+                "num_publications": node_counts.get(inst, 0)
+            })
+
+        node_meta_df = pd.DataFrame(node_meta_list)
+
+        if self.use_gpu:
+            try:
+                edges_gdf = cudf.from_pandas(edges_pdf[['source_id', 'dest_id', 'weight']])
+                collab_graph = cugraph.Graph()
+                collab_graph.from_cudf_edgelist(edges_gdf, source='source_id', destination='dest_id', edge_attr='weight')
+                partition, _ = cugraph.louvain(collab_graph)
+                pagerank = cugraph.pagerank(collab_graph)
+
+                node_meta_df = node_meta_df.merge(partition.to_pandas(), on='vertex', how='left')
+                node_meta_df = node_meta_df.merge(pagerank.to_pandas(), on='vertex', how='left')
+            except Exception as e:
+                logging.warning(f"GPU institutional graph calculation failed ({e}), falling back to CPU.")
+                self.use_gpu = False
+
+        if not self.use_gpu:
+            edges_pdf_cpu = edges_pdf[['source_id', 'dest_id', 'weight']]
+            nx_graph = nx.from_pandas_edgelist(edges_pdf_cpu, source='source_id', target='dest_id', edge_attr='weight')
+            partition_dict = community_louvain.best_partition(nx_graph, random_state=42)
             pagerank_dict = nx.pagerank(nx_graph, weight='weight')
 
             part_df = pd.DataFrame([{'vertex': k, 'partition': v, 'pagerank': pagerank_dict[k]} for k, v in partition_dict.items()])

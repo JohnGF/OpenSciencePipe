@@ -1,0 +1,13 @@
+{
+    "doi": "10.1371/journal.pdig.0000198",
+    "title": "Performance of ChatGPT on USMLE: Potential for AI-assisted medical education using large language models",
+    "authors": "Kung, Tiffany H.; Cheatham, Morgan; Medenilla, Arielle; Sillos, Czarina; De Leon, Lorie; Elepa\u00f1o, Camille; Madriaga, Maria; Aggabao, Rimel; Diaz-Candido, Giezel; Maningo, James; Tseng, Victor",
+    "year": 2023,
+    "abstract": "<jats:p>We evaluated the performance of a large language model called ChatGPT on the United States Medical Licensing Exam (USMLE), which consists of three exams: Step 1, Step 2CK, and Step 3. ChatGPT performed at or near the passing threshold for all three exams without any specialized training or reinforcement. Additionally, ChatGPT demonstrated a high level of concordance and insight in its explanations. These results suggest that large language models may have the potential to assist with medical education, and potentially, clinical decision-making.</jats:p>",
+    "pdf_validation": {
+        "page_count": 12,
+        "pdf_meta_title": "Performance of ChatGPT on USMLE: Potential for AI-assisted medical education using large language models",
+        "pdf_meta_author": "Tiffany H. Kung, Morgan Cheatham, Arielle Medenilla, Czarina Sillos, Lorie De Leon, Camille Elepa\u00f1o, Maria Madriaga, Rimel Aggabao, Giezel Diaz-Candido, James Maningo, Victor Tseng",
+        "first_page_snippet": "RESEARCH ARTICLE\nPerformance of ChatGPT on USMLE: Potential\nfor AI-assisted medical education using large\nlanguage models\nTiffany H. Kung1,2, Morgan Cheatham3, Arielle Medenilla1, Czarina Sillos1, Lorie De Leon1,\nCamille Elepa\u00f1o1, Maria Madriaga1, Rimel Aggabao1, Giezel Diaz-Candido1,\nJames Maningo1, Victor TsengID1,4*\n1 AnsibleHealth, Inc Mountain View, California, United States of America, 2 Department of Anesthesiology,\nMassachusetts General Hospital, Harvard School of Medicine Boston, Massachusetts, United States of\nAmerica, 3 Warren Alpert Medical School; Brown University Providence, Rhod"
+    }
+}

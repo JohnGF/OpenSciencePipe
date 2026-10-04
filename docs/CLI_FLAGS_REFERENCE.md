@@ -32,13 +32,18 @@ This document provides a comprehensive reference for all command-line interface 
 
 ---
 
-## 3. Paper Screening & LLM Options
+## 3. Paper Screening & Systematic Review Options
 
 | Flag | Argument Type | Default | Description |
 | :--- | :--- | :--- | :--- |
+| `--mode` | `str` | `"biblio"` | Execution mode: `'biblio'` (bibliometric), `'systematic'` (PRISMA review), `'meta'` (quantitative meta-analysis), or `'all'`. |
+| `--include-regex` | `str` | `None` | Grep/regex pattern(s) that **must** be matched for study inclusion (e.g. `'algorithm\|circuit\|qubit'`). |
+| `--exclude-regex` | `str` | `None` | Grep/regex pattern(s) triggering study exclusion (e.g. `'review\|survey\|editorial\|rat\|mice'`). |
+| `--criteria-file` | `str` | `None` | Path to JSON or text file specifying systematic inclusion/exclusion criteria. |
+| `--target-prompt` | `str` | `None` | Target semantic prompt for embedding/LLM screening (defaults to active search query). |
 | `--screen-embeddings` | `switch` | `False` | Enables Option 1: GPU Vector Embedding Relevance Filter (SentenceTransformers `all-MiniLM-L6-v2`). |
 | `--embedding-threshold`| `float` | `0.35` | Cosine similarity threshold for embedding relevance filter. |
-| `--screen-llm` | `switch` | `False` | Enables Option 2: Zero-shot LLM classification & noise treatment paradigm tagging. |
+| `--screen-llm` | `switch` | `False` | Enables Option 2: Zero-shot LLM classification & thematic paradigm tagging. |
 | `--llm-model` | `str` | `"llama3.2:3b"`| Model name for Ollama local LLM screening. |
 | `--include-preprints` | `switch` | `False` | Includes preprints from arXiv and bioRxiv (disabled by default for peer-reviewed papers only). |
 
@@ -54,7 +59,17 @@ This document provides a comprehensive reference for all command-line interface 
 
 ## Example Usage
 
-### Full 33,525 Manuscript Corpus Fetch (Unlimited & Screened)
+### 1. Systematic Review with Deterministic Grep Screening
+```bash
+python -m src.cli \
+  --file data/collected_quantum_computing.csv \
+  --mode systematic \
+  --include-regex "algorithm|circuit|qubit|error correction" \
+  --exclude-regex "review|survey|tutorial" \
+  --output pipeline_results_quantum_slr
+```
+
+### 2. Full 33,525 Manuscript Corpus Fetch (Unlimited & Screened)
 ```bash
 uv run biblio-pipeline \
   --query-file data/original_33k_query.txt \
@@ -65,3 +80,4 @@ uv run biblio-pipeline \
   --embedding-threshold 0.35 \
   --output pipeline_results_manuscript_33k
 ```
+

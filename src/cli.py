@@ -1,10 +1,28 @@
 import logging
 import argparse
 import os
-from src.orchestrators.pipeline_manager import PipelineManager
+
+def _load_dotenv_if_exists(dotenv_path: str = ".env"):
+    if os.path.exists(dotenv_path):
+        try:
+            with open(dotenv_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#") or "=" not in line:
+                        continue
+                    k, v = line.split("=", 1)
+                    k, v = k.strip(), v.strip().strip("'\"")
+                    if k and k not in os.environ:
+                        os.environ[k] = v
+        except Exception:
+            pass
 
 def main():
-    parser = argparse.ArgumentParser(description="Bibliometric Research Pipeline CLI")
+    _load_dotenv_if_exists()
+    parser = argparse.ArgumentParser(
+        description="Bibliometric Research & PRISMA Systematic Review Pipeline CLI",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("--file", type=str, help="Path to local CSV/Parquet file")
     parser.add_argument("--refs-file", type=str, help="Path to external references CSV file")
     parser.add_argument("--query", type=str, help="Search query for autonomous collection")
@@ -12,7 +30,8 @@ def main():
     parser.add_argument("--limit", type=int, default=100, help="Limit per source for collection")
     parser.add_argument("--start-year", type=int, help="Start year for collection")
     parser.add_argument("--end-year", type=int, help="End year for collection")
-    parser.add_argument("--output", type=str, default="pipeline_results", help="Output directory")
+    parser.add_argument("--output", "--output-dir", dest="output", type=str, default="outputs/pipeline_results", help="Output directory")
+    parser.add_argument("--skip-llm", action="store_true", help="Skip LLM screening stage (default if not screening)")
     parser.add_argument("--openalex-email", type=str, help="Email for OpenAlex polite pool")
     parser.add_argument("--ss-api-key", type=str, help="API Key for Semantic Scholar")
     parser.add_argument("--crossref-email", type=str, help="Email for Crossref User-Agent")
@@ -21,7 +40,11 @@ def main():
     parser.add_argument("--scopus-inst-token", type=str, help="Institutional Token for Scopus (optional)")
     parser.add_argument("--wos-api-key", type=str, help="API Key for Web of Science")
 
-    # Paper Screening & Source Options
+    # Paper Screening & Systematic Review Filtering Options
+    parser.add_argument("--include-regex", "--include-pattern", type=str, help="Grep/regex pattern(s) that MUST be present for study inclusion (e.g. 'algorithm|circuit|qubit')")
+    parser.add_argument("--exclude-regex", "--exclude-pattern", type=str, help="Grep/regex pattern(s) triggering study exclusion (e.g. 'review|survey|editorial|rat|mice')")
+    parser.add_argument("--criteria-file", type=str, help="Path to JSON or text file specifying systematic inclusion/exclusion criteria")
+    parser.add_argument("--target-prompt", type=str, help="Target semantic prompt for embedding/LLM screening (defaults to active search query)")
     parser.add_argument("--screen-embeddings", action="store_true", help="Enable Option 1: Embedding semantic relevance filter")
     parser.add_argument("--embedding-threshold", type=float, default=0.35, help="Similarity threshold for embedding filter")
     parser.add_argument("--screen-llm", action="store_true", help="Enable Option 2: LLM zero-shot classification")
@@ -60,6 +83,8 @@ def main():
         session.run_menu()
         return
 
+    from src.orchestrators.pipeline_manager import PipelineManager
+
     active_query = args.query
     if args.query_file and os.path.exists(args.query_file):
         with open(args.query_file, "r", encoding="utf-8") as qf:
@@ -68,6 +93,7 @@ def main():
 
     config = {}
     config["mode"] = args.mode
+    if active_query: config["query"] = active_query
     if args.openalex_email: config["openalex_email"] = args.openalex_email
     if args.ss_api_key: config["ss_api_key"] = args.ss_api_key
     if args.crossref_email: config["crossref_email"] = args.crossref_email
@@ -76,6 +102,10 @@ def main():
     if args.scopus_inst_token: config["scopus_inst_token"] = args.scopus_inst_token
     if args.wos_api_key: config["wos_api_key"] = args.wos_api_key
 
+    config["include_regex"] = args.include_regex
+    config["exclude_regex"] = args.exclude_regex
+    config["criteria_file"] = args.criteria_file
+    config["target_prompt"] = args.target_prompt
     config["screen_embeddings"] = args.screen_embeddings
     config["embedding_threshold"] = args.embedding_threshold
     config["screen_llm"] = args.screen_llm

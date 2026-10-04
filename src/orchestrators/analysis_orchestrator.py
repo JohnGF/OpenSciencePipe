@@ -13,6 +13,11 @@ from src.core.citations import CitationsAnalysis
 
 logger = logging.getLogger(__name__)
 
+# Harvest year is incomplete at collection time: annual trajectory / epoch
+# figures stop at the last complete year so a partial year never renders as a
+# collapse. Deltas, growth (YTD-aware) and static matrices are unaffected.
+_LAST_COMPLETE_YEAR = int(pd.Timestamp.now().year) - 1
+
 def _print_stage_summary(title: str, bullets: List[str], elapsed_sec: Optional[float] = None):
     """Prints a clean ASCII bullet-point summary box to stdout."""
     time_header = f" (Execution: {elapsed_sec:.2f}s)" if elapsed_sec is not None else ""
@@ -346,8 +351,27 @@ class AnalysisOrchestrator:
                             save_path=os.path.join(self.figures_dir, "temporal_delta_shifts.pdf"),
                         )
                         logger.info("Generated temporal_delta_shifts.pdf")
+
+                    # Annual market share trajectories
+                    trajectories_df = TemporalDeltaAnalysis().compute_annual_trajectories(
+                        kdf, category_col="Keyword", year_col="Year", top_n=8
+                    )
+                    if trajectories_df is not None and not trajectories_df.empty:
+                        trajectories_df = trajectories_df[trajectories_df["Year"] <= _LAST_COMPLETE_YEAR]
+                        trajectories_df.to_csv(
+                            os.path.join(self.data_dir, "annual_trajectories.csv"), index=False
+                        )
+                        self.viz.plot_annual_share_trajectories(
+                            trajectories_df,
+                            category_col="Category",
+                            year_col="Year",
+                            share_col="Market_Share_Pct",
+                            title_suffix="Key Focus Areas",
+                            save_path=os.path.join(self.figures_dir, "annual_technique_trajectories.pdf"),
+                        )
+                        logger.info("Generated annual_technique_trajectories.pdf")
             except Exception as e:
-                logger.warning(f"Could not generate temporal delta shifts figure: {e}")
+                logger.warning(f"Could not generate temporal delta / trajectory figures: {e}")
 
         # LLM noise treatment paradigm taxonomy (Title/Abstract heuristics)
         try:
@@ -366,3 +390,67 @@ class AnalysisOrchestrator:
             logger.info("Generated method_application_matrix.pdf")
         except Exception as e:
             logger.warning(f"Could not generate methodology x application matrix figure: {e}")
+
+        # Multi-epoch methodology x application matrix
+        try:
+            titles = (
+                df_pd["Title"].fillna("").astype(str).str.lower()
+                if "Title" in df_pd.columns
+                else pd.Series([""] * len(df_pd))
+            )
+            abstracts = (
+                df_pd["Abstract"].fillna("").astype(str).str.lower()
+                if "Abstract" in df_pd.columns
+                else pd.Series([""] * len(df_pd))
+            )
+            text = titles + " " + abstracts
+
+            methods = []
+            apps = []
+            for t in text:
+                if any(w in t for w in ["ica", "wavelet", "artifact removal", "filtering", "suppression", "denois"]):
+                    m = "ICA / Wavelet Denoising"
+                elif any(w in t for w in ["deep learning", "cnn", "convolutional", "transformer", "neural network"]):
+                    m = "Deep Learning (CNN/DL)"
+                elif any(w in t for w in ["csp", "fbcsp", "ssvep", "spatial pattern", "evoked"]):
+                    m = "Spatial Patterns (CSP/SSVEP)"
+                elif any(w in t for w in ["stochastic", "resonance", "entropy", "variability"]):
+                    m = "Stochastic Noise Dynamics"
+                else:
+                    m = "General Signal Processing"
+
+                if any(w in t for w in ["epilep", "seiz"]):
+                    a = "Epilepsy & Seizures"
+                elif any(w in t for w in ["sleep", "apnea", "polysomn"]):
+                    a = "Sleep Staging"
+                elif any(w in t for w in ["workload", "fatigue", "drows", "vigilance", "mental load"]):
+                    a = "Cognitive Workload"
+                elif any(w in t for w in ["motor imagery", "mi-bci", "prosthet", "stroke", "rehab"]):
+                    a = "Motor Imagery BCI"
+                elif any(w in t for w in ["emotion", "affective", "valence", "arousal"]):
+                    a = "Emotion Recognition"
+                else:
+                    a = "General Clinical & Bio"
+                methods.append(m)
+                apps.append(a)
+
+            mapped_df = df_pd.copy()
+            mapped_df["Method"] = methods
+            mapped_df["Application"] = apps
+            mapped_df = mapped_df[
+                mapped_df["Year"].isna() | (mapped_df["Year"].astype(int) <= _LAST_COMPLETE_YEAR)
+            ]
+            if "Year" in mapped_df.columns:
+                epoch_matrices = TemporalDeltaAnalysis().compute_multi_epoch_crosstab(
+                    mapped_df, row_col="Method", col_col="Application", year_col="Year", n_bins=3
+                )
+                if epoch_matrices:
+                    self.viz.plot_faceted_crosstab_heatmap(
+                        epoch_matrices,
+                        title_prefix="Methodology vs Application Evolution Across Eras",
+                        save_path=os.path.join(self.figures_dir, "method_application_multi_epoch.pdf"),
+                    )
+                    logger.info("Generated method_application_multi_epoch.pdf")
+        except Exception as e:
+            logger.warning(f"Could not generate multi-epoch methodology x application matrix: {e}")
+

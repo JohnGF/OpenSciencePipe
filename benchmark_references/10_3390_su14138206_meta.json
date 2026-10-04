@@ -1,0 +1,9 @@
+{
+    "doi": "10.3390/su14138206",
+    "title": "A Bibliometric Analysis of Blockchain Technology Research Using VOSviewer",
+    "authors": "Kuzior, Aleksandra; Sira, Mariya",
+    "year": 2022,
+    "abstract": "<jats:p>Blockchain technology remains popular for several reasons. The main one is that it has facilitated the rise of digital currencies over the past several years and many other uses of non-crypto currency. There is a belief that the technology itself could far exceed cryptocurrencies by its impact. Thus, researchers are still discovering the real potential of blockchain. This study aims to conduct a comprehensive blockchain analysis with a bibliometric study. The data was retrieved from the Scopus database and was analyzed using the VOSviewer software, developed at Leiden University\u2019s Centre for Science and Technology Studies (CWTS), Leiden University, the Netherlands. The study is based on the analysis of 1842 documents published in the 2007\u20132021 period using Scopus. From the visualization, three main groups of six clusters are generated. The red area includes topics related to blockchain technology, supply chain management, and sustainable development. The green cluster stands for such keywords as blockchains, smart contracts, electronic money, and Bitcoin and Ethereum. The blue cluster area focuses on issues related to artificial intelligence, big data, health care, and COVID-19. The analysis helps to improve the quality of the review by directing researchers to the most significant documents and mapping areas of publications.</jats:p>",
+    "pdf_downloaded": false,
+    "domain_category": "Technology & Engineering (Blockchain)"
+}

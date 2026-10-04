@@ -116,7 +116,7 @@ class PipelineManager:
             meta_orch = MetaAnalysisOrchestrator(self.output_dir, profiler=self.profiler)
             meta_orch.run(df_pd)
         elif self.mode == "systematic":
-            slr_orch = SystematicReviewOrchestrator(self.output_dir, profiler=self.profiler)
+            slr_orch = SystematicReviewOrchestrator(self.output_dir, config=self.config, profiler=self.profiler)
             slr_orch.run(df_pd)
         elif self.mode == "all":
             # Run Bibliometric
@@ -125,7 +125,7 @@ class PipelineManager:
             self.profiler.stop("3. Bibliometric Analysis")
 
             # Run Systematic
-            slr_orch = SystematicReviewOrchestrator(self.output_dir, profiler=self.profiler)
+            slr_orch = SystematicReviewOrchestrator(self.output_dir, config=self.config, profiler=self.profiler)
             slr_orch.run(df_pd)
 
             # Run Meta

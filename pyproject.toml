@@ -1,7 +1,7 @@
 [project]
-name = "bibliometric-pipeline"
+name = "opensciencepipe"
 version = "0.1.0"
-description = "Modular pipeline for multidisciplinary bibliometric research."
+description = "End-to-end framework for autonomous science mapping and systematic evidence synthesis."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
@@ -26,13 +26,14 @@ dependencies = [
   "tenacity>=8.0.0",
   "pytest>=8.0.0",
   "pytest-mock>=3.12.0",
-  "torch==2.5.1",
-  "torchvision==0.20.1",
-  "torchaudio==2.5.1",
+  "torch>=2.5.1,<2.9",
+  "torchvision>=0.20.1,<0.24",
+  "torchaudio>=2.5.1,<2.9",
   "pymupdf>=1.28.0",
 ]
 
 [project.scripts]
+opensciencepipe = "src.pipeline:main"
 biblio-pipeline = "src.pipeline:main"
 
 [build-system]

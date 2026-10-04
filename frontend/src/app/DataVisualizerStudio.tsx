@@ -56,8 +56,8 @@ const COLOR_PALETTES: Record<PaletteType, { primary: string; secondary: string; 
 };
 
 export default function DataVisualizerStudio({ apiBase, onClose, initialFile, initialFolder }: DataVisualizerStudioProps) {
-  const [folders, setFolders] = useState<string[]>(["data", "pipeline_results", "pipeline_results_original_33k"]);
-  const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "pipeline_results_original_33k");
+  const [folders, setFolders] = useState<string[]>(["data", "outputs/pipeline_results", "outputs/pipeline_results_original_33k"]);
+  const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "outputs/pipeline_results_original_33k");
   const [availableFiles, setAvailableFiles] = useState<string[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>(initialFile || "");
   
@@ -92,7 +92,7 @@ export default function DataVisualizerStudio({ apiBase, onClose, initialFile, in
       })
       .catch(() => {
         // Fallback default folders
-        setFolders(["data", "pipeline_results", "pipeline_results_original_33k"]);
+        setFolders(["data", "outputs/pipeline_results", "outputs/pipeline_results_original_33k"]);
       });
   }, [apiBase]);
 

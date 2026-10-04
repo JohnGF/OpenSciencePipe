@@ -87,14 +87,40 @@ uv run biblio-pipeline --file data/collected_rent_control.csv --mode systematic 
 
 ### 3. Bibliometric Mode (`--mode biblio`)
 Analyzes macro scientometrics, co-authorship networks, citation structure, and keyword trends:
-```bash
-# Host CPU/PyTorch execution:
-uv run biblio-pipeline --query "brain-computer interface" --mode biblio --limit 200
 
-# GPU Acceleration with Podman (NVIDIA RAPIDS cuGraph):
-podman run -i --rm --ipc=host --device nvidia.com/gpu=all -v .:/app:z biblio-pipeline \
-  --query "brain-computer interface" --mode biblio --limit 200
+#### Direct on Host Hardware with `uv`:
+```bash
+uv run biblio-pipeline --query '"digital transformation" OR "digital change"' --mode biblio --start-year 2010 --end-year 2020 --limit 850 --output pipeline_results_dt
 ```
+
+#### GPU Accelerated with Podman Container (NVIDIA RAPIDS cuGraph & PyTorch CUDA):
+```bash
+podman run -i --rm --ipc=host --device nvidia.com/gpu=all -v .:/app:z \
+  --entrypoint python biblio-pipeline -m src.pipeline \
+  --query '"digital transformation" OR "digital change"' \
+  --mode biblio \
+  --start-year 2010 \
+  --end-year 2020 \
+  --limit 850 \
+  --output pipeline_results_dt
+```
+
+### 4. Benchmark Discovery & Ultra-Validation
+
+Search top-cited open-access published benchmarks (VOSviewer, CiteSpace, PRISMA meta-analyses) and evaluate results:
+```bash
+# 1. Discover seminal OA benchmarks and fetch reference PDFs:
+uv run python scripts/find_top_benchmarks.py --tool vosviewer --years 2021 2022 --per-year 2 --download-pdf
+
+# 2. Validate pipeline output directly against benchmark ground truth:
+uv run python scripts/validate_against_benchmark.py \
+  --results pipeline_results_dt \
+  --benchmark data/benchmarks/benchmark_digital_transformation_kraus2021.json
+
+# 3. Run automated dual-track validation across all registered benchmarks:
+uv run python scripts/auto_validate_benchmarks.py
+```
+
 
 ---
 
