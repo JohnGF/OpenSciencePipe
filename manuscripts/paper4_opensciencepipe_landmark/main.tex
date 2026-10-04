@@ -79,9 +79,16 @@ Despite their shared reliance on bibliographic corpora, existing scientometric a
 
 Concurrently, the scientific information landscape is shifting toward open bibliographic indices, most notably OpenAlex \cite{priem2022openalex}, Crossref \cite{hendricks2020crossref}, and Semantic Scholar \cite{kinney2023semantic}, which provide programmatic access to hundreds of millions of interconnected scholarly records with structured metadata. In parallel, local open-weight Large Language Models (LLMs) deployed on optimized inference runtimes (e.g., Ollama) facilitate reproducible, zero-shot document triage without cloud API expenses or proprietary data exposure.
 
-Building upon this open infrastructure, we introduce \textbf{OpenSciencePipe}, an integrated, open-source computational framework for automated bibliometric science mapping and quantitative evidence synthesis. OpenSciencePipe executes macro-level exploratory mapping and micro-level PRISMA meta-analysis within a single, reproducible workflow.
+Building upon this open infrastructure, we introduce \textbf{OpenSciencePipe}, an integrated, open-source computational framework that unifies macro-level exploratory science mapping and micro-level PRISMA meta-analysis within a single, autonomous, reproducible workflow. Rather than requiring researchers to manually shuttle flat files between fragmented, single-purpose software packages, OpenSciencePipe provides an end-to-end pipeline that ingests scholarly records from open APIs, constructs GPU-accelerated graph topologies, executes density-based neural topic modeling, conducts dual-prompt zero-shot screening, pools empirical effect sizes, and compiles publication-grade camera-ready \LaTeX{} manuscripts.
 
-To validate the framework, we present an empirical benchmark against \textbf{23 published bibliometric studies} originally conducted with legacy software suites (CiteSpace, VOSviewer, Bibliometrix), alongside canonical meta-analytic datasets in medicine, psychology, and econometrics. We systematically evaluate topological fidelity, rank-order concordance, semantic coherence, screening recall, and computational efficiency across diverse disciplinary corpora.
+To rigorously substantiate this framework, we benchmark OpenSciencePipe against \textbf{23 published bibliometric studies} originally conducted across seven legacy software ecosystems (VOSviewer, CiteSpace, Bibliometrix, SciMAT, CitNetExplorer, Gephi, and Rayyan/ASReview), alongside canonical meta-analytic datasets in clinical medicine, epidemiology, and econometrics. We evaluate performance across five formal quantitative dimensions:
+\begin{enumerate}
+    \item \textbf{Topological Scalability and Speedup:} Wall-clock execution time and relative speedup for Louvain community modularity and PageRank on graphs exceeding 50,000 publications.
+    \item \textbf{Thematic Quality and Semantic Diversity:} Topic Diversity ($\text{TD} \in [0, 1]$), Normalized Pointwise Mutual Information topic coherence ($C_{\text{NPMI}}$), and peripheral noise isolation percentage (Topic~$-1$).
+    \item \textbf{Geopolitical and Institutional Concordance:} Rank preservation measured by Spearman's rank correlation ($\rho$) with explicit sample sizes ($n$), alongside Top-$K$ entity overlap percentage.
+    \item \textbf{Screening Fidelity and Labor Reduction:} Empirical sensitivity (recall), precision, $F_1$-score, inter-prompt agreement (Cohen's $\kappa$), and Work Saved over Sampling ($\text{WSS}@95$) against human consensus and active-learning platforms.
+    \item \textbf{Meta-Analytic Replication Fidelity:} Absolute deviation in pooled effect size ($|\Delta d|$) and between-study heterogeneity ($\Delta I^2$) against published Cochrane and econometric meta-analyses.
+\end{enumerate}
 
 \section{Related Work}
 \label{sec:related_work}
@@ -89,21 +96,64 @@ To validate the framework, we present an empirical benchmark against \textbf{23 
 \subsection{Foundations of Science Mapping and Informetrics}
 As scientific publication volumes expanded in the mid-20th century, researchers could no longer maintain comprehensive domain awareness through manual synthesis alone. Quantitative science mapping emerged to address this information overload by visualizing macro-level knowledge structures. Methodological foundations originate in bibliographic coupling \cite{kessler1963bibliographic} and co-citation analysis \cite{small1973co}, where Small and Griffith \cite{small1974structure} established that citation graph topologies reflect the intellectual and social consensus of a scientific specialty. In parallel, co-word analysis was formulated by Callon et al. \cite{callon1983co} to map conceptual dynamics through lexical co-occurrences. Later, Cobo et al. \cite{cobo2011science, cobo2012scimat} formalized these distinct relational modalities (citation, co-citation, and co-word networks) into a unified scientometric workflow spanning retrieval, preprocessing, network extraction, normalization, spatial layout, and cluster analysis.
 
-\subsection{Software Landscape in Contemporary Informetrics}
-Contemporary computational science mapping is primarily anchored by three major software ecosystems. First, \textbf{VOSviewer} \cite{van2010software} implements the Visualization of Similarities (VOS) layout optimization technique to project bibliometric networks into low-dimensional Euclidean space based on normalized association strength, optimized for interactive visual exploration of co-authorship, citation, and co-occurrence graphs. Second, \textbf{CiteSpace} \cite{chen2006citespace} focuses on identifying progressive scientific frontiers and landmark transition nodes, using Kleinberg's burst detection algorithm \cite{kleinberg2003bursty} across time-sliced citation networks. Third, \textbf{Bibliometrix} \cite{aria2017bibliometrix} provides an extensive R package and web interface (\texttt{biblioshiny}) for quantitative scientometric profiling, descriptive statistics, and factorial analysis.
+\subsection{Contemporary Informetric Ecosystems and Operational Limits}
+Over the past three decades, the informetrics community has developed specialized tools targeting distinct sub-problems of literature analysis. These tools can be organized into five operational classes:
 
-While these tools provide mature analytical capabilities within their designated domains, they remain operational silos. Ingesting, cleaning, and transforming multi-source open bibliometric data into these platforms still relies on manual file handling and fragmented scripts. Furthermore, none of these environments natively unite macro-level exploratory network analysis with micro-level confirmatory evidence synthesis into a single automated pipeline.
+\paragraph{Exploratory Science Mappers} Contemporary bibliometric mapping is primarily anchored by three desktop suites: \textbf{VOSviewer} \cite{van2010software}, which optimizes the Visualization of Similarities (VOS) layout normalized by association strength to map co-authorship and co-occurrence; \textbf{CiteSpace} \cite{chen2006citespace}, which detects progressive scientific frontiers and pivotal transition nodes using Kleinberg's burst detection \cite{kleinberg2003bursty} across time-sliced networks; and \textbf{Bibliometrix} (\texttt{biblioshiny}) \cite{aria2017bibliometrix}, an extensive R package evaluating classical empirical laws (Lotka, Bradford, Zipf) and strategic Callon thematic diagrams. Despite their visual clarity, these tools operate as isolated GUI desktop applications constrained by workstation CPU memory and manual batch exports.
 
-\subsection{Evidence Synthesis and Meta-Analysis Tools}
-In empirical evidence synthesis, the PRISMA 2020 guidelines \cite{page2021prisma} specify protocols for systematic identification, screening, eligibility auditing, and study inclusion. While active-learning platforms like ASReview \cite{van2021active} and Rayyan \cite{ouzzani2016rayyan} have accelerated title and abstract triage, they function as disconnected screening tools dependent on manual flat-file imports. For quantitative pooling, statistical packages such as RevMan and R \texttt{metafor} \cite{viechtbauer2010conducting} provide inverse-variance and random-effects models (e.g., DerSimonian--Laird, REML), but remain structurally isolated from the upstream search, harvesting, and deduplication phases of the research lifecycle.
+\paragraph{Longitudinal Thematic Evolution Engines} Dedicated platforms like \textbf{SciMAT} \cite{cobo2012scimat} and the \textbf{Sci2 Tool} \cite{borner2010science} model longitudinal science mapping by dividing bibliographic data into sequential time intervals, evaluating Callon centrality versus density to track how thematic clusters merge, split, or perish across eras. However, they require manual period configuration and flat-file matrix transfers between stages.
 
-\subsection{Deep Learning and Neural Topic Modeling in Scientometrics}
-Recent advances in natural language processing (NLP) offer solutions to the known limitations of lexical bibliometrics. Classical frequency-based approaches, such as term co-occurrence matrices and Latent Dirichlet Allocation (LDA) \cite{blei2003latent}, fail to account for word-order syntax, polysemy, and vocabulary mismatch (where conceptually identical studies employ distinct terminology). Pretrained transformer architectures address these limitations by projecting text into dense continuous vector spaces that encode semantic context (BERT \cite{devlin2018bert}, Sentence-BERT \cite{reimers2019sentence}). 
+\paragraph{Direct Citation Genealogies and Historiographs} Tools such as \textbf{CitNetExplorer} \cite{van2014citnetexplorer} and \textbf{HistCite} \cite{garfield2004histcite} render directed chronological citation networks to trace direct parent-to-descendant intellectual lineages (Garfield historiographs). Modern web services (e.g., Connected Papers, Litmaps) provide seed-paper neighborhood expansion. Nevertheless, these platforms remain tied to proprietary Web of Science flat-file formats or single-seed queries rather than end-to-end corpus synthesis.
 
-Building upon these representations, BERTopic \cite{grootendorst2022bertopic} coordinates three complementary stages: (i) encoding title and abstract corpora into dense contextual vectors, (ii) reducing the high-dimensional embedding space to a low-dimensional manifold via UMAP \cite{mcinnes2018umap}, and (iii) grouping semantically coherent documents into clusters using HDBSCAN \cite{campello2013density}, which isolates peripheral or multidisciplinary literature into an explicit noise pool. Integrating dense contextual representations with density-based clustering provides a principled alternative to bag-of-words methods, capturing nuanced conceptual clusters without contaminating thematic cores with noise.
+\paragraph{Large-Scale Graph and Community Engines} General complex network engines like \textbf{Gephi} \cite{bastian2009gephi} and \textbf{Pajek} \cite{batagelj1998pajek} provide ForceAtlas2 layouts and Louvain/Leiden modularity for large graphs. While powerful, they are domain-agnostic, require complex intermediate graph conversions (\texttt{.gexf}, \texttt{.net}), and exhibit severe memory bottlenecks and UI latency when handling dense co-citation graphs exceeding $10^5$ edges on commodity hardware.
 
-\subsection{Synthesis and Positioning}
-In summary, contemporary literature analysis exhibits a distinct methodological divide. On the macro level, traditional science mapping tools evaluate field-wide relational structures but remain constrained by manual exports, CPU memory limits on dense graphs, and lexical heuristics. On the micro level, systematic review platforms execute confirmatory eligibility screening and statistical pooling in isolation from upstream bibliometric harvesting. OpenSciencePipe resolves this bifurcation by integrating multi-source open API harvesting, GPU-accelerated graph topologies, density-based neural thematic modeling, and zero-shot PRISMA screening into a unified, autonomous computational architecture.
+\paragraph{Scripted Extraction Utilities and API Wrappers} Programmatic utilities including \textbf{Bibexcel} \cite{persson2009bibexcel}, \textbf{metaknowledge} \cite{mclevey2017metaknowledge}, and \textbf{pybliometrics} \cite{rose2019pybliometrics} automate bibliographic matrix extraction or wrap proprietary APIs (such as Elsevier Scopus). However, they function strictly as extraction aids, requiring researchers to write extensive glue code to connect extraction with downstream statistical modeling or visualization.
+
+\subsection{Evidence Synthesis, Active Screening, and Meta-Analysis Tools}
+In empirical evidence synthesis, the PRISMA 2020 guidelines \cite{page2021prisma} specify protocols for systematic identification, screening, eligibility auditing, and study inclusion. While active-learning platforms like \textbf{ASReview} \cite{van2021active} and \textbf{Rayyan} \cite{ouzzani2016rayyan} have accelerated title and abstract triage through machine-assisted prioritization, they remain isolated screening silos dependent on manual CSV/RIS imports. For quantitative synthesis, statistical packages such as Cochrane \textbf{RevMan} \cite{revman2020} and R \textbf{\texttt{metafor}} \cite{viechtbauer2010conducting} provide inverse-variance and random-effects models (e.g., DerSimonian--Laird \cite{dersimonian1986meta}, REML), but remain entirely disconnected from the upstream search, harvesting, and deduplication phases of the research lifecycle.
+
+\subsection{Deep Learning, Dense Embeddings, and Density-Based Noise Isolation}
+Recent advances in natural language processing (NLP) address long-standing limitations in lexical bibliometrics. Classical frequency-based approaches, including co-word matrices and Latent Dirichlet Allocation (LDA) \cite{blei2003latent}, rely on bag-of-words assumptions that ignore syntactic context, polysemy, and vocabulary mismatch. Pretrained transformer architectures project text into dense continuous vector spaces encoding semantic context (BERT \cite{devlin2018bert}, Sentence-BERT \cite{reimers2019sentence}). 
+
+Building upon these representations, BERTopic \cite{grootendorst2022bertopic} coordinates three complementary stages: (i) encoding title and abstract corpora into dense contextual vectors, (ii) reducing dimensionality via UMAP \cite{mcinnes2018umap}, and (iii) grouping semantically coherent documents into clusters using HDBSCAN \cite{campello2013density}. Crucially, HDBSCAN isolates peripheral or multidisciplinary literature into an explicit noise pool (Topic~$-1$). Integrating dense contextual representations with density-based clustering provides a principled alternative to bag-of-words methods, capturing cohesive thematic clusters without forcing peripheral literature into artificial groupings.
+
+\subsection{Systematic Ecosystem Comparison and Evaluation Metrics}
+Table~\ref{tab:ecosystem_comparison} synthesizes the relationship between existing tool families, their primary operational limits, their direct OpenSciencePipe counterparts, and the quantitative metrics used to evaluate them in this study.
+
+\begin{table*}[t]
+\centering
+\small
+\caption{Comparative Taxonomy of Contemporary Research Synthesis Platforms versus OpenSciencePipe}
+\label{tab:ecosystem_comparison}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{p{3.2cm}p{3.2cm}p{5.0cm}p{3.8cm}p{4.2cm}}
+\hline
+\textbf{Paradigm / Tool Class} & \textbf{Representative Systems} & \textbf{Core Analytical Scope \& Bottlenecks} & \textbf{OpenSciencePipe Module} & \textbf{Evaluated Metric \& Performance} \\
+\hline
+Exploratory Science Mapping & VOSviewer \cite{van2010software}, CiteSpace \cite{chen2006citespace}, Bibliometrix \cite{aria2017bibliometrix} & Distance-based spatial layouts, Kleinberg bursts, scientometric laws; manual flat-file imports, CPU memory caps, isolated desktop GUIs. & \texttt{src/core/network.py}, \texttt{src/core/nlp.py}, \texttt{src/core/viz.py} & Louvain community layout in $0.84$\,s on $>50{,}000$ nodes; Top-$K$ nation overlap ($93.3\%$, $\rho = 0.99, p < 0.001$). \\
+Longitudinal Thematic Evolution & SciMAT \cite{cobo2012scimat}, Sci2 Tool \cite{borner2010science} & Sequential multi-period co-word tracking, Callon strategic diagrams; manual interval definition, disjoint period extraction. & \texttt{src/core/temporal\_delta.py}, \texttt{src/core/exporters/temporal\_exporter.py} & Compound Annual Growth Rate (CAGR); multi-epoch method-application matrices; dynamic percolation analysis. \\
+Direct Citation Genealogies & CitNetExplorer \cite{van2014citnetexplorer}, HistCite \cite{garfield2004histcite}, Connected Papers & Direct citation ancestry trees, chronological historiographs; dependent on proprietary WoS files or single-seed API expansions. & \texttt{src/core/citations.py}, \texttt{src/core/exporters/cocitation\_exporter.py} & Graph PageRank centrality; automated multi-source citation graph resolution via OpenAlex and Semantic Scholar. \\
+General Graph Engines & Gephi \cite{bastian2009gephi}, Pajek \cite{batagelj1998pajek} & ForceAtlas2 layouts, Louvain/Leiden modularity; CPU memory bottlenecks, severe desktop freezes on $>10^5$ edges, complex file conversions. & \texttt{src/core/network.py} (GPU RAPIDS \texttt{cugraph} \& \texttt{cudf}) & Louvain modularity $Q$; $>1{,}000\times$ speedup over NetworkX ($0.84$\,s vs.\ $14\text{--}88$\,min on 50k nodes). \\
+Scripted Extraction \& Wrappers & Bibexcel \cite{persson2009bibexcel}, metaknowledge \cite{mclevey2017metaknowledge}, pybliometrics \cite{rose2019pybliometrics} & Granular matrix extraction, programmatic Scopus API access; fragmented scripts requiring glue code, single-database focus, no downstream modeling. & \texttt{src/core/collection.py}, \texttt{src/core/ingestion.py} & Unified Pydantic schema (\texttt{PublicationSchema}); multi-source concurrent deduplication (OpenAlex, PubMed, Crossref, S2). \\
+Evidence Synthesis Screening & Rayyan \cite{ouzzani2016rayyan}, ASReview \cite{van2021active} & Semi-automated title/abstract triage; disconnected manual workflows, human fatigue on thousands of records, risk of false-negative omissions. & \texttt{src/core/screening.py} (Local Zero-Shot LLM + Prompt Inversion) & Screening Sensitivity ($100.0\%$ on clinical trials), Precision ($96.5\%$ on machine reviews), Cohen's $\kappa \ge 0.82$, $\text{WSS}@95$. \\
+Statistical Meta-Analytic Pooling & Cochrane RevMan \cite{revman2020}, R \texttt{metafor} \cite{viechtbauer2010conducting} & Inverse-variance / random-effects effect size pooling; disconnected manual data entry from literature tables, no automated extraction link. & \texttt{src/core/meta\_analysis.py}, \texttt{src/core/meta\_validator.py} & DerSimonian--Laird pooling replication error ($|\Delta d| \le 0.0308$), exact heterogeneity ($I^2 = 87.5\%$), Egger's test publication bias. \\
+Automated Publication Orchestration & \textit{No legacy software equivalent} (Manual manuscript drafting) & Manual transcription of statistics, copy-pasting numbers into LaTeX/Word, ad-hoc figure assembly prone to transcription errors. & \texttt{src/core/latex\_exporter.py}, \texttt{src/pipeline.py} & Autonomous end-to-end IEEEtran / Elsevier LaTeX manuscript compilation with automated vector graphics and formatted tables. \\
+\hline
+\end{tabular}%
+}
+\end{table*}
+
+\subsection{Methodological and Architectural Novelties Introduced by OpenSciencePipe}
+Beyond superseding the functionality of individual legacy tools, OpenSciencePipe introduces six distinct methodological and architectural innovations that do not exist in prior systems:
+
+\begin{enumerate}
+    \item \textbf{Unified Macro-to-Micro Synthesis Pipeline:} To our knowledge, OpenSciencePipe is the first system to bridge macro-level exploratory science mapping and micro-level confirmatory PRISMA meta-analysis within a single, autonomous computational execution, eliminating the error-prone manual transfer of intermediate files across disparate platforms.
+    \item \textbf{Sub-Second GPU Modularity on Standard Workstations:} By harnessing NVIDIA RAPIDS \texttt{cugraph} and \texttt{cudf}, OpenSciencePipe executes Louvain community detection and PageRank on graphs exceeding 50,000 publications in $0.84$\,seconds, delivering a $>1{,}000\times$ speedup over standard CPU libraries (e.g., NetworkX) on accessible consumer GPU hardware.
+    \item \textbf{Density-Based Noise Rejection in Bibliometric Thematic Modeling:} Unlike classical bag-of-words or topic modeling algorithms (e.g., LDA) that force $100\%$ of documents into clusters, OpenSciencePipe integrates HDBSCAN with dense sentence embeddings to route $20\text{--}40\%$ of peripheral literature into an explicit noise pool (Topic~$-1$). This prevents cluster corruption and sustains high topic diversity ($\overline{\text{TD}} = 0.79\text{--}0.87$) where classical models suffer semantic collapse ($\text{TD} = 0.58$).
+    \item \textbf{Dual-Prompt Adversarial Zero-Shot Screening with Auditability:} To automate title and abstract screening while mitigating hallucination, OpenSciencePipe introduces a dual-prompt consensus protocol featuring a strict prompt-inversion audit, ensuring high inter-rater agreement (Cohen's $\kappa \ge 0.82$) and achieving $100.0\%$ sensitivity on clinical trial benchmarks.
+    \item \textbf{Direct End-to-End Meta-Analytic Synthesis:} The framework directly extracts statistical parameters from the screened corpus and executes DerSimonian--Laird random-effects pooling, generating publication-ready forest plots and funnel plots with Egger's test within the same pipeline run, replicating published ground truth within $|\Delta d| \le 0.0308$ and exact heterogeneity ($I^2 = 87.5\%$).
+    \item \textbf{Autonomous Camera-Ready Publication Scaffolding:} OpenSciencePipe autonomously coordinates the compilation of multi-page IEEEtran and Elsevier \LaTeX{} manuscripts directly from harvested data, generating synchronized vector plots, formatted tables, and bibliography keys without manual cut-and-paste transcription.
+\end{enumerate}
 
 \section{The OpenSciencePipe Computational Architecture}
 \label{sec:architecture}
@@ -614,6 +664,30 @@ M.~Egger, G.~Davey~Smith, M.~Schneider, C.~Minder, Bias in meta-analysis detecte
 
 \bibitem{duval2000trim}
 S.~Duval, R.~Tweedie, Trim and fill: A simple 3-step-based method for testing and adjusting for publication bias in meta-analysis, Biometrics 56~(2) (2000) 455--463.
+
+\bibitem{van2014citnetexplorer}
+N.~J. van Eck, L.~Waltman, CitNetExplorer: A new software tool for analyzing and visualizing citation networks, Journal of Informetrics 8~(3) (2014) 802--823.
+
+\bibitem{garfield2004histcite}
+E.~Garfield, Histographic mapping of knowledge domains literature, Journal of Information Science 30~(2) (2004) 119--145.
+
+\bibitem{bastian2009gephi}
+M.~Bastian, S.~Heymann, M.~Jacomy, Gephi: An open source software for exploring and manipulating networks, in: International AAAI Conference on Weblogs and Social Media (ICWSM), 2009.
+
+\bibitem{batagelj1998pajek}
+V.~Batagelj, A.~Mrvar, Pajek---Program for large network analysis, Connections 21~(2) (1998) 47--57.
+
+\bibitem{persson2009bibexcel}
+O.~Persson, R.~Danell, J.~W. Schneider, How to use Bibexcel for various types of bibliometric analysis, in: Celebrating Scholarly Communication Studies: A Festschrift for Olle Persson at His 60th Birthday, 2009, pp. 9--24.
+
+\bibitem{mclevey2017metaknowledge}
+J.~McLevey, R.~McIlroy-Young, metaknowledge: Open source software for social networks, bibliometrics, and science of science, Quantitative Science Studies / arXiv:1709.07436 (2017).
+
+\bibitem{rose2019pybliometrics}
+M.~E. Rose, J.~R. Kitchin, pybliometrics: Scripting, automating, and archiving Scopus data in Python, SoftwareX 10 (2019) 100263.
+
+\bibitem{borner2010science}
+K.~B{\"o}rner, Atlas of Science: Anyone Can Map, MIT Press, Cambridge, MA, 2010.
 
 \end{thebibliography}
 
