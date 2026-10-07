@@ -2,7 +2,7 @@
 
 # OpenSciencePipe
 
-**An End-to-End Computational Framework for Autonomous Science Mapping and Systematic Evidence Synthesis**
+**Autonomous Science Mapping & Systematic Evidence Synthesis**
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -12,7 +12,7 @@
 [![Target Journal](https://img.shields.io/badge/manuscript-Journal%20of%20Informetrics-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
 
 <p align="center">
-  <b>As simple as a search query.</b> One declarative command executes multi-source harvesting, GPU-accelerated graph analytics, neural topic modeling, zero-shot LLM screening, random-effects meta-analysis, and camera-ready LaTeX manuscript compilation.
+  <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe autonomously harvests open literature, maps networks, isolates topic noise, screens papers, pools effect sizes, and compiles a camera-ready PDF manuscript.
 </p>
 
 ```bash
@@ -23,40 +23,25 @@ biblio-pipeline --query "brain-computer interface"
 
 ---
 
-## Key Highlights
+## Quick Start (Run in Seconds)
 
-- **As Simple as a Search Query:** No multi-dialog GUI menus, no intermediate `.txt` flat-file transfers, and no spreadsheet copy-pasting. Enter a query and receive publication-grade vector figures, formatted LaTeX tables, and a compiled manuscript.
-- **Unified Macro-to-Micro Synthesis:** Bridges the historical divide between macroscopic science mapping (VOSviewer, CiteSpace, Bibliometrix) and microscopic evidence synthesis (Cochrane RevMan, `metafor`, Rayyan, ASReview) under a shared Pydantic data schema.
-- **$>1{,}000\times$ GPU Acceleration:** Executes Louvain community detection and PageRank on graphs exceeding 50,000 publications in **0.84 seconds** via NVIDIA RAPIDS (`cuGraph`, `cuDF`) in device CSR memory (vs. $>28$ minutes on CPU NetworkX).
-- **Density-Based Noise Isolation:** Neural topic modeling (Sentence-BERT + UMAP + HDBSCAN) routes peripheral literature into an explicit noise pool (**Topic $-1$**, averaging $32.1\%$ outlier rejection), maintaining high lexical topic diversity ($\overline{\text{TD}} = 0.80$).
-- **Local Zero-Shot Screening:** Integrates local open-weight LLMs (Ollama `llama3.2:3b` at $T=0.0$) with structured JSON schemas for auditable title/abstract PRISMA triage with zero cloud API costs and zero private data leakage.
-- **Automated Publication Typesetting:** Autonomous compilation into camera-ready IEEEtran / Elsevier manuscripts (`paper_scaffold.pdf`) with synchronized figures, forest plots, funnel plots, and PRISMA flowcharts.
+Choose the setup that fits your workflow:
 
----
+### Option 1: All-in-One GPU Container (Zero Setup — Recommended)
+Pre-configured with NVIDIA CUDA 12.8, RAPIDS 25.06 (`cugraph`, `cudf`), PyTorch CUDA, and all dependencies. No Python version issues, no CUDA driver conflicts, and no compilation needed.
 
-## Quick Start: Choose Your Deployment
-
-Choose the setup that fits your environment:
-
-### Option 1: All-in-One GPU Container (Recommended — Zero Local Setup)
-Pre-configured with NVIDIA CUDA 12.8, RAPIDS 25.06 (`cugraph`, `cudf`), PyTorch CUDA, and all dependencies. No Python version mismatches, C++ compilation steps, or local CUDA driver conflicts.
-
-#### Using Docker:
+#### Docker:
 ```bash
-# 1. Build the all-in-one container
+# Build the container once
 docker build -t opensciencepipe -f Containerfile .
 
-# 2. Run an end-to-end pipeline analysis with GPU acceleration
+# Run an analysis directly
 docker run --gpus all --rm -it -v $(pwd):/app:z opensciencepipe \
   biblio-pipeline --query "brain-computer interface" --limit 200
-
-# 3. Or launch the full-stack FastAPI backend
-docker run --gpus all -p 8000:8000 -v $(pwd):/app:z opensciencepipe
 ```
 
-#### Using Podman:
+#### Podman:
 ```bash
-# Build & run directly with GPU passthrough
 podman build -t opensciencepipe -f Containerfile .
 podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z opensciencepipe \
   biblio-pipeline --query "brain-computer interface" --limit 200
@@ -64,45 +49,50 @@ podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z open
 
 ---
 
-### Option 2: Ultra-Fast Local Run via `uv` (Recommended for Local Dev)
-If you prefer running directly on your host machine, [`uv`](https://github.com/astral-sh/uv) handles environments and pinned dependencies instantly:
+### Option 2: Local Run via `uv` (Fastest for Local Python)
+If you have Python installed, [`uv`](https://github.com/astral-sh/uv) executes the pipeline with zero manual environment management:
 
 ```bash
-# 1. Install uv (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# 2. Run the pipeline immediately (uv resolves dependencies on the fly)
+# Run immediately on the fly
 uv run biblio-pipeline --query "brain-computer interface" --limit 100
 
-# Run on a local dataset
-uv run biblio-pipeline --file data/collected_sample.csv --mode meta
+# Or run on an existing CSV dataset
+uv run biblio-pipeline --file data/sample.csv --mode meta
 ```
 
 ---
 
-### Option 3: Standard Python Virtual Environment (`pip`)
-If you do not use `uv` or containers, standard `pip` works out of the box (Python 3.10+):
+### Option 3: Standard Virtual Environment (`pip`)
+Standard Python installation (Python 3.10+):
 
 ```bash
-# 1. Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# 2. Install OpenSciencePipe
 pip install -e .
 
-# 3. Run the CLI
 biblio-pipeline --query "brain-computer interface" --limit 100
 ```
+
+---
+
+## The 3 Operational Modes
+
+OpenSciencePipe adapts to your research question via the `--mode` flag:
+
+| Mode | Command Example | Primary Output |
+| :--- | :--- | :--- |
+| **Macro Science Mapping** (`--mode biblio`) | `biblio-pipeline --query "microplastics" --mode biblio` | GPU Louvain community graphs, PageRank centrality, Sentence-BERT topics, and IEEEtran report |
+| **PRISMA Systematic Review** (`--mode systematic`) | `biblio-pipeline --query "stroke rehabilitation" --mode systematic` | Local LLM zero-shot screening, inclusion/exclusion audit, and PRISMA 2020 flow diagram |
+| **Quantitative Meta-Analysis** (`--mode meta`) | `biblio-pipeline --file clinical_data.csv --mode meta` | DerSimonian–Laird random-effects pooling ($\tau^2$, $I^2$, Cochran $Q$), Forest & Funnel plots |
 
 ---
 
 ## Interactive Web App: Frontend + Backend (Work in Progress)
 
 > [!NOTE]
-> The command-line interface (`biblio-pipeline`) is the primary, production-ready, and fully validated computational engine. The full-stack Web App (Next.js frontend + FastAPI backend) is an optional visual interface currently under active development.
+> The CLI (`biblio-pipeline`) is the primary, production-ready, and fully validated computational engine. The full-stack Web App (Next.js frontend + FastAPI backend) is an optional visual interface currently under active development.
 
-For interactive visual exploration, launch both servers concurrently:
+To inspect results interactively in your browser:
 
 ```bash
 python run_local.py
@@ -113,27 +103,15 @@ python run_local.py
 
 ---
 
-## Operational Modes
+## Under the Hood: Key Architectural Capabilities
 
-OpenSciencePipe supports three specialized analysis modes via the `--mode` flag:
+For researchers and developers interested in the underlying methodology:
 
-### 1. Macro Science Mapping (`--mode biblio`)
-Performs multi-source bibliographic harvesting, co-authorship community graphs, citation PageRank centrality, and BERTopic neural clustering:
-```bash
-biblio-pipeline --query "digital transformation" --mode biblio --start-year 2015 --end-year 2024 --limit 500 --output results_dt
-```
-
-### 2. PRISMA Systematic Review Screening (`--mode systematic`)
-Applies PICOS inclusion/exclusion criteria, executes local zero-shot LLM screening via Ollama, builds taxonomic categories, and generates a PRISMA 2020 flow diagram:
-```bash
-biblio-pipeline --query "stroke neurorehabilitation" --mode systematic --limit 100 --output results_slr
-```
-
-### 3. Quantitative Meta-Analysis (`--mode meta`)
-Extracts empirical effect sizes from study data, computes DerSimonian–Laird random-effects pooling ($\tau^2$, Cochran's $Q$, Higgins' $I^2$, Egger's test), and renders publication forest and funnel plots:
-```bash
-biblio-pipeline --file data/collected_sample.csv --mode meta --output results_meta
-```
+- **Unified Macro-to-Micro Pipeline:** Bridges exploratory science mapping (VOSviewer, CiteSpace) and confirmatory meta-analysis (RevMan, `metafor`) under a single Pydantic schema ($\mathcal{P}_i$), eliminating manual intermediate file transfers.
+- **$>1{,}000\times$ GPU Acceleration:** Executes Louvain community detection and PageRank on graphs exceeding 50,000 publications in **0.84 seconds** using NVIDIA RAPIDS (`cuGraph`, `cuDF`) in device CSR memory (vs. $>28$ minutes on single-threaded CPU NetworkX).
+- **Density-Based Noise Isolation:** Sentence-BERT embeddings clustered via HDBSCAN isolate peripheral literature into an explicit noise pool (**Topic $-1$**, averaging $32.1\%$ outlier rejection), maintaining high lexical topic diversity ($\overline{\text{TD}} = 0.80$) without forced assignment.
+- **Local Zero-Shot Screening:** Integrates local open-weight LLMs (Ollama `llama3.2:3b` at $T=0.0$) with structured JSON schemas, producing deterministic, auditable decisions with zero cloud API costs and zero private data leakage.
+- **Automated Publication Typesetting:** Assembles figures, formatted tables, and citations directly into camera-ready LaTeX manuscripts (`paper_scaffold.pdf`).
 
 ---
 
@@ -143,14 +121,14 @@ biblio-pipeline --file data/collected_sample.csv --mode meta --output results_me
 flowchart TD
     %% Inputs
     subgraph Inputs ["1. Data Inputs"]
-        in_query["Search Query & Filters\n(Single-Query Specification)"]
+        in_query["Search Query & Filters\n(Declarative Single Query)"]
         in_file["Local Dataset\n(CSV / Parquet / RIS)"]
     end
 
     %% Shared Core Infrastructure
     subgraph Core ["2. Unified Ingestion & Preprocessing"]
         scraping["Unified Asynchronous Harvester\n(OpenAlex, Crossref, Semantic Scholar, PubMed)"]
-        ingest["Pydantic Canonical Schema Validation (P_i)\n& Two-Stage Deduplication (DOI + Levenshtein Sim >= 0.92)"]
+        ingest["Pydantic Schema Validation (P_i)\n& Two-Stage Deduplication (DOI + Levenshtein >= 0.92)"]
     end
 
     %% Mode Selection & Dispatcher
@@ -162,7 +140,7 @@ flowchart TD
 
     %% Specialized Pipelines
     subgraph BiblioPipeline ["4A. Bibliometric Pipeline"]
-        b_nlp["GPU BERTopic NLP\n(Sentence-BERT + UMAP + HDBSCAN Noise Pool)"]
+        b_nlp["GPU BERTopic NLP\n(Sentence-BERT + UMAP + HDBSCAN Topic -1 Noise)"]
         b_net["Co-Authorship & Citation Graphs\n(RAPIDS cuGraph CSR Modularity Q & PageRank)"]
         b_doc["IEEEtran / Elsevier Paper Scaffold\n(paper_scaffold.pdf)"]
     end
@@ -208,7 +186,7 @@ The variable extractor ([`src/core/extraction.py`](src/core/extraction.py)) stan
 
 ## Landmark Empirical Benchmark Suite (30 Evaluations)
 
-OpenSciencePipe is evaluated against 26 published bibliometric landmark studies and 4 canonical meta-analyses across 11 software families:
+OpenSciencePipe is validated across 26 published bibliometric landmark studies and 4 canonical meta-analyses across 11 software families:
 
 | Software Ecosystem | Primary Paradigm | Benchmark Studies ($N$) | Representative Benchmark Corpora |
 | :--- | :--- | :---: | :--- |
@@ -229,7 +207,7 @@ OpenSciencePipe is evaluated against 26 published bibliometric landmark studies 
 
 ## Test Suite & Reproducibility
 
-Execute the regression and unit test suite:
+Run the regression and unit test suite:
 
 ```bash
 # Using uv (fastest)
