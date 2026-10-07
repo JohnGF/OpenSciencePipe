@@ -97,9 +97,12 @@ biblio-pipeline --query "brain-computer interface" --limit 100
 
 ---
 
-## Full-Stack Web GUI & Dashboard
+## Interactive Web App: Frontend + Backend (Work in Progress)
 
-For interactive visual exploration, launch the full-stack interface (FastAPI backend + Next.js frontend concurrently):
+> [!NOTE]
+> The command-line interface (`biblio-pipeline`) is the primary, production-ready, and fully validated computational engine. The full-stack Web App (Next.js frontend + FastAPI backend) is an optional visual interface currently under active development.
+
+For interactive visual exploration, launch both servers concurrently:
 
 ```bash
 python run_local.py
