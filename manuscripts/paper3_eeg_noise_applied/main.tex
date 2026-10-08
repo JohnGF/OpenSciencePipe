@@ -210,9 +210,9 @@ Complementary bibliographic coupling pairs cluster around the same challenging n
 The mapping data shows that traditional artifact removal remains the standard approach in BCI neurorehabilitation, accounting for 97.0\% of rule hits under first-hit precedence (10,838 of 11,176; deep latent decoding 0.7\%, noise-as-information zero exclusive footprint), while aperiodic-term papers ($\sim$30) all co-carry filtering terms. At the same time, keyword growth is concentrated in transformer, encoder and convolutional neural architectures.
 
 \subsection{Waveform Integrity vs.\ Latent-Space Invariance}
-The methodological divergence revealed in the bipartite cross-tabulation (Figure~\ref{fig:method_application_matrix}) is fundamentally dictated by clinical versus engineering constraints. In offline and supervised BCI-neurorehab practice, still dominated by the MI-BCI $\times$ ICA cell (7,330 papers, 65.6\%), evaluation relies on preserving interpretable waveform morphology and phase alignment, and on explicit, linear subspace projection like extended Infomax or fastICA \cite{delorme2004eeglab, jung2000removing} because the unmixing matrix $\mathbf{W} = \mathbf{A}^{-1}$ is invertible and visualizable, allowing experts to inspect the topographical scalp projection of isolated ocular or cardiac components before approving rejection. [REVIEW NOTE: latency 20--50\,ms and 4--8-channel figures below are hypothesized divergence drivers, uncited --- sources required before submission.]
+The methodological divergence revealed in the bipartite cross-tabulation (Figure~\ref{fig:method_application_matrix}) is fundamentally dictated by clinical versus engineering constraints. In offline and supervised BCI-neurorehab practice, still dominated by the MI-BCI $\times$ ICA cell (7,330 papers, 65.6\%), evaluation relies on preserving interpretable waveform morphology and phase alignment, and on explicit, linear subspace projection like extended Infomax or fastICA \cite{delorme2004eeglab, jung2000removing} because the unmixing matrix $\mathbf{W} = \mathbf{A}^{-1}$ is invertible and visualizable, allowing experts to inspect the topographical scalp projection of isolated ocular or cardiac components before approving rejection.
 
-Conversely, closed-loop brain--computer interfaces for post-stroke motor recovery --- where MI practice with BCI support \cite{pichiorri2015brain} and BCI-controlled functional electrical stimulation \cite{ren2024festimeta} show rehabilitative efficacy --- and mobile neurotechnologies operate under strict runtime latency budgets of 20--50\,ms and restricted electrode montages of 4 to 8 channels. Under these underdetermined conditions where $N_{\text{channels}} \ll N_{\text{sources}}$, classical BSS algorithms fail due to matrix rank deficiency and numerical instability. The rapid rise of compact spatial-temporal architectures, exemplified by models such as EEGNet \cite{lawhern2018eegnet} and DeepConvNet \cite{schirrmeister2017deep}, circumvents explicit unmixing by performing 2D depthwise and separable convolutions directly over raw signals. These architectures treat noise mitigation as an implicit optimization objective, suppressing non-cerebral artifacts that do not co-vary with task labels within latent representations, without requiring separate decomposition steps.
+Conversely, closed-loop brain--computer interfaces for post-stroke motor recovery --- where MI practice with BCI support \cite{pichiorri2015brain}, brain-machine interfaces in chronic stroke \cite{ramosmurguialday2013brain}, and brain-actuated functional electrical stimulation \cite{biasiucci2018brain, ren2024festimeta} show rehabilitative efficacy --- and mobile neurotechnologies \cite{debener2012how, lopezgordo2014dry} operate under strict runtime and hardware constraints: few-channel, often dry-electrode montages in uncontrolled environments, where classical BSS assumptions (overdetermined mixtures, stationary calibration) break down through matrix rank deficiency and nonstationary drift, while MI performance itself varies widely across users and sessions \cite{ahn2015performance}, under tens-of-milliseconds latency budgets. Under these underdetermined conditions where $N_{\text{channels}} \ll N_{\text{sources}}$, classical BSS algorithms fail due to matrix rank deficiency and numerical instability. The rapid rise of compact spatial-temporal architectures, exemplified by models such as EEGNet \cite{lawhern2018eegnet} and DeepConvNet \cite{schirrmeister2017deep} and surveyed in \cite{roy2019deep, craik2019deep}, circumvents explicit unmixing by performing 2D depthwise and separable convolutions directly over raw signals. These architectures treat noise mitigation as an implicit optimization objective, suppressing non-cerebral artifacts that do not co-vary with task labels within latent representations, without requiring separate decomposition steps.
 
 \subsection{Aperiodic Dynamics and Redefining Biological ``Noise''}
 A notable conceptual shift within the literature is the emergence of the noise-as-information framework in Paradigm~3. Electrophysiological studies have traditionally focused on narrowband oscillatory rhythms ($\theta, \alpha, \beta, \gamma$), largely treating the underlying broadband decay of the power spectrum as uninformative background noise. However, recent studies identified within the spectral parameterization coupling cluster \cite{gerster2022separating, porcaro2026quantifying} demonstrate the value of explicitly decomposing the power spectrum into an aperiodic background and periodic oscillatory peaks:
@@ -351,6 +351,30 @@ R.~van de Schoot \emph{et al.}, ``An open source machine learning framework for 
 
 \bibitem{page2021prisma}
 M.~J. Page \emph{et al.}, ``The PRISMA 2020 statement: an updated guideline for reporting systematic reviews,'' \emph{BMJ}, vol. 372, p. n71, 2021. \url{https://doi.org/10.1136/bmj.n71}
+
+\bibitem{roy2019deep}
+Y.~Roy \emph{et al.}, ``Deep learning-based electroencephalography analysis: a systematic review,'' \emph{J. Neural Eng.}, vol. 16, no. 5, p. 051001, 2019. \url{https://doi.org/10.1088/1741-2552/ab260c}
+
+\bibitem{craik2019deep}
+A.~Craik, Y.~He, and J.~L. Contreras-Vidal, ``Deep learning for electroencephalogram (EEG) classification tasks: a review,'' \emph{J. Neural Eng.}, vol. 16, no. 3, p. 031001, 2019. \url{https://doi.org/10.1088/1741-2552/ab0ab5}
+
+\bibitem{barachant2012multiclass}
+A.~Barachant, S.~Bonnet, M.~Congedo, and C.~Jutten, ``Multiclass brain-computer interface classification by Riemannian geometry,'' \emph{IEEE Trans. Biomed. Eng.}, vol. 59, no. 4, pp. 920--928, 2012. \url{https://doi.org/10.1109/TBME.2011.2172210}
+
+\bibitem{lopezgordo2014dry}
+M.~A. Lopez-Gordo, D.~Sanchez-Morillo, and F.~Pelayo Valle, ``Dry EEG electrodes,'' \emph{Sensors}, vol. 14, no. 7, pp. 12847--12870, 2014. \url{https://doi.org/10.3390/s140712847}
+
+\bibitem{debener2012how}
+S.~Debener \emph{et al.}, ``How about taking a low-cost, small, and wireless EEG for a walk?'' \emph{Psychophysiology}, vol. 49, no. 11, pp. 1617--1621, 2012. \url{https://doi.org/10.1111/j.1469-8986.2012.01471.x}
+
+\bibitem{ahn2015performance}
+M.~Ahn and S.~C. Jun, ``Performance variation in motor imagery brain-computer interface: a brief review,'' \emph{J. Neurosci. Methods}, vol. 243, pp. 103--110, 2015. \url{https://doi.org/10.1016/j.jneumeth.2015.01.033}
+
+\bibitem{ramosmurguialday2013brain}
+A.~Ramos-Murguialday \emph{et al.}, ``Brain-machine interface in chronic stroke rehabilitation: a controlled study,'' \emph{Ann. Neurol.}, vol. 74, no. 1, pp. 100--108, 2013. \url{https://doi.org/10.1002/ana.23879}
+
+\bibitem{biasiucci2018brain}
+A.~Biasiucci \emph{et al.}, ``Brain-actuated functional electrical stimulation elicits lasting arm motor recovery after stroke,'' \emph{Nature Commun.}, vol. 9, p. 2421, 2018. \url{https://doi.org/10.1038/s41467-018-04673-z}
 
 \end{thebibliography}
 
