@@ -31,10 +31,19 @@ EXCLUDE = [
     r"autism", r"\basd\b", r"schizophrenia", r"psychosis",
     r"alzheimer", r"dementia", r"neonatal", r"anesthesia",
 ]
+# Hab-only arm (v2, post-adjudication n=300): neurorehab terms alone
+# over-included CT/MRI diagnosis, TMS/tDCS trials and animal work
+# (regex prec 0.75). Require an EEG/decoding/noise anchor as well.
+HAB_ANCHOR = [
+    r"eeg", r"electroenceph", r"\bbci\b", r"brain[\s\-]*computer",
+    r"motor[\s\-]*imagery", r"decod", r"artifact", r"denois",
+    r"neurofeedback", r"brain[\s\-]*state",
+]
 
 bci_re = re.compile("|".join(f"(?:{p})" for p in BCI_CORE), re.I)
 hab_re = re.compile("|".join(f"(?:{p})" for p in NEUROHAB), re.I)
 exc_re = re.compile("|".join(f"(?:{p})" for p in EXCLUDE), re.I)
+anchor_re = re.compile("|".join(f"(?:{p})" for p in HAB_ANCHOR), re.I)
 
 
 def main() -> None:
@@ -58,10 +67,11 @@ def main() -> None:
             has_bci = bool(bci_re.search(text))
             has_hab = bool(hab_re.search(text))
             has_exc = bool(exc_re.search(text))
+            has_anchor = bool(anchor_re.search(text))
             if has_bci:
                 n_bci += 1
                 w.writerow(row)
-            elif has_hab and not has_exc:
+            elif has_hab and not has_exc and has_anchor:
                 n_hab_only += 1
                 w.writerow(row)
             elif has_hab and has_exc:
