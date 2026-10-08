@@ -20,7 +20,7 @@ SEED = 42
 BCI_CORE = [
     r"brain[\s\-]*computer[\s\-]*interface", r"\bbci\b",
     r"motor[\s\-]*imagery", r"steady[\s\-]*state\s+visual", r"\bssvep\b",
-    r"\bp300\b", r"event[\s\-]*related\s+desynch",
+    r"\bp300\b", r"event[\s\-]*related\s+desynch", r"\berd\b.?\/?\s*.?\bers\b",
     r"common\s+spatial", r"\bcsp\b",
     r"neuroprosthes", r"neurofeedback",
     r"closed[\s\-]*loop.*\beeg\b", r"\beeg\b.*closed[\s\-]*loop",
