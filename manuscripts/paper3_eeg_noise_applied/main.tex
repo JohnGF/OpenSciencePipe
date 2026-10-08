@@ -96,8 +96,8 @@ The analytical corpus was constructed through an automated, multi-source ingesti
 To evaluate methodological shifts across this corpus without manual annotation bottlenecks, we implemented a four-tier computational pipeline:
 \begin{enumerate}
     \item \textbf{Deductive Paradigm Categorization via Deterministic Rules:} To classify the methodological orientation of each study, title and abstract metadata were matched against ordered keyword rules implementing an operational taxonomy comprising four categories: explicit artifact filtering and removal via subtractive BSS/ICA, robust latent decoding via end-to-end deep spatial-temporal representation learning, noise-as-information and aperiodic dynamics through $1/f^\beta$ spectral parameterization, and general neuroengineering analysis. Rule-based matching is fully deterministic, guaranteeing complete, reproducible taxonomic attribution across all 11,176 subset publications; the ordered term lists and first-hit precedence are published in \nolinkurl{scripts/paradigm_shares.py}, and exclusive-vs-any-mention sensitivity is reported in Table~\ref{tab:paradigm_sensitivity}.
-    \item \textbf{Inductive Neural Topic Modeling and Outlier Containment:} Unsupervised thematic discovery was conducted using BERTopic on the 11,176-record subset. Title and abstract texts were converted into dense semantic representations using the \texttt{all-MiniLM-L6-v2} sentence transformer, projected into a lower-dimensional manifold via UMAP, and partitioned using density-based spatial clustering (HDBSCAN). To prevent forcing heterogeneous records into spurious clusters, the pipeline enforced an explicit outlier detection mechanism: 4,595 publications (41.1\%) residing in low-density semantic regions were preserved in a residual cluster (Topic~$-1$). Across the remaining 6,581 publications (58.9\%), 136 micro-clusters were extracted and parameterized using class-based TF-IDF (c-TF-IDF), led by CNN motor-imagery decoding, ICA artifact removal, imagined-speech decoding, wheelchair control, SSVEP/P300 spellers, neurofeedback and CSP themes.
-    \item \textbf{Graph Topologies (GPU-Accelerated):} Co-citation and co-authorship networks were computed on GPU memory using containerized NVIDIA RAPIDS cuDF and cuGraph 25.06, with Louvain modularity optimization identifying cohesive collaborative author communities and sparse co-citation ranking isolating the foundational intellectual backbone.
+    \item \textbf{Inductive Neural Topic Modeling and Outlier Containment:} Unsupervised thematic discovery was conducted using BERTopic on the 11,176-record subset. Title and abstract texts were converted into dense semantic representations using the \texttt{all-MiniLM-L6-v2} sentence transformer, projected into a lower-dimensional manifold via UMAP \cite{mcinnes2018umap}, and partitioned using density-based spatial clustering (HDBSCAN \cite{campello2013density}). To prevent forcing heterogeneous records into spurious clusters, the pipeline enforced an explicit outlier detection mechanism: 4,595 publications (41.1\%) residing in low-density semantic regions were preserved in a residual cluster (Topic~$-1$). Across the remaining 6,581 publications (58.9\%), 136 micro-clusters were extracted and parameterized using class-based TF-IDF (c-TF-IDF \cite{grootendorst2022bertopic}), led by CNN motor-imagery decoding, ICA artifact removal, imagined-speech decoding, wheelchair control, SSVEP/P300 spellers, neurofeedback and CSP themes.
+    \item \textbf{Graph Topologies (GPU-Accelerated):} Co-citation and co-authorship networks were computed on GPU memory using containerized NVIDIA RAPIDS cuDF and cuGraph 25.06, with Louvain modularity optimization \cite{blondel2008fast} identifying cohesive collaborative author communities and sparse co-citation ranking isolating the foundational intellectual backbone.
     \item \textbf{Longitudinal Dynamics and Growth Tracking:} Compound annual growth rates (CAGR) and temporal market-share shifts ($\Delta$) were computed across longitudinal publication windows, mapping the adoption velocity of emerging algorithmic strategies against historical baselines.
 \end{enumerate}
 
@@ -195,7 +195,7 @@ The geographic distribution in Figure~\ref{fig:country_world_map} (paired with t
 
 \subsection{Reference-Based Analysis}
 \subsubsection{Co-Citation Network}
-Figure~\ref{fig:cocitation_graph} illustrates the subset co-citation backbone (Table~\ref{tab:top_references_pagerank}, Table~\ref{tab:CoCitationLabels}): a BCI lineage from Wolpaw et al.\ (2002) and Pfurtscheller's ERD/ERS framework through CSP spatial filtering (Ramoser, Blankertz, Ang), anchored by EEGLAB \cite{delorme2004eeglab} on the toolbox side and EEGNet \cite{lawhern2018eegnet} with DeepConvNet \cite{schirrmeister2017deep} on the convolutional side (590 EEGNet--DeepConvNet co-citations), with a transformer bridge via EEG Conformer (199 co-citations with EEGNet). External citation counts are global (retrieved at harvest), not in-corpus counts.
+Figure~\ref{fig:cocitation_graph} illustrates the subset co-citation backbone (Table~\ref{tab:top_references_pagerank}, Table~\ref{tab:CoCitationLabels}): a BCI lineage from Wolpaw et al.\ (2002) \cite{wolpaw2002brain} and Pfurtscheller's ERD/ERS framework \cite{pfurtscheller1999event} through CSP spatial filtering (Ramoser \cite{ramoser2000optimal}, Blankertz \cite{blankertz2008optimizing}, Ang \cite{ang2008filter}; reviews \cite{lotte2018review, nicolasalonso2012brain}), anchored by EEGLAB \cite{delorme2004eeglab} on the toolbox side and EEGNet \cite{lawhern2018eegnet} with DeepConvNet \cite{schirrmeister2017deep} on the convolutional side (590 EEGNet--DeepConvNet co-citations), with a transformer bridge via EEG Conformer \cite{song2022conformer} (199 co-citations with EEGNet). External citation counts are global (retrieved at harvest), not in-corpus counts.
 
 \begin{figure}[htbp]
     \centering
@@ -288,6 +288,42 @@ EEG noise treatment bibliometric corpus and science-mapping data (57,601 records
 % TODO(author): record count assumes an updated Zenodo v2 upload; reconcile on submission.
 
 
+
+\bibitem{wolpaw2002brain}
+J.~R. Wolpaw, N.~Birbaumer, D.~J. McFarland, G.~Pfurtscheller, and T.~M. Vaughan, ``Brain--computer interfaces for communication and control,'' \emph{Clin. Neurophysiol.}, vol. 113, no. 6, pp. 767--791, 2002. \url{https://doi.org/10.1016/S1388-2457(02)00057-3}
+
+\bibitem{pfurtscheller1999event}
+G.~Pfurtscheller and F.~H. Lopes da Silva, ``Event-related EEG/MEG synchronization and desynchronization: basic principles,'' \emph{Clin. Neurophysiol.}, vol. 110, no. 11, pp. 1842--1857, 1999. \url{https://doi.org/10.1016/S1388-2457(99)00141-8}
+
+\bibitem{ramoser2000optimal}
+H.~Ramoser, J.~Muller-Gerking, and G.~Pfurtscheller, ``Optimal spatial filtering of single trial EEG during imagined hand movement,'' \emph{IEEE Trans. Rehab. Eng.}, vol. 8, no. 4, pp. 441--446, 2000. \url{https://doi.org/10.1109/86.895946}
+
+\bibitem{blankertz2008optimizing}
+B.~Blankertz, R.~Tomioka, S.~Lemm, M.~Kawanabe, and K.-R. M\"uller, ``Optimizing spatial filters for robust EEG single-trial analysis,'' \emph{IEEE Signal Process. Mag.}, vol. 25, no. 1, pp. 41--56, 2008. \url{https://doi.org/10.1109/MSP.2008.4408441}
+
+\bibitem{lotte2018review}
+F.~Lotte \emph{et al.}, ``A review of classification algorithms for EEG-based brain--computer interfaces: a 10 year update,'' \emph{J. Neural Eng.}, vol. 15, no. 3, p. 031005, 2018. \url{https://doi.org/10.1088/1741-2552/aab2f2}
+
+\bibitem{ang2008filter}
+K.~K. Ang, Z.~Y. Chin, H.~Zhang, and C.~Guan, ``Filter bank common spatial pattern (FBCSP) in brain-computer interface,'' in \emph{Proc. IEEE IJCNN}, 2008, pp. 2390--2397. \url{https://doi.org/10.1109/IJCNN.2008.4634130}
+
+\bibitem{nicolasalonso2012brain}
+L.~F. Nicolas-Alonso and J.~Gomez-Gil, ``Brain computer interfaces, a review,'' \emph{Sensors}, vol. 12, no. 2, pp. 1211--1279, 2012. \url{https://doi.org/10.3390/s120201211}
+
+\bibitem{song2022conformer}
+Y.~Song, Q.~Zheng, B.~Liu, and X.~Gao, ``EEG Conformer: Convolutional Transformer for EEG decoding and visualization,'' \emph{IEEE Trans. Neural Syst. Rehabil. Eng.}, vol. 31, pp. 710--719, 2022. \url{https://doi.org/10.1109/TNSRE.2022.3230250}
+
+\bibitem{grootendorst2022bertopic}
+M.~Grootendorst, ``BERTopic: Neural topic modeling with a class-based TF-IDF procedure,'' \emph{arXiv:2203.05794}, 2022. \url{https://doi.org/10.48550/arXiv.2203.05794}
+
+\bibitem{mcinnes2018umap}
+L.~McInnes, J.~Healy, N.~Saul, and L.~Grossberger, ``UMAP: Uniform Manifold Approximation and Projection,'' \emph{J. Open Source Softw.}, vol. 3, no. 29, p. 861, 2018. \url{https://doi.org/10.21105/joss.00861}
+
+\bibitem{campello2013density}
+R.~J.~G.~B. Campello, D.~Moulavi, and J.~Sander, ``Density-based clustering based on hierarchical density estimates,'' in \emph{Proc. PAKDD}, 2013, pp. 160--172. \url{https://doi.org/10.1007/978-3-642-37456-2_14}
+
+\bibitem{blondel2008fast}
+V.~D. Blondel, J.-L. Guillaume, R.~Lambiotte, and E.~Lefebvre, ``Fast unfolding of communities in large networks,'' \emph{J. Stat. Mech.}, vol. 2008, no. 10, p. P10008, 2008. \url{https://doi.org/10.1088/1742-5468/2008/10/P10008}
 
 \end{thebibliography}
 
