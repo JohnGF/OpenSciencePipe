@@ -158,7 +158,7 @@ Fine-grained frontiers crossing HDBSCAN's density threshold ($\text{min\_cluster
 \end{figure}
 
 Figure~\ref{fig:method_application_matrix} cross-tabulates these methodologies against application domains on the subset. Classical ICA and Wavelet denoising dominate Motor Imagery BCI itself (7,330 papers, 65.6\%) to maintain interpretability. Deep-learning (CNN/DL) methods remain a small exclusive minority (48 papers in MI-BCI, 0.4\%) while carrying 29.2\% any-mention presence, bypassing manual component pruning entirely (paired with the BERTopic overview in Figure~\ref{fig:bertopic_clusters}).
-Epoch decomposition of the subset cross-tabulation into complete-year windows is queued with the subset co-citation rerun; until then no epoch-share claims are made.
+Epoch decomposition of the subset cross-tabulation is reported via median-split keyword deltas (Table~\ref{tab:temporal_deltas}); method$\times$application epoch shares await a dedicated recompute.
 
 \begin{figure}[htbp]
     \centering
@@ -168,7 +168,7 @@ Epoch decomposition of the subset cross-tabulation into complete-year windows is
 \end{figure}
 
 \subsection{Scientific Temporal Dynamics \& Paradigm Shifts (\texorpdfstring{$\Delta$}{Delta} Analysis)}
-Keyword-level momentum on the subset (compositional, 2026 partial year excluded from windows) is led by transformer (+108\% CAGR, base 1$\rightarrow$39), encoder (+57\%, base 1$\rightarrow$24) and convolutional neural network (+51\%, base 141) terms. Small-base CAGRs are reported with bases and read as directional only; epoch market-share deltas await the subset temporal recompute.
+Keyword-level momentum on the subset uses median-split epochs (T1 2014--2019 vs T2 2020--2026, multi-label paper penetration; 2026 partial retained in T2 and read compositionally). The largest positive deltas (Table~\ref{tab:temporal_deltas}) are decoding methods (+6.59\%, 2.6x), deep learning (+6.54\%, 3.6x), convolutional neural network (+6.47\%, 2.7x) and artificial neural network (+3.64\%), with transformer (+1.72\%), transfer of learning (+1.54\%, 3.4x) and neural decoding (+1.34\%, 3.1x) as small-base frontiers. The 2024--2025 bulk harvest inflates absolute T2 counts; deltas are therefore share-based and directional.
 
 \begin{figure}[htbp]
     \centering
@@ -195,7 +195,7 @@ The geographic distribution in Figure~\ref{fig:country_world_map} (paired with t
 
 \subsection{Reference-Based Analysis}
 \subsubsection{Co-Citation Network}
-Figure~\ref{fig:cocitation_graph} [SUBSET RERUN QUEUED: current visual is broad-corpus] illustrates the reference co-citation network. Until the subset rerun lands, backbone claims rest on the cited toolboxes (EEGLAB \cite{delorme2004eeglab}, FieldTrip \cite{oostenveld2011fieldtrip}, EEGNet \cite{lawhern2018eegnet}, DeepConvNet \cite{schirrmeister2017deep}) rather than recomputed subset counts.
+Figure~\ref{fig:cocitation_graph} illustrates the subset co-citation backbone (Table~\ref{tab:top_references_pagerank}, Table~\ref{tab:CoCitationLabels}): a BCI lineage from Wolpaw et al.\ (2002) and Pfurtscheller's ERD/ERS framework through CSP spatial filtering (Ramoser, Blankertz, Ang), anchored by EEGLAB \cite{delorme2004eeglab} on the toolbox side and EEGNet \cite{lawhern2018eegnet} with DeepConvNet \cite{schirrmeister2017deep} on the convolutional side (590 EEGNet--DeepConvNet co-citations), with a transformer bridge via EEG Conformer (199 co-citations with EEGNet). External citation counts are global (retrieved at harvest), not in-corpus counts.
 
 \begin{figure}[htbp]
     \centering
