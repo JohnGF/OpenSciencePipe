@@ -31,7 +31,7 @@
 
 \begin{frontmatter}
 
-\title{Noise-Robust Decoding for BCI Neurorehabilitation: A Science Mapping of the Context-Blind Majority} % branch eeg-bci-neurorehab: 11,176/57,601 (19.4\%) — broad title frozen in tag eeg-broad-57k-v2
+\title{Noise-Robust Decoding for BCI Neurorehabilitation: A Science Mapping of the Context-Blind Majority} 
 
 \author[inst1]{João Garcia Farinha\corref{cor1}\orcidlink{0009-0009-9177-9964}}
 \ead{jgfarinha@ciencias.ulisboa.pt}
@@ -46,12 +46,12 @@
             country={Portugal}}
 
 \begin{abstract}
-  Electroencephalography (EEG) data processing has historically centered on the challenge of isolating microvolt-scale ($\mu\text{V}$) neuropotentials from physiological and environmental artifacts. This scoping science-mapping analysis filters a 57,601-record EEG noise-treatment harvest (2014--2026) down to 11,176 BCI-neurorehabilitation records (19.4\%) using validated BCI-core and anchored-rehab rules (precision 0.81, recall 0.97 on a 300-record dual-coded audit, Cohen's $\kappa = 0.86$). Using deterministic keyword-rule classification, BERTopic neural clustering (137 topics; 4,595 unclustered residual, 41.1\%), and citation network analysis, we quantify the methodological distribution across three paradigms under documented first-hit precedence: explicit artifact filtering and linear source separation (97.0\%), robust latent representation decoding (0.7\%), and noise-as-information with zero exclusive footprint (raw aperiodic-term papers exist but all co-carry filtering terms). Longitudinal keyword CAGR tracking on the subset is led by transformer (+108\%, base 1$\rightarrow$39), encoder (+57\%, 1$\rightarrow$24) and convolutional neural network (+51\%, base 141) terms, read compositionally given the 2024--2025 bulk harvest. We trace the evolution of noise processing from foundational blind source separation tools to compact end-to-end convolutional encoders, synthesizing the trade-offs between explicit artifact suppression, implicit noise invariance, and the functional utilization of aperiodic neural dynamics for closed-loop home neurorehabilitation.
+  Electroencephalography (EEG) data processing has historically centered on the challenge of isolating microvolt-scale ($\mu\text{V}$) neuropotentials from physiological and environmental artifacts. This scoping science-mapping analysis filters a 57,601-record EEG noise-treatment harvest (2014--2026) down to 11,176 BCI-neurorehabilitation records (19.4\%) using validated BCI-core and anchored-rehab rules (precision 0.81, recall 0.97 on a 300-record dual-coded audit, Cohen's $\kappa = 0.81$ (filter-vs-human; LLM-vs-human $\kappa = 0.86$, Annex)). Using deterministic keyword-rule classification, BERTopic neural clustering (136 clusters + residual; 4,595 unclustered residual, 41.1\%), and citation network analysis, we quantify the methodological distribution across three paradigms under documented first-hit precedence: explicit artifact filtering and linear source separation (97.0\%), robust latent representation decoding (0.7\%), and noise-as-information with zero exclusive footprint (raw aperiodic-term papers exist but all co-carry filtering terms). Longitudinal keyword CAGR tracking on the subset is led by transformer (+108\%, base 1$\rightarrow$39), encoder (+57\%, 1$\rightarrow$24) and convolutional neural network (+51\%, base 141) terms, read compositionally given the 2024--2025 bulk harvest. We trace the evolution of noise processing from foundational blind source separation tools to compact end-to-end convolutional encoders, synthesizing the trade-offs between explicit artifact suppression, implicit noise invariance, and the functional utilization of aperiodic neural dynamics for closed-loop home neurorehabilitation.
 \end{abstract}
 
 \begin{highlights}
 \item Science-mapping of 11,176 BCI-neurorehabilitation records (19.4\% of a 57,601 EEG noise harvest, 2014--2026).
-\item Validated BCI-core/anchored-rehab filter (prec 0.81, rec 0.97, $\kappa = 0.86$, n=300 dual-coded).
+\item Validated BCI-core/anchored-rehab filter (prec 0.81, rec 0.97, $\kappa = 0.81$, n=300 dual-coded).
 \item Quantifies three paradigms on BCI-neurorehab: filtering 97.0\%, latent decoding 0.7\%, noise-as-information 0.0\% exclusive (first-hit precedence disclosed).
 \item Fastest-growing keywords: transformer, encoder, CNN (small bases; read compositionally).
 \item Clinical morphology-preservation vs sparse 4--8ch home-BCI divergence as the analytical spine.
@@ -88,10 +88,10 @@ Given the accelerating publication volume in neural engineering, traditional man
     \item \textbf{RQ2 (Constraint divergence):} Why do clinical morphology-preservation pipelines (invertible unmixing, visual component approval) and sparse 4--8-channel home-BCI pipelines (rank-deficient, latency-budgeted) diverge in their choice of noise mitigation?
     \item \textbf{RQ3 (Momentum on the filtered corpus):} Which architectures show positive market-share momentum ($\Delta$) net of the 2024--2025 bulk harvest, and how has the co-citation backbone shifted from classical toolboxes toward compact neural encoders?
 \end{itemize}
-Excluded at the filter stage were pure-clinical literatures without a BCI link (epilepsy/seizure detection, sleep staging, ASD/schizophrenia/Alzheimer, neonatal, anesthesia), non-EEG diagnosis (CT/MRI imaging, TMS/tDCS therapy trials, cochlear implants, EMG-only prosthetics), and closed-loop neuromodulation without intent decoding or a rehab population (e.g.\ brain-state-dependent TMS in healthy participants) --- each boundary adjudicated on a 300-record dual-coded audit (Cohen's $\kappa = 0.86$).
+Excluded at the filter stage were pure-clinical literatures without a BCI link (epilepsy/seizure detection, sleep staging, ASD/schizophrenia/Alzheimer, neonatal, anesthesia), non-EEG diagnosis (CT/MRI imaging, TMS/tDCS therapy trials, cochlear implants, EMG-only prosthetics), and closed-loop neuromodulation without intent decoding or a rehab population (e.g.\ brain-state-dependent TMS in healthy participants) --- each boundary adjudicated on a 300-record dual-coded audit (Cohen's $\kappa = 0.81$ (filter-vs-human; LLM-vs-human $\kappa = 0.86$, Annex)). The BCI-core priority override retains 328 records carrying epilepsy/sleep terms alongside explicit BCI wording (e.g.\ closed-loop seizure-suppression interfaces); these rows are reported, not excluded, in the application matrix.
 
 \section{Methodology}
-The analytical corpus was constructed through an automated, multi-source ingestion protocol harvesting open scholarly metadata across OpenAlex, Semantic Scholar, and Crossref, capturing the study period from January 1, 2014, through 2026. A two-stage deduplication protocol, combining canonical Digital Object Identifier (DOI) normalization with exact normalized-title matching (union-find grouping), consolidated duplicate records across databases. Restricting the retrieval to entries with complete abstracts, verified as 99.8\% English on a 3,000-record audit sample, yielded a curated harvest of 57,601 publications. A validated BCI-neurorehabilitation filter was then applied (BCI-core terms with priority override, plus anchored-rehab terms requiring an EEG/decoding/noise anchor; clinical exclusions for epilepsy, sleep, ASD/schizophrenia/Alzheimer, neonatal and anesthesia): 11,176 records retained (19.4\%; 10,316 BCI-core + 860 anchored rehab). Filter performance was measured on a stratified 300-record sample dual-coded by a domain LLM (Qwen2.5-7B, greedy) and human adjudication of all 60 conflicts in ASReview \cite{vandeschoot2021open} (precision 0.81, recall 0.97, Cohen's $\kappa = 0.86$; script \nolinkurl{scripts/filter_bci_neurorehab.py}), following PRISMA 2020 reporting \cite{page2021prisma} for the harvest-to-inclusion flow. The 2026 harvest year was incomplete at the time of data collection and is flagged as a partial year in all annual outputs; annual trajectory and epoch figures are therefore truncated at the last complete year (2025), while corpus totals retain 2026 records.
+The analytical corpus was constructed through an automated, multi-source ingestion protocol harvesting open scholarly metadata across OpenAlex, Semantic Scholar, and Crossref, capturing the study period from January 1, 2014, through 2026. A two-stage deduplication protocol, combining canonical Digital Object Identifier (DOI) normalization with exact normalized-title matching (union-find grouping), consolidated duplicate records across databases. Restricting the retrieval to entries with complete abstracts, verified as 99.8\% English on a 3,000-record audit sample, yielded a curated harvest of 57,601 publications. A validated BCI-neurorehabilitation filter was then applied (BCI-core terms with priority override, plus anchored-rehab terms requiring an EEG/decoding/noise anchor; clinical exclusions for epilepsy, sleep, ASD/schizophrenia/Alzheimer, neonatal and anesthesia): 11,176 records retained (19.4\%; 10,316 BCI-core + 860 anchored rehab). Filter performance was measured on a stratified 300-record sample dual-coded by a domain LLM (Qwen2.5-7B, greedy) and human adjudication of all 60 conflicts in ASReview \cite{vandeschoot2021open} (precision 0.81, recall 0.97, Cohen's $\kappa = 0.81$ (filter-vs-human; LLM-vs-human $\kappa = 0.86$, Annex); script \nolinkurl{scripts/filter_bci_neurorehab.py}), following PRISMA 2020 reporting \cite{page2021prisma} for the harvest-to-inclusion flow. The 2026 harvest year was incomplete at the time of data collection and is flagged as a partial year in all annual outputs; annual trajectory and epoch figures are therefore truncated at the last complete year (2025), while corpus totals retain 2026 records.
 
 To evaluate methodological shifts across this corpus without manual annotation bottlenecks, we implemented a four-tier computational pipeline:
 \begin{enumerate}
@@ -109,11 +109,11 @@ The volume of BCI-neurorehabilitation noise research in the subset scales from 3
 \begin{figure}[htbp]
     \centering
     \IfFileExists{figures/Figure_1.pdf}{\includegraphics[width=0.72\linewidth]{Figure_1.pdf}}{}
-    \caption{Publication Count and Annual Growth}
+    \caption{Publication Count and Annual Growth (BCI-neurorehab subset, $N=11{,}176$)}
     \label{fig:pubCountGrowth}
     \vspace{1em}
     \IfFileExists{figures/annual_technique_trajectories.pdf}{\includegraphics[width=0.72\linewidth]{annual_technique_trajectories.pdf}}{}
-    \caption{Annual Market Share Evolution of Key Focus Areas and Techniques}
+    \caption{Annual Market Share Evolution of Key Focus Areas and Techniques (subset, $N=11{,}176$)}
     \label{fig:technique_trajectories}
 \end{figure}
 
@@ -122,7 +122,7 @@ Figure~\ref{fig:technique_trajectories} decomposes the same growth into discipli
 Automated rule-based taxonomy categorization of the 11,176 BCI-neurorehab records reveals that explicit Artifact Filtering \& Removal continues to represent the dominant operational paradigm (97.0\% of exclusive rule hits).
 \IfFileExists{tables/annex_llm_screening.tex}{\input{tables/annex_llm_screening.tex}}{}
 
-Deterministic classification of the BCI-neurorehab subset (Table~\ref{tab:paradigm_sensitivity}) shows the imbalance and its measurement: exclusive first-hit shares of 97.0\% explicit filtering, 0.7\% latent decoding, 0.0\% noise-as-information (263 unclassified, 2.4\%), against any-mention shares of 97.0\% / 29.2\% / 0.55\% --- the gap between exclusive and any-mention quantifies first-hit shadowing, since broad filtering terms co-occur in nearly every deep or aperiodic paper.
+Deterministic classification of the BCI-neurorehab subset (Table~\ref{tab:paradigm_sensitivity}) shows the imbalance and its measurement: exclusive first-hit shares of 97.0\% explicit filtering, 0.7\% latent decoding, 0.0\% noise-as-information (263 unclassified, 2.4\%), against any-mention shares of 97.0\% / 30.4\% / 1.09\% (3,397 / 122 papers) --- the gap between exclusive and any-mention quantifies first-hit shadowing, since broad filtering terms co-occur in nearly every deep or aperiodic paper.
 \begin{table}[htbp]
 \caption{Exclusive vs any-mention paradigm shares, BCI-neurorehab subset ($N=11{,}176$)}
 \label{tab:paradigm_sensitivity}
@@ -132,8 +132,8 @@ Deterministic classification of the BCI-neurorehab subset (Table~\ref{tab:paradi
 Paradigm & Exclusive (\%) & Any-mention (\%) \\
 \midrule
 P1 explicit filtering & 97.0 & 97.0 \\
-P2 latent decoding & 0.7 & 29.2 \\
-P3 noise-as-information & 0.0 & 0.55 \\
+P2 latent decoding & 0.7 & 30.4 \\
+P3 noise-as-information & 0.0 & 1.09 \\
 Unclassified & 2.4 & --- \\
 \bottomrule
 \end{tabular}
@@ -149,21 +149,21 @@ Fine-grained frontiers crossing HDBSCAN's density threshold ($\text{min\_cluster
 \begin{figure}[htbp]
     \centering
     \IfFileExists{figures/Figure_20.pdf}{\includegraphics[width=0.72\linewidth]{Figure_20.pdf}}{}
-    \caption{Discovered BERTopic Thematic Clusters and Keyword Scores}
+    \caption{Discovered BERTopic Thematic Clusters and Keyword Scores (subset, 136 clusters, $N=11{,}176$)}
     \label{fig:bertopic_clusters}
     \vspace{1em}
     \IfFileExists{figures/Figure_25.pdf}{\includegraphics[width=0.72\linewidth]{Figure_25.pdf}}{}
-    \caption{Methodology vs Application Field Cross-Tabulation Bipartite Matrix}
+    \caption{Methodology vs Application Field Cross-Tabulation Bipartite Matrix (subset, $N=11{,}176$)}
     \label{fig:method_application_matrix}
 \end{figure}
 
-Figure~\ref{fig:method_application_matrix} cross-tabulates these methodologies against application domains on the subset. Classical ICA and Wavelet denoising dominate Motor Imagery BCI itself (7,330 papers, 65.6\%) to maintain interpretability. Deep-learning (CNN/DL) methods remain a small exclusive minority (48 papers in MI-BCI, 0.4\%) while carrying 29.2\% any-mention presence, bypassing manual component pruning entirely (paired with the BERTopic overview in Figure~\ref{fig:bertopic_clusters}).
+Figure~\ref{fig:method_application_matrix} cross-tabulates these methodologies against application domains on the subset. Classical ICA and Wavelet denoising dominate Motor Imagery BCI itself (7,330 papers, 65.6\%) to maintain interpretability. Deep-learning (CNN/DL) methods remain a small exclusive minority (48 papers in MI-BCI, 0.4\%) while carrying 30.4\% any-mention presence (3,397 papers), bypassing manual component pruning entirely (paired with the BERTopic overview in Figure~\ref{fig:bertopic_clusters}).
 Epoch decomposition of the subset cross-tabulation is reported via median-split keyword deltas (Table~\ref{tab:temporal_deltas}); method$\times$application epoch shares await a dedicated recompute.
 
 \begin{figure}[htbp]
     \centering
     \IfFileExists{figures/method_application_multi_epoch.pdf}{\includegraphics[width=0.72\linewidth]{method_application_multi_epoch.pdf}}{}
-    \caption{Methodology vs Application Evolution Across Epochs (2014--2017, 2018--2021, 2022--2025)}
+    \caption{Methodology vs Application Evolution Across Epochs [BROAD-CORPUS FIGURE: subset epoch recompute pending]}
     \label{fig:method_application_epochs}
 \end{figure}
 
@@ -173,7 +173,7 @@ Keyword-level momentum on the subset uses median-split epochs (T1 2014--2019 vs 
 \begin{figure}[htbp]
     \centering
     \IfFileExists{figures/Figure_15.pdf}{\includegraphics[width=0.72\linewidth]{Figure_15.pdf}}{}
-    \caption{Scientific Market Share Deltas ($\Delta$ \%) Between Baseline vs Modern Epochs}
+    \caption{Subset Keyword Market Share Deltas ($\Delta$ \%) Between Median-Split Epochs (T1 2014--2019 vs T2 2020--2026, $N=11{,}176$)}
     \label{fig:temporal_delta_shifts}
 \end{figure}
 
@@ -183,11 +183,11 @@ Figure~\ref{fig:network_graph} maps the Louvain co-authorship communities, ident
 \begin{figure}[htbp]
     \centering
     \IfFileExists{figures/Figure_8.pdf}{\includegraphics[width=0.72\linewidth]{Figure_8.pdf}}{}
-    \caption{Louvain Community Clustered Co-Authorship Ring Network}
+    \caption{Louvain Community Clustered Co-Authorship Ring Network [BROAD-CORPUS FIGURE: subset rerun pending]}
     \label{fig:network_graph}
     \vspace{1em}
     \IfFileExists{figures/Figure_10.pdf}{\includegraphics[width=0.72\linewidth]{Figure_10.pdf}}{}
-    \caption{Global Institutional Research Heatmap by Country}
+    \caption{Global Institutional Research Heatmap by Country [BROAD-CORPUS FIGURE: subset rerun pending]}
     \label{fig:country_world_map}
 \end{figure}
 
@@ -195,24 +195,24 @@ The geographic distribution in Figure~\ref{fig:country_world_map} (paired with t
 
 \subsection{Reference-Based Analysis}
 \subsubsection{Co-Citation Network}
-Figure~\ref{fig:cocitation_graph} illustrates the subset co-citation backbone (Table~\ref{tab:top_references_pagerank}, Table~\ref{tab:CoCitationLabels}): a BCI lineage from Wolpaw et al.\ (2002) \cite{wolpaw2002brain} and Pfurtscheller's ERD/ERS framework \cite{pfurtscheller1999event} through CSP spatial filtering (Ramoser \cite{ramoser2000optimal}, Blankertz \cite{blankertz2008optimizing}, Ang \cite{ang2008filter}; reviews \cite{lotte2018review, nicolasalonso2012brain}), anchored by EEGLAB \cite{delorme2004eeglab} on the toolbox side and EEGNet \cite{lawhern2018eegnet} with DeepConvNet \cite{schirrmeister2017deep} on the convolutional side (590 EEGNet--DeepConvNet co-citations), with a transformer bridge via EEG Conformer \cite{song2022conformer} (199 co-citations with EEGNet). External citation counts are global (retrieved at harvest), not in-corpus counts.
+Figure~\ref{fig:cocitation_graph} illustrates the subset co-citation backbone (Table~\ref{tab:top_references_pagerank}, Table~\ref{tab:CoCitationLabels}): a BCI lineage from Wolpaw et al.\ (2002) \cite{wolpaw2002brain} and Pfurtscheller's ERD/ERS framework \cite{pfurtscheller1999event} through CSP spatial filtering (Ramoser \cite{ramoser2000optimal}, Blankertz \cite{blankertz2008optimizing}, Ang \cite{ang2008filter}, Riemannian extensions \cite{barachant2012multiclass}; reviews \cite{lotte2018review, nicolasalonso2012brain}), anchored by EEGLAB \cite{delorme2004eeglab} and FieldTrip \cite{oostenveld2011fieldtrip} on the toolbox side (with MNE-Python \cite{gramfort2013meg} as the open Python stack) and EEGNet \cite{lawhern2018eegnet} with DeepConvNet \cite{schirrmeister2017deep} on the convolutional side (590 EEGNet--DeepConvNet co-citations), with a transformer bridge via EEG Conformer \cite{song2022conformer} (199 co-citations with EEGNet). External citation counts are global (retrieved at harvest), not in-corpus counts.
 
 \begin{figure}[htbp]
     \centering
     \IfFileExists{figures/Figure_5.pdf}{\includegraphics[width=0.72\linewidth]{Figure_5.pdf}}{}
-    \caption{Reference Co-Citation Network Graph}
+    \caption{Reference Co-Citation Network Graph [BROAD-CORPUS LAYOUT: subset counts in Tables~\ref{tab:top_references_pagerank}--\ref{tab:CoCitationLabels}]}
     \label{fig:cocitation_graph}
 \end{figure}
 \IfFileExists{tables/tab_top_references_pagerank.tex}{\input{tables/tab_top_references_pagerank.tex}}{}
 Complementary bibliographic coupling pairs cluster around the same challenging noise domains, including high-amplitude electromagnetic pulses in TMS-EEG \cite{rogasch2014removing, farzan2016characterizing} and methodological spectral parameterization separating aperiodic $1/f^\beta$ background dynamics from true narrowband oscillatory peaks \cite{gerster2022separating, porcaro2026quantifying}.
 
 \section{Discussion}
-The mapping data shows that traditional artifact removal remains the standard approach in BCI neurorehabilitation, accounting for 97.0\% of rule hits under first-hit precedence (10,838 of 11,176; deep latent decoding 0.7\%, noise-as-information zero exclusive footprint), while aperiodic-term papers ($\sim$30) all co-carry filtering terms. At the same time, keyword growth is concentrated in transformer, encoder and convolutional neural architectures.
+The mapping data shows that traditional artifact removal remains the standard approach in BCI neurorehabilitation, accounting for 97.0\% of exclusive rule hits under first-hit precedence (10,838 of 11,176; deep latent decoding 0.7\%, noise-as-information zero exclusive footprint), while 122 aperiodic-term papers (1.09\% any-mention, $\sim$31 explicitly aperiodic) all co-carry filtering terms. At the same time, keyword growth is concentrated in transformer, encoder and convolutional neural architectures.
 
 \subsection{Waveform Integrity vs.\ Latent-Space Invariance}
 The methodological divergence revealed in the bipartite cross-tabulation (Figure~\ref{fig:method_application_matrix}) is fundamentally dictated by clinical versus engineering constraints. In offline and supervised BCI-neurorehab practice, still dominated by the MI-BCI $\times$ ICA cell (7,330 papers, 65.6\%), evaluation relies on preserving interpretable waveform morphology and phase alignment, and on explicit, linear subspace projection like extended Infomax or fastICA \cite{delorme2004eeglab, jung2000removing} because the unmixing matrix $\mathbf{W} = \mathbf{A}^{-1}$ is invertible and visualizable, allowing experts to inspect the topographical scalp projection of isolated ocular or cardiac components before approving rejection.
 
-Conversely, closed-loop brain--computer interfaces for post-stroke motor recovery --- where MI practice with BCI support \cite{pichiorri2015brain}, brain-machine interfaces in chronic stroke \cite{ramosmurguialday2013brain}, and brain-actuated functional electrical stimulation \cite{biasiucci2018brain, ren2024festimeta} show rehabilitative efficacy --- and mobile neurotechnologies \cite{debener2012how, lopezgordo2014dry} operate under strict runtime and hardware constraints: few-channel, often dry-electrode montages in uncontrolled environments, where classical BSS assumptions (overdetermined mixtures, stationary calibration) break down through matrix rank deficiency and nonstationary drift, while MI performance itself varies widely across users and sessions \cite{ahn2015performance}, under tens-of-milliseconds latency budgets. Under these underdetermined conditions where $N_{\text{channels}} \ll N_{\text{sources}}$, classical BSS algorithms fail due to matrix rank deficiency and numerical instability. The rapid rise of compact spatial-temporal architectures, exemplified by models such as EEGNet \cite{lawhern2018eegnet} and DeepConvNet \cite{schirrmeister2017deep} and surveyed in \cite{roy2019deep, craik2019deep}, circumvents explicit unmixing by performing 2D depthwise and separable convolutions directly over raw signals. These architectures treat noise mitigation as an implicit optimization objective, suppressing non-cerebral artifacts that do not co-vary with task labels within latent representations, without requiring separate decomposition steps.
+Conversely, closed-loop brain--computer interfaces for post-stroke motor recovery --- where MI practice with BCI support \cite{pichiorri2015brain}, brain-machine interfaces in chronic stroke \cite{ramosmurguialday2013brain}, and brain-actuated functional electrical stimulation \cite{biasiucci2018brain, ren2024festimeta} show rehabilitative efficacy --- and mobile neurotechnologies \cite{debener2012how, lopezgordo2014dry} operate under strict runtime and hardware constraints: few-channel, often dry-electrode montages in uncontrolled environments, where classical BSS assumptions (overdetermined mixtures, stationary calibration) break down through matrix rank deficiency and nonstationary drift, while MI performance itself varies widely across users and sessions \cite{ahn2015performance}, under tight real-time budgets. Under these underdetermined conditions where $N_{\text{channels}} \ll N_{\text{sources}}$, classical BSS algorithms fail due to matrix rank deficiency and numerical instability. The rapid rise of compact spatial-temporal architectures, exemplified by models such as EEGNet \cite{lawhern2018eegnet} and DeepConvNet \cite{schirrmeister2017deep} and surveyed in \cite{roy2019deep, craik2019deep}, circumvents explicit unmixing by performing 2D depthwise and separable convolutions directly over raw signals. These architectures treat noise mitigation as an implicit optimization objective, suppressing non-cerebral artifacts that do not co-vary with task labels within latent representations, without requiring separate decomposition steps.
 
 \subsection{Aperiodic Dynamics and Redefining Biological ``Noise''}
 A notable conceptual shift within the literature is the emergence of the noise-as-information framework in Paradigm~3. Electrophysiological studies have traditionally focused on narrowband oscillatory rhythms ($\theta, \alpha, \beta, \gamma$), largely treating the underlying broadband decay of the power spectrum as uninformative background noise. However, recent studies identified within the spectral parameterization coupling cluster \cite{gerster2022separating, porcaro2026quantifying} demonstrate the value of explicitly decomposing the power spectrum into an aperiodic background and periodic oscillatory peaks:
@@ -229,7 +229,7 @@ While end-to-end deep learning pipelines in Paradigm~2 achieve high empirical de
 This creates a critical performance gap between offline evaluations and live, closed-loop execution. In real-time deployments, spontaneous movements, postural changes, and electrode impedance drift disrupt the accidental correlations learned during offline training, frequently causing decoders to fail when evaluated online. In clinical monitoring and real-time interfaces, models that appear robust offline can deteriorate across sessions or hardware montages where artifact distributions decouple from genuine neural activity. Hybrid pipelines combining automated, verifiable artifact attenuation like ICLabel \cite{pion2019iclabel} with compact deep spatial decoders provide a much more dependable strategy for practical, live systems.
 
 \subsection{Limitations \& Threats to Validity}
-Several bibliometric limitations should be noted. First, although the automated multi-source ingestion protocol across OpenAlex, Semantic Scholar, and Crossref minimized disciplinary bias between medical and engineering venues, unindexed technical reports were excluded; no explicit language filter was applied, but audit sampling shows 99.8\% of abstracts are English. The 2024--2025 bulk harvest step and the partial 2026 year mean absolute growth and small-base CAGR figures are read compositionally, not as organic field rates. Second, the ordered first-hit paradigm rules shadow deep and aperiodic papers that co-mention filtering terms: exclusive shares (97.0/0.7/0.0) understate any-mention presence (97.0/29.2/0.55\%), reported jointly in Table~\ref{tab:paradigm_sensitivity}; a multi-label or P2-first sensitivity is future work. The BCI-neurorehab filter itself carries measured error (precision 0.81, recall 0.97, n=300 dual-coded, $\kappa = 0.86$), concentrated on stimulation-trial and imaging-diagnosis boundaries. Finally, the density-based HDBSCAN topic model deliberately preserved a 41.1\% unclustered residual (Topic $-1$, $n=4{,}595$), reflecting heterogeneous boundary records rather than forced thematic clustering.
+Several bibliometric limitations should be noted. First, although the automated multi-source ingestion protocol across OpenAlex, Semantic Scholar, and Crossref minimized disciplinary bias between medical and engineering venues, unindexed technical reports were excluded; no explicit language filter was applied, but audit sampling shows 99.8\% of abstracts are English. The 2024--2025 bulk harvest step and the partial 2026 year mean absolute growth and small-base CAGR figures are read compositionally, not as organic field rates. Second, the ordered first-hit paradigm rules shadow deep and aperiodic papers that co-mention filtering terms: exclusive shares (97.0/0.7/0.0) understate any-mention presence (97.0/30.4/1.09\%), reported jointly in Table~\ref{tab:paradigm_sensitivity}; a multi-label or P2-first sensitivity is future work. The BCI-neurorehab filter itself carries measured error (precision 0.81, recall 0.97, n=300 dual-coded, $\kappa = 0.81$), concentrated on stimulation-trial and imaging-diagnosis boundaries. Finally, the density-based HDBSCAN topic model deliberately preserved a 41.1\% unclustered residual (Topic $-1$, $n=4{,}595$), reflecting heterogeneous boundary records rather than forced thematic clustering.
 
 \section{Conclusion}
 Over the 2014--2026 monitoring period, EEG noise treatment has expanded beyond manual filtering and linear blind source separation into automated, data-driven representation learning. Deep learning models have redefined state-of-the-art decoding by embedding noise invariance directly within spatial-temporal layers. Addressing future deployment demands will require hybrid pipelines that combine automated artifact suppression with interpretable, noise-robust architectures suitable for real-time mobile neurotechnology.
@@ -311,7 +311,7 @@ K.~K. Ang, Z.~Y. Chin, H.~Zhang, and C.~Guan, ``Filter bank common spatial patte
 L.~F. Nicolas-Alonso and J.~Gomez-Gil, ``Brain computer interfaces, a review,'' \emph{Sensors}, vol. 12, no. 2, pp. 1211--1279, 2012. \url{https://doi.org/10.3390/s120201211}
 
 \bibitem{song2022conformer}
-Y.~Song, Q.~Zheng, B.~Liu, and X.~Gao, ``EEG Conformer: Convolutional Transformer for EEG decoding and visualization,'' \emph{IEEE Trans. Neural Syst. Rehabil. Eng.}, vol. 31, pp. 710--719, 2022. \url{https://doi.org/10.1109/TNSRE.2022.3230250}
+Y.~Song, Q.~Zheng, B.~Liu, and X.~Gao, ``EEG Conformer: Convolutional Transformer for EEG decoding and visualization,'' \emph{IEEE Trans. Neural Syst. Rehabil. Eng.}, vol. 31, pp. 710--719, 2023. \url{https://doi.org/10.1109/TNSRE.2022.3230250}
 
 \bibitem{grootendorst2022bertopic}
 M.~Grootendorst, ``BERTopic: Neural topic modeling with a class-based TF-IDF procedure,'' \emph{arXiv:2203.05794}, 2022. \url{https://doi.org/10.48550/arXiv.2203.05794}

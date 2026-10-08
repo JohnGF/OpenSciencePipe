@@ -33,9 +33,13 @@ def main() -> None:
     text = (df["Title"].fillna("") + " " + df["Abstract"].fillna("")).str.lower()
     labels = text.map(paradigm)
     n = len(labels)
-    print(f"n={n}")
+    print(f"n={n} (exclusive, first-hit)")
     for k, c in labels.value_counts().items():
         print(f"{k}: {c} ({c / n:.1%})")
+    print("any-mention (same term lists, no precedence):")
+    for name, terms in [("P1", P1), ("P2", P2), ("P3", P3)]:
+        m = text.apply(lambda x, ts=terms: any(w in x for w in ts))
+        print(f"{name}: {m.sum()} ({m.mean():.2%})")
 
 
 if __name__ == "__main__":
