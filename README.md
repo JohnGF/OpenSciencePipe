@@ -1,5 +1,10 @@
 # Bibliometric Research Pipeline
 
+[![Build Status](https://img.shields.io/badge/build-passing-success)](https://github.com/JohnGF/bibliometric)
+[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/JohnGF/bibliometric)
+[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
+[![License](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
+
 A modular, schema-driven Python pipeline for advanced bibliometric research. It supports autonomous metadata scraping, cross-source deduplication, dynamic keyword CAGR analysis, NLP-based topic clustering (BERTopic), and co-authorship network visualization.
 
 ## Key Features
@@ -36,7 +41,7 @@ flowchart TD
     end
 
     %% Analysis Blocks
-    subgraph Processors ["Modular Analysis Engines"]
+    subgraph Processors ["GPU Acceleration Pipeline / Analysis"]
         nlp_proc["NLP Engine (BERTopic)"]
         country_proc["Country Analysis"]
         net_proc["Network Analysis (cuGraph GPU / NetworkX CPU)"]
@@ -44,7 +49,7 @@ flowchart TD
     end
 
     %% Outputs
-    subgraph DataOutputs ["Generated Data & Reports (pipeline_results/)"]
+    subgraph DataOutputs ["Parsed Bibliometric Graph / Output"]
         out_csv["Cleaned CSV / Parquet Datasets"]
         out_plots["Trend PDF Plots (CAGR, Growth, Evolution)"]
         out_net["Network Graphs (Co-authorship, percolation)"]
@@ -71,12 +76,27 @@ flowchart TD
     out_csv & out_plots & out_net --> WebDashboard
 ```
 
+## Quickstart Commands
+
+```bash
+# Install dependencies
+uv venv && uv pip install -e .
+
+# Run the Web App (Frontend + Backend)
+python run_local.py
+
+# Run a query with the CLI
+uv run biblio-pipeline --query "brain-computer interface" --limit 200 --start-year 2020 --end-year 2025
+```
+
 ## Project Structure
 To keep Git tracking lightweight and clean, the repository is structured as:
 - `/src`: Core source code (API, pipeline orchestration, viz, collectors, network engines).
+- `/tests`: Test suites covering extractors, parsing utilities, and query pipelines.
 - `/notebooks`: Contains research Jupyter notebooks (`Authors`, `Citations`, `Keyword`, etc.).
 - `/scripts`: Miscellaneous scripts and classifiers.
 - `/data` & `/pipeline_results`: Ignored directories for fetched raw datasets and run plots/graphs.
+- `/frontend`: Next.js web application for the dashboard.
 
 ---
 

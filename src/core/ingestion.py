@@ -3,7 +3,7 @@ import polars as pl
 import pycountry
 import re
 from typing import List, Optional
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 # --- Pydantic Schema ---
 
@@ -21,19 +21,22 @@ class PublicationSchema(BaseModel):
     eid: Optional[str] = Field(None, alias="EID")
     references: Optional[str] = Field(None, alias="References")
 
-    @validator("title", "abstract", "authors", "author_keywords", "index_keywords", "source_title", "affiliations", "doi", "eid", "references", pre=True)
+    @field_validator("title", "abstract", "authors", "author_keywords", "index_keywords", "source_title", "affiliations", "doi", "eid", "references", mode="before")
+    @classmethod
     def parse_strings(cls, v):
         if pd.isna(v) or v == "" or v is None:
             return None
         return str(v)
 
-    @validator("title", pre=True)
+    @field_validator("title", mode="before")
+    @classmethod
     def parse_title(cls, v):
         if pd.isna(v) or v == "" or v is None:
             return "Untitled Publication"
         return str(v)
 
-    @validator("year", pre=True)
+    @field_validator("year", mode="before")
+    @classmethod
     def parse_year(cls, v):
         if pd.isna(v) or v == "":
             return None
