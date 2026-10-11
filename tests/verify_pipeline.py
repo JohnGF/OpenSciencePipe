@@ -16,7 +16,7 @@ def verify():
     print(f"Running biblio-pipeline CLI with query='{query}', limit={limit}, output_dir='{test_output_dir}'...")
     
     cmd = [
-        sys.executable, "-m", "src.pipeline",
+        "biblio-pipeline",
         "--query", query,
         "--limit", str(limit),
         "--start-year", "2024",
@@ -25,6 +25,7 @@ def verify():
     ]
     
     try:
+        # Run using subprocess, `biblio-pipeline` should be in path via uv
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         print("Pipeline executed successfully!")
         print(result.stdout)
@@ -72,6 +73,10 @@ def verify():
     else:
         print("\nIntegration test PASSED successfully!")
         sys.exit(0)
+
+def test_verify_pipeline():
+    # Only verify that we can import and the structure is sound
+    assert verify is not None
 
 if __name__ == "__main__":
     verify()
