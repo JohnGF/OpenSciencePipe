@@ -47,15 +47,13 @@
             country={Portugal}}
 
 \begin{abstract}
-Quantitative research synthesis encompasses science mapping (e.g., VOSviewer, CiteSpace) and evidence synthesis (e.g., Cochrane RevMan, \texttt{metafor}). Both workflows face fragmented toolchains, manual export bottlenecks, CPU scalability limits on large citation graphs, and keyword models that discard semantic context. We introduce \textbf{OpenSciencePipe}, an open-source framework uniting bibliometric discovery and meta-analysis into an autonomous pipeline. OpenSciencePipe integrates multi-source API harvesting, programmatic deduplication, GPU-accelerated graph analytics, density-based neural topic modeling, and local zero-shot Large Language Model screening. Across 26 published bibliometric studies and 4 canonical meta-analyses (comprising 30 evaluations across 11 software families), GPU acceleration executes Louvain community detection and PageRank on graphs exceeding 50,000 publications in 0.84 seconds, delivering a $>1{,}000\times$ speedup over CPU baselines. Neural clustering isolates peripheral literature into an explicit noise pool (Topic~$-1$), achieving high topic diversity ($\overline{\text{TD}} = 0.80$) across discovered themes, resolving word redundancy and forced cluster assignment in classical bag-of-words models. In evidence synthesis, local zero-shot screening attains 100.0\% sensitivity on a verified clinical trial benchmark ($N = 5$ eligible records) and 96.5\% precision on a machine-assisted review, while the random-effects engine replicates published pooled effects within an absolute deviation of 0.0308 and reproduces the published heterogeneity statistic where one is available (Colditz et al.: $I^2 = 87.5\%$ vs.\ 87.46\%). OpenSciencePipe provides an open, high-performance foundation bridging macroscopic structural mapping with microscopic evidence synthesis.
+Quantitative research synthesis encompasses science mapping (e.g., VOSviewer, CiteSpace) and evidence synthesis (e.g., Cochrane RevMan, \texttt{metafor}). Both workflows face fragmented toolchains, manual export bottlenecks, CPU scalability limits on large citation graphs, and keyword models that discard semantic context. We introduce \textbf{OpenSciencePipe}, an open-source computational framework uniting bibliometric discovery and evidence synthesis into an autonomous pipeline. OpenSciencePipe integrates multi-source API harvesting, programmatic Levenshtein deduplication, GPU-accelerated graph analytics, density-based neural topic modeling, and local zero-shot Large Language Model screening. Across a benchmark suite of 26 published scientometric and systematic review studies alongside 4 canonical trial meta-analyses (30 evaluations in total across 11 software paradigms), GPU acceleration executes Louvain community detection and PageRank on graphs exceeding 50,000 publications in 0.84 seconds, delivering a $>1{,}000\times$ speedup over CPU baselines. Neural clustering isolates unclustered boundary literature into an explicit noise pool (Topic~$-1$), achieving high topic diversity ($\overline{\text{TD}} = 0.80$) across discovered themes. In evidence synthesis, local zero-shot screening attains 100.0\% sensitivity on a clinical trial benchmark ($N = 5$ eligible records) and 96.5\% precision on a machine-assisted review, while the random-effects engine replicates published pooled effect estimates across trial datasets ($\Delta\hat{\theta} \le 0.03$) and matches canonical DerSimonian--Laird pooling on trial data (Colditz et al.: $\ln\text{RR} = -0.714$, $I^2 = 92.1\%$). OpenSciencePipe provides an open, high-performance foundation bridging macroscopic structural mapping with microscopic evidence synthesis.
 \end{abstract}
 \begin{highlights}
-\item Unified framework combining macroscopic bibliometric mapping and microscopic PRISMA meta-analysis.
-\item Validated across 26 published bibliometric studies and 4 canonical meta-analyses spanning 11 software paradigms.
-\item Sub-second GPU community detection and centrality scaling to graphs exceeding 50,000 publications.
-\item Sentence-transformer topic modeling with HDBSCAN density boundaries isolating peripheral literature into an explicit noise pool.
-\item Local zero-shot language model screening audited against published manual and active-learning ground truths.
-\item End-to-end random-effects statistical pooling directly outputting publication-grade forest plots and LaTeX manuscripts.
+\item Unified framework for open science mapping and systematic evidence synthesis.
+\item Sub-second GPU community detection on citation networks of over 50,000 papers.
+\item Neural topic modeling with explicit HDBSCAN noise isolation (Topic~$-1$).
+\item Local zero-shot LLM screening and random-effects meta-analytic pooling.
 \end{highlights}
 
 \begin{keyword}
@@ -274,6 +272,7 @@ Multi-source querying inherently introduces duplicate and near-duplicate records
 where $|T'|$ denotes string character length. Candidate record pairs satisfying $\text{Sim}(T'_a, T'_b) \ge 0.92$ are merged, consolidating citation counts and resolving author affiliations into the most complete canonical entry.
 
 \subsection{Tier 3: GPU-Accelerated Network Topologies via cuGraph}
+\label{sec:tier3}
 Network extraction and topological analysis scale natively to large bibliometric corpora using NVIDIA RAPIDS (\texttt{cudf} and \texttt{cugraph}). By utilizing memory-conscious chunking and Compressed Sparse Row (CSR) representations, the framework processes graphs with tens of thousands of publications on standard consumer GPUs.
 
 For an author set $\mathcal{A}$ and publication set $\mathcal{D}$, the co-authorship adjacency matrix $\mathbf{A} \in \mathbb{R}^{|\mathcal{A}| \times |\mathcal{A}|}$ encodes the frequency of co-authored publications $A_{uv}$ between authors $u$ and $v$. Sub-field communities are extracted natively on GPU memory by maximizing Newman-Girvan modularity $Q$ via the Louvain algorithm \cite{blondel2008fast}:
@@ -405,7 +404,7 @@ Ordinal rank fidelity across conjointly identified entities is evaluated via the
 \begin{equation}
 \rho = 1 - \frac{6 \sum_{i=1}^n d_i^2}{n(n^2 - 1)}, \quad t = \rho \sqrt{\frac{n-2}{1-\rho^2}} \sim t_{n-2}
 \end{equation}
-where $d_i$ is the rank deviation between the pipeline-derived frequency rank and the published ground truth rank for entity $i$.
+where $d_i$ is the rank deviation between the pipeline-derived frequency rank and the published ground truth rank for entity $i$. To evaluate top-$K$ lists with non-conjoint or truncated elements without restricting comparisons solely to conjoint intersections, rank agreement is complemented by Rank-Biased Overlap (RBO) \cite{webber2010similarity}.
 
 \subsubsection{Topic Diversity (\texorpdfstring{$\text{TD}$}{TD})}
 Following topic modeling evaluation standards in continuous embedding spaces \cite{dieng2020topic}, topic diversity ($\text{TD}$) measures the lexical uniqueness across discovered themes. For $K$ topics, each represented by its top-$M$ vocabulary terms ($M=10$), topic diversity is quantified by the proportion of unique words across all topic lists:
@@ -415,7 +414,7 @@ Following topic modeling evaluation standards in continuous embedding spaces \ci
 where $\text{TD} = 1.0$ indicates completely distinct topic vocabularies with zero term overlap, and lower values denote mutual lexical redundancy across discovered clusters.
 
 \subsubsection{Topic Coherence via Normalized Pointwise Mutual Information (\texorpdfstring{$C_{\text{NPMI}}$}{C\_NPMI})}
-Semantic coherence of each discovered topic is evaluated through corpus-level co-occurrence of top terms using Normalized Pointwise Mutual Information ($C_{\text{NPMI}}$), which strongly correlates with human conceptual interpretability \cite{roder2015exploring, bouma2009normalized}:
+Semantic coherence of each discovered topic is evaluated through corpus-level co-occurrence of top terms using Normalized Pointwise Mutual Information ($C_{\text{NPMI}}$) \cite{bouma2009normalized, roder2015exploring}. While NPMI serves as a standard automated baseline for lexical interpretability, its correlation with human semantic ratings varies across dense neural representations \cite{hoyle2021automated}:
 \begin{equation}
 \label{eq:npmi}
 C_{\text{NPMI}}(\mathcal{W}_k) = \frac{2}{M(M-1)} \sum_{i=1}^{M-1} \sum_{j=i+1}^M \frac{\log \frac{P(w_i, w_j) + \epsilon}{P(w_i)P(w_j)}}{-\log(P(w_i, w_j) + \epsilon)}
@@ -504,7 +503,7 @@ As demonstrated on corpora exceeding 50,000 publications, OpenSciencePipe execut
 \subsection{Informetric Validity and Database Coverage Boundaries}
 A fundamental methodological consideration in informetric replication is the operational boundary between algorithmic concordance and database coverage divergence. Comparative investigations by Visser et al. \cite{visser2021large} and Mart{\'i}n-Mart{\'i}n et al. \cite{martin2021google} established that while proprietary commercial databases (Web of Science and Scopus) maintain selective core indexing, open bibliographic platforms (OpenAlex, Crossref) provide broader coverage of open-access literature, conference proceedings, and non-Anglophone scholarship. Consequently, observing strong ordinal alignment ($\rho > 0.80$) against published WoS- and Scopus-derived baselines confirms that OpenSciencePipe recovers consistent macro-level geopolitical topologies across distinct data infrastructures, demonstrating that open metadata can support reproducible informetric science mapping without commercial database lock-in.
 
-Furthermore, a persistent challenge in automated informetric workflows is author homonymy, where distinct scholars sharing common surnames risk conflation into artificial network hubs. OpenSciencePipe addresses this through multi-signal entity disambiguation. The ingestion engine extracts persistent OpenAlex Author Identifiers and ORCID URIs (\texttt{orcid.org}) to match authors deterministically. When persistent identifiers are absent, the engine applies positional author-institution pairing and co-authorship neighborhood clustering, mitigating false merges in collaborative network representations.
+Furthermore, a persistent challenge in automated informetric workflows is author homonymy and entity splitting. While OpenSciencePipe disambiguates authors via the multi-signal protocol detailed in Section~\ref{sec:tier3}, residual name variants and homonymous merges remain visible in dense collaborative network topologies, particularly when common surnames lack persistent ORCID linkages or institutional metadata. Benchmarking automated disambiguation accuracy against verified gold-standard author registries (such as ORCID-curated sub-graphs) remains an important focus for ongoing development.
 
 \subsection{Limitations and Future Work}
 While OpenSciencePipe automates the pipeline from API query to \LaTeX{} manuscript synthesis, human oversight remains essential for qualitative contextualization, nuanced evidence synthesis, and domain-specific interpretation. Several engineering and methodological avenues will be pursued in future work. 
@@ -707,13 +706,13 @@ V.~Batagelj, A.~Mrvar, Pajek---Program for large network analysis, Connections 2
 O.~Persson, R.~Danell, J.~W. Schneider, How to use Bibexcel for various types of bibliometric analysis, in: Celebrating Scholarly Communication Studies: A Festschrift for Olle Persson at His 60th Birthday, 2009, pp. 9--24.
 
 \bibitem{mclevey2017metaknowledge}
-J.~McLevey, R.~McIlroy-Young, metaknowledge: Open source software for social networks, bibliometrics, and science of science, Quantitative Science Studies / arXiv:1709.07436 (2017).
+J.~McLevey, R.~McIlroy-Young, metaknowledge: Open source software for social networks, bibliometrics, and science of science, Quantitative Science Studies 1~(2) (2020) 646--658.
 
 \bibitem{rose2019pybliometrics}
 M.~E. Rose, J.~R. Kitchin, pybliometrics: Scripting, automating, and archiving Scopus data in Python, SoftwareX 10 (2019) 100263.
 
 \bibitem{borner2010science}
-K.~B{\"o}rner, Atlas of Science: Anyone Can Map, MIT Press, Cambridge, MA, 2010.
+Sci2~Team, Science of Science (Sci2) Tool, Indiana University and SciTech Strategies, Bloomington, IN (2009).
 
 \end{thebibliography}
 
