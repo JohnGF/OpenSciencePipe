@@ -8,10 +8,9 @@ Review reference: `manuscripts/paper4_opensciencepipe_landmark/reviewer_round2.m
 
 These items require your scientific judgment, authorial decisions, or external ground-truth knowledge.
 
-### 1.1 Strategic Scope Decision (Paper 4 vs Paper 5)
-- [ ] **Decide on evidence synthesis scope in Paper 4:**
-  - **Option A (Recommended by Reviewer):** Narrow Paper 4 exclusively to science mapping / informetrics for *Quantitative Science Studies* (QSS) or *Scientometrics*. Move PRISMA screening and meta-analysis extraction into a dedicated follow-up paper (e.g., target *Research Synthesis Methods*).
-  - **Option B:** Keep both in Paper 4, but downgrade claims to an "experimental proof-of-concept module" and soften claims of parity with RevMan / ASReview.
+- [x] **Decided on Option A (Science mapping focus for Paper 4):**
+  - *Context:* Carlos Duarte recommended focusing Paper 4 strictly on science mapping / informetrics for *Quantitative Science Studies* (QSS) or *Scientometrics*, moving PRISMA screening and meta-analysis extraction into a separate dedicated manuscript.
+  - *Resolution:* Adopted Option A. Paper 4 is streamlined to bibliometric science mapping (ingestion, deduplication, GPU network analysis, neural topic modeling vs LDA, geopolitical concordance, and automated report compilation). Evidence synthesis is framed as modular companion capabilities with dedicated validation in companion Paper 2 (`manuscripts/paper2_meta_analysis_benchmark`).
 
 ### 1.2 Ground Truth Sources to Verify or Remove
 - [x] **ChatGPT benchmark corrected to Barrington et al. (2023):**
@@ -60,8 +59,9 @@ These items are executed automatically in Python code, scripts, and LaTeX files.
 - [x] **Refactor Figure 2a & 2b (`src/core/viz.py` & `main.tex`):**
   - Restricted circular network labeling to top prominent authors per community instead of printing all 100 author names around the perimeter.
   - Updated Figure 2 caption in `main.tex` to explicitly specify national research publication volume with log10 units.
-- [ ] **Resolve arithmetic discrepancies in Figure 3a PRISMA flow diagram:**
-  - Reconcile identification, screening exclusion, and inclusion tallies if evidence synthesis figures remain in final draft.
+- [x] **Decoupled Figure 3 from Paper 4 under Option A:**
+  - *Context:* Figure 3a contained PRISMA flow arithmetic discrepancies.
+  - *Resolution:* Under Option A, Figure 3 (PRISMA flow, Forest plot, Funnel plot) and evidence synthesis evaluation tables are decoupled from Paper 4 into companion Paper 2 (`manuscripts/paper2_meta_analysis_benchmark`), removing review surface and arithmetic discrepancies from Paper 4.
 
 ### 2.4 Text & Manuscript Polish (`manuscripts/paper4_opensciencepipe_landmark/main.tex`)
 - [x] **Tone down overclaims:**

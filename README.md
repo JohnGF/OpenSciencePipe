@@ -8,7 +8,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![NVIDIA RAPIDS](https://img.shields.io/badge/RAPIDS-cuGraph%20%7C%20cuDF%20%7C%20cuML-76B900?logo=nvidia&logoColor=white)](https://rapids.ai/)
 [![Container: Docker & Podman](https://img.shields.io/badge/container-Docker%20%7C%20Podman-2496ED?logo=docker&logoColor=white)](Containerfile)
-[![Test Suite](https://img.shields.io/badge/tests-37%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![CI](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml)
+[![Test Suite](https://img.shields.io/badge/tests-43%20passed%20(100%25)-brightgreen.svg)](tests/)
 [![Target Journal](https://img.shields.io/badge/manuscript-Journal%20of%20Informetrics-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
 
 <p align="center">
