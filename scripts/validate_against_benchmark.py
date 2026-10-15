@@ -181,6 +181,10 @@ def evaluate_scientometrics(results_dir: str, benchmark_data: dict) -> Dict[str,
                     metrics["country_spearman_rho"] = round(float(rho), 4) if not np.isnan(rho) else None
                     metrics["country_spearman_p"] = round(float(p_val), 4) if not np.isnan(p_val) else None
 
+                from src.core.countries import compute_rbo, compute_jaccard_at_k
+                metrics["country_rbo"] = round(compute_rbo(gt_c_names, pipeline_countries, p=0.9), 4)
+                metrics["country_jaccard_topk"] = round(compute_jaccard_at_k(gt_c_names, pipeline_countries, k=len(gt_c_names)), 4)
+
     # 3. Institution ranking correlation
     gt_institutions = sc_cfg.get("top_institutions", [])
     if gt_institutions:
@@ -245,6 +249,9 @@ def evaluate_scientometrics(results_dir: str, benchmark_data: dict) -> Dict[str,
                     rho, p_val = stats.spearmanr(gt_ranks, pipe_ranks)
                     metrics["institution_spearman_rho"] = round(float(rho), 4) if not np.isnan(rho) else None
                     metrics["institution_spearman_p"] = round(float(p_val), 4) if not np.isnan(p_val) else None
+
+                from src.core.countries import compute_rbo
+                metrics["institution_rbo"] = round(compute_rbo(gt_inst_names, pipeline_institutions, p=0.9), 4)
 
     return metrics
 

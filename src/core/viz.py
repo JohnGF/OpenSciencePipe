@@ -655,66 +655,29 @@ class Visualization:
         apps = []
 
         for t in text:
-            if any(
-                w in t
-                for w in [
-                    "ica",
-                    "wavelet",
-                    "artifact removal",
-                    "filtering",
-                    "suppression",
-                    "denois",
-                ]
-            ):
-                m = "ICA / Wavelet Denoising"
-            elif any(
-                w in t
-                for w in [
-                    "deep learning",
-                    "cnn",
-                    "convolutional",
-                    "transformer",
-                    "neural network",
-                ]
-            ):
-                m = "Deep Learning (CNN/DL)"
-            elif any(
-                w in t for w in ["csp", "fbcsp", "ssvep", "spatial pattern", "evoked"]
-            ):
-                m = "Spatial Patterns (CSP/SSVEP)"
-            elif any(
-                w in t for w in ["stochastic", "resonance", "entropy", "variability"]
-            ):
-                m = "Stochastic Noise Dynamics"
+            if any(k in t for k in ["deep learning", "cnn", "convolutional", "transformer", "conformer", "autoencoder", "latent representation", "neural network"]):
+                m = "Deep Latent Decoding"
+            elif any(k in t for k in ["common spatial", "csp", "fbcsp", "riemannian", "spatial filter"]):
+                m = "Spatial & Riemannian Filtering"
+            elif any(k in t for k in ["aperiodic", "1/f", "specparam", "fooof", "irasa", "stochastic", "resonance", "pink noise", "scale-free"]):
+                m = "Aperiodic & Spectral Parameterization"
+            elif any(k in t for k in ["ica", "independent component", "blind source", "artifact removal", "artifact correction", "wavelet", "denois", "filtering", "suppression"]):
+                m = "Linear BSS & Explicit Filtering"
             else:
                 m = "General Signal Processing"
 
-            if any(
-                w in t
-                for w in [
-                    "motor imagery",
-                    "bci",
-                    "rehabilitation",
-                    "prosthetic",
-                    "neuroprosthet",
-                ]
-            ):
-                a = "Motor Imagery BCI"
-            elif any(w in t for w in ["epilepsy", "seizure", "hfo", "spike", "ictal"]):
-                a = "Epilepsy & Seizures"
-            elif any(
-                w in t for w in ["emotion", "affective", "deap", "valence", "arousal"]
-            ):
-                a = "Emotion Recognition"
-            elif any(w in t for w in ["sleep", "somnology", "staging", "drowsiness"]):
-                a = "Sleep Staging"
-            elif any(
-                w in t
-                for w in ["workload", "fatigue", "driving", "cognitive", "mental"]
-            ):
-                a = "Cognitive Workload"
+            if any(k in t for k in ["stroke", "hemipares", "neurorehab", "motor recovery", "upper limb", "upper-limb", "gait", "exoskelet", "orthos", "fes", "wheelchair", "prosthes", "prosthet", "assistive robot"]):
+                a = "Neurorehab & Assistive Robotics"
+            elif any(k in t for k in ["motor imagery", "mi-bci", "sensorimotor rhythm", "mu rhythm", "erd/ers", " erd ", " ers ", "movement intent", "imagined movement", "hand movement"]):
+                a = "Motor Imagery & SMR"
+            elif any(k in t for k in ["ssvep", "p300", "speller", "steady-state visual", "steady state visual", "evoked potential", "visual evoked", "event-related potential", "oddball"]):
+                a = "Evoked Potentials (SSVEP / P300)"
+            elif any(k in t for k in ["emotion", "affective", "mental workload", "workload", "fatigue", "drowsiness", "vigilance", "cognitive load"]):
+                a = "Passive & Affective BCI"
+            elif any(k in t for k in ["neurofeedback", "brain-state", "neuromodulation", "closed-loop", "cognitive training", "alpha training"]):
+                a = "Neurofeedback & Closed-Loop"
             else:
-                a = "General Clinical & Bio"
+                a = "General BCI & Neural Decoding"
 
             methods.append(m)
             apps.append(a)
@@ -1087,8 +1050,17 @@ class Visualization:
             zorder=3,
         )
 
-        # 3. Radial Outward Vector Labeling for ALL Nodes
-        for node_id in G.nodes:
+        # 3. Radial Outward Vector Labeling for Top Prominent Nodes Only
+        nodes_to_label = set()
+        for p, p_nodes in community_nodes.items():
+            sorted_p = sorted(
+                p_nodes,
+                key=lambda n: (G.nodes[n]["size"], G.nodes[n]["citations"]),
+                reverse=True,
+            )
+            nodes_to_label.update(sorted_p[:top_per_community])
+
+        for node_id in nodes_to_label:
             if node_id in pos:
                 theta = angles[node_id]
                 r_label = radius + 0.04

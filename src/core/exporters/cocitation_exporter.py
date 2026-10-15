@@ -252,7 +252,7 @@ def export_cocitation_tables(output_dir: str = "pipeline_results", title_map: di
                 if clean2 not in dataset_lookup:
                     rejected_ids.add(c2_val)
 
-            if len(valid_annex) >= 25:
+            if len(valid_annex) >= 15:
                 break
 
         # Write rejected references to a CSV
@@ -267,12 +267,12 @@ def export_cocitation_tables(output_dir: str = "pipeline_results", title_map: di
         # Build Main Table III
         tex = []
         tex.append(r"\begin{table}[htbp]")
-        tex.append(r"\caption{Top 20 Most Referenced Landmark Publications}")
+        tex.append(r"\caption{Top 20 Landmark Publications Ranked by Co-Citation Network Link Weight}")
         tex.append(r"\label{tab:top_references_pagerank}")
         tex.append(r"\footnotesize")
-        tex.append(r"\begin{tabular}{p{0.75\linewidth} r}")
+        tex.append(r"\begin{tabular}{p{0.68\linewidth} r}")
         tex.append(r"\toprule")
-        tex.append(r"\textbf{Landmark Reference Publication} & \textbf{Citations} \\")
+        tex.append(r"\textbf{Landmark Reference Publication} & \textbf{Co-Citation Weight} \\")
         tex.append(r"\midrule")
 
         for ref_id, cnt, clean_id in valid_top_20:
@@ -282,6 +282,7 @@ def export_cocitation_tables(output_dir: str = "pipeline_results", title_map: di
             tex.append(f"{link_str} & {cnt:,} \\\\")
 
         tex.append(r"\bottomrule")
+        tex.append(r"\multicolumn{2}{p{0.88\linewidth}}{\scriptsize \textit{Note: Metric reflects the cumulative pairwise co-citation link weight across document dyads within the corpus co-citation projection network ($N=11{,}176$).}} \\")
         tex.append(r"\end{tabular}")
         tex.append(r"\end{table}")
 

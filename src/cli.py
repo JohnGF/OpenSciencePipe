@@ -75,7 +75,27 @@ def main():
     parser.add_argument("--meta-analysis", action="store_true", help="Run full-text PDF parsing, extraction, and meta-analysis stats")
     parser.add_argument("--picos-config", type=str, help="Path to PICOS configuration JSON file")
 
+    # Bibliographic Validation & Hallucination Auditing
+    parser.add_argument("--validate-bib", type=str, help="Validate citations file (.bib, .csv, .json, .tex, .md) against Crossref/OpenAlex to flag hallucinations")
+
     args = parser.parse_args()
+
+    if args.validate_bib:
+        from src.core.biblio_validator import BiblioValidator
+        validator = BiblioValidator(email=args.openalex_email or args.crossref_email)
+        out_report = os.path.join(args.output, "biblio_validation_report.csv") if args.output else "biblio_validation_report.csv"
+        df_res, metrics = validator.validate_file(args.validate_bib, output_path=out_report)
+        print("\n" + "=" * 70)
+        print("BIBLIOGRAPHIC VALIDATION & HALLUCINATION AUDIT SUMMARY")
+        print("=" * 70)
+        print(f"Total Entries Checked    : {metrics.get('total_checked', 0)}")
+        print(f"Verified Authentic       : {metrics.get('verified', 0)}")
+        print(f"Flagged for Human Review : {metrics.get('flagged_for_human_review', 0)}")
+        print(f"Suspected Hallucinations : {metrics.get('suspected_hallucinations', 0)}")
+        print(f"Verification Success Rate: {metrics.get('verification_rate_pct', 0.0)}%")
+        print(f"Audit Report Saved To    : {out_report}")
+        print("=" * 70)
+        return
 
     if args.interactive:
         from scripts.interactive_viz import InteractiveVizSession

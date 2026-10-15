@@ -43,6 +43,7 @@ def export_country_table(output_dir: str = "pipeline_results", force: bool = Fal
                     status = str(r["Trend"])
                     tex.append(f"{i} & {cname} & {cnt:,} & {cagr:.1f}\\% & {status} \\\\")
                 tex.append("\\bottomrule")
+                tex.append("\\multicolumn{5}{p{0.95\\linewidth}}{\\scriptsize \\textit{Note: CAGR evaluated from country appearance baseline to 2026. India's surge (+424.4\\%) reflects rapid recent indexing acceleration from 2024 ($n=2$) to 2026 ($n=55$).}} \\\\")
                 tex.append("\\end{tabular}")
                 tex.append("\\end{table}")
                 with open(fpath, "w", encoding="utf-8") as f:

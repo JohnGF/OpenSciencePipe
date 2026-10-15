@@ -1,0 +1,25 @@
+{
+    "doi": "10.3390/medsci11030061",
+    "title": "A Bibliometric Analysis of the Rise of ChatGPT in Medical Research",
+    "abstract": "<jats:p>The rapid emergence of publicly accessible artificial intelligence platforms such as large language models (LLMs) has led to an equally rapid increase in articles exploring their potential benefits and risks. We performed a bibliometric analysis of ChatGPT literature in medicine and science to better understand publication trends and knowledge gaps. Following title, abstract, and keyword searches of PubMed, Embase, Scopus, and Web of Science databases for ChatGPT articles published in the medical field, articles were screened for inclusion and exclusion criteria. Data were extracted from included articles, with citation counts obtained from PubMed and journal metrics obtained from Clarivate Journal Citation Reports. After screening, 267 articles were included in the study, most of which were editorials or correspondence with an average of 7.5 +/\u2212 18.4 citations per publication. Published articles on ChatGPT were authored largely in the United States, India, and China. The topics discussed included use and accuracy of ChatGPT in research, medical education, and patient counseling. Among non-surgical specialties, radiology published the most ChatGPT-related articles, while plastic surgery published the most articles among surgical specialties. The average citation number among the top 20 most-cited articles was 60.1 +/\u2212 35.3. Among journals with the most ChatGPT-related publications, there were on average 10 +/\u2212 3.7 publications. Our results suggest that managing the inevitable ethical and safety issues that arise with the implementation of LLMs will require further research exploring the capabilities and accuracy of ChatGPT, to generate policies guiding the adoption of artificial intelligence in medicine and science.</jats:p>",
+    "authors": [
+        "Nikki M. Barrington",
+        "Nithin Gupta",
+        "Basel Musmar",
+        "David Doyle",
+        "Nicholas Panico",
+        "Nikhil Godbole",
+        "Taylor Reardon",
+        "Randy S. D\u2019Amico"
+    ],
+    "journal": "Medical Sciences",
+    "published": {
+        "date-parts": [
+            [
+                2023,
+                9,
+                17
+            ]
+        ]
+    }
+}

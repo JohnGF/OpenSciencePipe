@@ -131,7 +131,27 @@ class UnifiedCollector:
             if pd.isna(title) or not isinstance(title, str):
                 return ""
             import re
-            return re.sub(r'[^a-z0-9]', '', title.lower())
+            cleaned = re.sub(r'[^a-z0-9\s]', ' ', title.lower())
+            tokens = sorted(cleaned.split())
+            return " ".join(tokens)
+
+        def levenshtein_dist(s1: str, s2: str, max_dist: int) -> int:
+            if abs(len(s1) - len(s2)) > max_dist:
+                return max_dist + 1
+            if len(s1) > len(s2):
+                s1, s2 = s2, s1
+            prev = list(range(len(s1) + 1))
+            for j, c2 in enumerate(s2, 1):
+                curr = [j] * (len(s1) + 1)
+                min_val = curr[0]
+                for i, c1 in enumerate(s1, 1):
+                    cost = 0 if c1 == c2 else 1
+                    curr[i] = min(prev[i] + 1, curr[i - 1] + 1, prev[i - 1] + cost)
+                    min_val = min(min_val, curr[i])
+                if min_val > max_dist:
+                    return max_dist + 1
+                prev = curr
+            return prev[len(s1)]
 
         merged_df["normalized_doi"] = merged_df["DOI"].apply(normalize_doi)
         merged_df["normalized_title"] = merged_df["Title"].apply(normalize_title)
@@ -181,6 +201,7 @@ class UnifiedCollector:
         doi_to_idx = {}
         title_to_idx = {}
         
+        # Stage 1: Exact DOI and exact normalized token-sorted Title matching
         for idx, row in merged_df.iterrows():
             doi = row["normalized_doi"]
             title = row["normalized_title"]
@@ -196,7 +217,43 @@ class UnifiedCollector:
                     union(idx, title_to_idx[title])
                 else:
                     title_to_idx[title] = idx
-                    
+
+        # Stage 2: Fuzzy Levenshtein matching on normalized titles (Sim >= 0.92)
+        # Compare unique root representatives to avoid redundant comparisons
+        root_representatives = {}
+        for idx in range(n_rows):
+            r = find(idx)
+            if r not in root_representatives:
+                t = merged_df.at[idx, "normalized_title"]
+                if t and len(t) >= 10:
+                    root_representatives[r] = (idx, t, len(t))
+
+        rep_list = list(root_representatives.values())
+        # Sort by title length for efficient bounded window matching
+        rep_list.sort(key=lambda x: x[2])
+        n_reps = len(rep_list)
+
+        for i in range(n_reps):
+            idx_i, title_i, len_i = rep_list[i]
+            root_i = find(idx_i)
+            # Maximum allowed edit distance for Sim >= 0.92 is floor(len_i * 0.08)
+            max_dist_allowed = int(len_i * 0.08)
+            for j in range(i + 1, n_reps):
+                idx_j, title_j, len_j = rep_list[j]
+                if len_j - len_i > max_dist_allowed:
+                    break
+                root_j = find(idx_j)
+                if root_i == root_j:
+                    continue
+                max_len = max(len_i, len_j)
+                threshold_dist = int(max_len * 0.08)
+                d = levenshtein_dist(title_i, title_j, threshold_dist)
+                if d <= threshold_dist:
+                    sim = 1.0 - (d / max_len)
+                    if sim >= 0.92:
+                        union(root_i, root_j)
+                        root_i = find(idx_i)
+                        
         merged_df["group_id"] = [find(i) for i in range(n_rows)]
         
         deduplicated_rows = []

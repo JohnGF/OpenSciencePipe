@@ -111,3 +111,6 @@ temp/
 *.synctex.gz
 *.blg
 *.spl
+.aider*
+*.sqlite
+zenodo_upload_*/

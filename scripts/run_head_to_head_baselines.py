@@ -74,32 +74,75 @@ def evaluate_lda_baseline(df, n_topics=5, top_m=10):
         "document_distribution": topic_counts
     }
 
+def evaluate_graph_baseline(edges_path: str):
+    """
+    Evaluates Graph Community Partitioning using NetworkX Louvain baseline.
+    Computes modularity Q, number of partitions, and execution time.
+    """
+    import networkx as nx
+    from networkx.algorithms.community import louvain_communities, modularity
+
+    if not os.path.exists(edges_path):
+        return {"error": f"Edges file {edges_path} not found"}
+
+    print(f"\n[Graph Baseline] Loading network edges from {edges_path}...")
+    df = pd.read_csv(edges_path)
+    src_col = next((c for c in ["source_id", "source", "Source"] if c in df.columns), df.columns[0])
+    dst_col = next((c for c in ["dest_id", "target", "Target", "destination"] if c in df.columns), df.columns[1])
+    weight_col = next((c for c in ["weight", "Weight"] if c in df.columns), None)
+
+    G = nx.Graph()
+    for _, row in df.iterrows():
+        w = float(row[weight_col]) if weight_col else 1.0
+        G.add_edge(row[src_col], row[dst_col], weight=w)
+
+    print(f"[Graph Baseline] Network loaded: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges.")
+    print("[Graph Baseline] Running NetworkX Louvain Community Detection...")
+    t0 = time.time()
+    communities = louvain_communities(G, weight="weight", seed=42)
+    nx_time = time.time() - t0
+
+    q_score = modularity(G, communities, weight="weight")
+    return {
+        "nodes": G.number_of_nodes(),
+        "edges": G.number_of_edges(),
+        "communities": len(communities),
+        "modularity_q": round(float(q_score), 4),
+        "runtime_seconds": round(float(nx_time), 4)
+    }
+
 def main():
     parser = argparse.ArgumentParser(description="Run head-to-head baseline evaluations on benchmark corpora.")
     parser.add_argument("--file", type=str, default="data/collected_bci_stroke_ren2024_benchmark.csv",
                         help="Path to collected benchmark CSV")
     parser.add_argument("--topics", type=int, default=5, help="Number of topics for LDA baseline")
+    parser.add_argument("--edges", type=str, default=None, help="Path to network_edges.csv for graph baseline")
     args = parser.parse_args()
 
-    if not os.path.exists(args.file):
-        print(f"Error: File {args.file} not found.", file=sys.stderr)
-        sys.exit(1)
+    if os.path.exists(args.file):
+        print(f"Loading benchmark corpus from {args.file}...")
+        df = pd.read_csv(args.file)
+        print(f"Corpus loaded: {len(df)} records.")
 
-    print(f"Loading benchmark corpus from {args.file}...")
-    df = pd.read_csv(args.file)
-    print(f"Corpus loaded: {len(df)} records.")
+        lda_res = evaluate_lda_baseline(df, n_topics=args.topics)
+        print("\n--- Head-to-Head Thematic Baseline Results ---")
+        print(f"Model: {lda_res['model']}")
+        print(f"Documents Analyzed: {lda_res['n_documents']}")
+        print(f"Topics (K): {lda_res['k_topics']}")
+        print(f"Runtime: {lda_res['runtime_seconds']} s")
+        print(f"Topic Diversity (TD): {lda_res['topic_diversity_td']}")
+        print(f"Outlier Rate (Unassigned Noise): {lda_res['outlier_percentage']}% (Forced assignment)")
+        print("\nTop Topic Vocabularies:")
+        for i, words in enumerate(lda_res['top_words']):
+            print(f"  Topic {i+1}: {', '.join(words)}")
 
-    lda_res = evaluate_lda_baseline(df, n_topics=args.topics)
-    print("\n--- Head-to-Head Thematic Baseline Results ---")
-    print(f"Model: {lda_res['model']}")
-    print(f"Documents Analyzed: {lda_res['n_documents']}")
-    print(f"Topics (K): {lda_res['k_topics']}")
-    print(f"Runtime: {lda_res['runtime_seconds']} s")
-    print(f"Topic Diversity (TD): {lda_res['topic_diversity_td']}")
-    print(f"Outlier Rate (Unassigned Noise): {lda_res['outlier_percentage']}% (Forced assignment)")
-    print("\nTop Topic Vocabularies:")
-    for i, words in enumerate(lda_res['top_words']):
-        print(f"  Topic {i+1}: {', '.join(words)}")
+    if args.edges and os.path.exists(args.edges):
+        g_res = evaluate_graph_baseline(args.edges)
+        print("\n--- Head-to-Head Graph Baseline Results (NetworkX) ---")
+        print(f"Nodes: {g_res['nodes']}, Edges: {g_res['edges']}")
+        print(f"Communities Discovered: {g_res['communities']}")
+        print(f"Modularity Q: {g_res['modularity_q']}")
+        print(f"Runtime: {g_res['runtime_seconds']} s")
 
 if __name__ == "__main__":
     main()

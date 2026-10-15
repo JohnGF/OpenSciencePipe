@@ -72,7 +72,7 @@ class TemporalDeltaAnalysis:
             s_t2 = (n_t2 / total_t2) * 100.0
             
             delta_share = s_t2 - s_t1
-            fold_change = (s_t2 / s_t1) if s_t1 > 0 else (s_t2 if s_t2 > 0 else 1.0)
+            fold_change = (s_t2 / s_t1) if s_t1 > 0 else None
             
             if delta_share > 1.5:
                 trajectory = "Emerging Frontier"
@@ -88,7 +88,7 @@ class TemporalDeltaAnalysis:
                 "Baseline_Share_Pct": round(s_t1, 2),
                 "Modern_Share_Pct": round(s_t2, 2),
                 "Delta_Share_Pct": round(delta_share, 2),
-                "Fold_Change": round(fold_change, 2),
+                "Fold_Change": round(fold_change, 2) if fold_change is not None else None,
                 "Trajectory": trajectory
             })
 
