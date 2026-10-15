@@ -55,8 +55,8 @@ cp .env.example .env
 
 ```bash
 # Contact email for OpenAlex & Crossref polite pools (RECOMMENDED)
-OPENALEX_EMAIL="researcher@university.edu"
-CROSSREF_EMAIL="researcher@university.edu"
+OPENALEX_EMAIL="user@example.com"
+CROSSREF_EMAIL="user@example.com"
 
 # Optional free API keys
 PUBMED_API_KEY=""
@@ -77,7 +77,7 @@ SPRINGER_API_KEY=""
 ### OpenAlex & Crossref (Recommended, 100% Free)
 - OpenAlex and Crossref do **not** require API keys or developer accounts.
 - By sending a valid email address in the request header, OpenAlex and Crossref route your requests into their dedicated "polite pools," unlocking significantly higher speed and reliability.
-- Set `OPENALEX_EMAIL="your_email@domain.com"` in `.env`.
+- Set `OPENALEX_EMAIL="user@example.com"` in `.env`.
 
 ### Semantic Scholar
 1. Go to the [Semantic Scholar API Key Form](https://www.semanticscholar.org/product/api#api-key-form).
