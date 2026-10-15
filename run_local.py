@@ -9,6 +9,10 @@ def run():
     
     # Set copy mode for uv since workspace is on an external drive partition
     os.environ["UV_LINK_MODE"] = "copy"
+
+    if not os.path.exists(".env") and not os.environ.get("OPENALEX_EMAIL"):
+        print("[INFO] No .env file detected. Running with open public rate limits.")
+        print("[INFO] To configure polite access or API keys, run: python scripts/setup_keys.py\n")
     
     # Run system setup script if requested or first run
     if "--setup" in sys.argv or "-s" in sys.argv:

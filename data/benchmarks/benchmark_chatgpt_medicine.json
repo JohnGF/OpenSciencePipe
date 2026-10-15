@@ -1,0 +1,42 @@
+{
+    "benchmark_title": "A Bibliometric Analysis of the Rise of ChatGPT in Medical Research",
+    "reference_doi": "10.3390/medsci11030061",
+    "authors": "Barrington, Gupta, Musmar, et al.",
+    "year": 2023,
+    "journal": "Medical Sciences",
+    "search_query": "(\"ChatGPT\" OR \"GPT-4\" OR \"Large Language Models\") AND (medical OR clinical OR healthcare)",
+    "year_range": [2022, 2024],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "India", "rank": 2},
+            {"country": "China", "rank": 3},
+            {"country": "United Kingdom", "rank": 4},
+            {"country": "Germany", "rank": 5},
+            {"country": "Singapore", "rank": 6},
+            {"country": "Canada", "rank": 7},
+            {"country": "Italy", "rank": 8},
+            {"country": "Australia", "rank": 9},
+            {"country": "Hong Kong", "rank": 10},
+            {"country": "Saudi Arabia", "rank": 11},
+            {"country": "France", "rank": 12},
+            {"country": "Japan", "rank": 13},
+            {"country": "Poland", "rank": 14},
+            {"country": "Belgium", "rank": 15}
+        ],
+        "top_institutions": [
+            {"institution": "Harvard University", "rank": 1},
+            {"institution": "Stanford University", "rank": 2},
+            {"institution": "Heidelberg University", "rank": 3},
+            {"institution": "University College London", "rank": 4},
+            {"institution": "Cornell University", "rank": 5},
+            {"institution": "University of Cambridge", "rank": 6},
+            {"institution": "Johns Hopkins University", "rank": 7},
+            {"institution": "Technical University of Munich", "rank": 8}
+        ]
+    }
+}

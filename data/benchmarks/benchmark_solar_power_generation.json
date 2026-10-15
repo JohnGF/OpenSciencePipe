@@ -1,0 +1,29 @@
+{
+    "benchmark_title": "A bibliometric evaluation and visualization of global solar power generation research: productivity, contributors and hot topics",
+    "reference_doi": "10.1007/s11356-023-31715-x",
+    "authors": "Xiaozan Lyu, Tianqi Ruan, Wujun Wang, Xiaojing Cai",
+    "year": 2024,
+    "journal": "Environmental Science and Pollution Research",
+    "search_query": "\"solar power generation\" OR \"photovoltaic power generation\" OR \"concentrated solar power\"",
+    "year_range": [2000, 2023],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "China", "rank": 1},
+            {"country": "United States", "rank": 2},
+            {"country": "India", "rank": 3},
+            {"country": "Germany", "rank": 4},
+            {"country": "Spain", "rank": 5}
+        ],
+        "top_keywords": [
+            "photovoltaic",
+            "solar energy",
+            "renewable energy",
+            "efficiency",
+            "perovskite solar cells"
+        ]
+    }
+}

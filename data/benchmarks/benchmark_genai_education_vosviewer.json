@@ -1,0 +1,33 @@
+{
+    "benchmark_title": "Transforming Education: A Comprehensive Review of Generative Artificial Intelligence in Educational Settings",
+    "reference_doi": "10.3390/su151712983",
+    "authors": "Zied Bahroun, Chiraz Anane, Vian Ahmed, Andrew Zacca",
+    "year": 2023,
+    "journal": "Sustainability",
+    "search_query": "(\"generative artificial intelligence\" OR \"generative AI\" OR \"ChatGPT\") AND (education OR educational OR learning OR teaching)",
+    "year_range": [
+        2020,
+        2023
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "China", "rank": 2},
+            {"country": "United Kingdom", "rank": 3},
+            {"country": "Australia", "rank": 4},
+            {"country": "Germany", "rank": 5}
+        ],
+        "top_keywords": [
+            "artificial intelligence",
+            "chatgpt",
+            "higher education",
+            "generative ai",
+            "teaching and learning",
+            "educational technology"
+        ]
+    }
+}

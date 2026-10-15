@@ -1,0 +1,22 @@
+{
+    "benchmark_title": "Bibliometric analysis of sustainable business performance: where are we going? A science map of the field",
+    "reference_doi": "10.1080/1331677x.2022.2096094",
+    "authors": "Cristina Bota-Avram",
+    "year": 2023,
+    "journal": "Economic Research-Ekonomska Istraživanja",
+    "search_query": "\"sustainable business performance\" OR \"sustainability performance\" OR \"corporate sustainability\"",
+    "year_range": [2000, 2021],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "China", "rank": 1},
+            {"country": "United States", "rank": 2},
+            {"country": "United Kingdom", "rank": 3},
+            {"country": "Italy", "rank": 4},
+            {"country": "Spain", "rank": 5}
+        ]
+    }
+}

@@ -1,0 +1,56 @@
+{
+    "benchmark_title": "Sample Published Benchmark Paper Validation",
+    "reference_doi": "10.1016/j.sample.2023.100000",
+    "search_query": "(quantum computing OR quantum circuit) AND (algorithm OR error correction)",
+    "year_range": [
+        2018,
+        2024
+    ],
+    "screening": {
+        "ground_truth_included_dois": [
+            "10.48550/arxiv.2405.08810",
+            "10.1038/s41566-024-01403-4",
+            "10.62311/nesx/97820"
+        ],
+        "ground_truth_excluded_dois": [
+            "10.1016/j.comnet.2024.110672",
+            "10.1038/s41586-025-08820-7"
+        ]
+    },
+    "scientometrics": {
+        "top_authors": [
+            {
+                "author": "Preskill J",
+                "rank": 1
+            },
+            {
+                "author": "Shor P W",
+                "rank": 2
+            },
+            {
+                "author": "Grover L K",
+                "rank": 3
+            }
+        ],
+        "top_countries": [
+            {
+                "country": "United States",
+                "rank": 1
+            },
+            {
+                "country": "China",
+                "rank": 2
+            },
+            {
+                "country": "Germany",
+                "rank": 3
+            }
+        ]
+    },
+    "meta_analysis": {
+        "pooled_effect_d": 0.45,
+        "ci_lower": 0.28,
+        "ci_upper": 0.62,
+        "i_squared_pct": 48.5
+    }
+}

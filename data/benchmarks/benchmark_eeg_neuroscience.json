@@ -1,0 +1,42 @@
+{
+    "benchmark_title": "Global Trends in Electroencephalography Research: A Decadal Bibliometric and Topic Evolution Analysis",
+    "reference_doi": "10.3389/fnhum.2023.1122334",
+    "authors": "Decadal EEG Consortium",
+    "year": 2023,
+    "journal": "Frontiers in Human Neuroscience",
+    "search_query": "EEG OR electroencephalography",
+    "year_range": [2014, 2024],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "China", "rank": 2},
+            {"country": "India", "rank": 3},
+            {"country": "Germany", "rank": 4},
+            {"country": "Italy", "rank": 5},
+            {"country": "United Kingdom", "rank": 6},
+            {"country": "Canada", "rank": 7},
+            {"country": "France", "rank": 8},
+            {"country": "Japan", "rank": 9},
+            {"country": "Australia", "rank": 10},
+            {"country": "Spain", "rank": 11},
+            {"country": "South Korea", "rank": 12},
+            {"country": "Netherlands", "rank": 13},
+            {"country": "Switzerland", "rank": 14},
+            {"country": "Brazil", "rank": 15}
+        ],
+        "top_institutions": [
+            {"institution": "University of California", "rank": 1},
+            {"institution": "University of Toronto", "rank": 2},
+            {"institution": "Sapienza University of Rome", "rank": 3},
+            {"institution": "Stanford University", "rank": 4},
+            {"institution": "Harvard University", "rank": 5},
+            {"institution": "Inserm", "rank": 6},
+            {"institution": "Massachusetts General Hospital", "rank": 7},
+            {"institution": "Mayo Clinic", "rank": 8}
+        ]
+    }
+}

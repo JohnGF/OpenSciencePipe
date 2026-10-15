@@ -1,0 +1,48 @@
+{
+    "benchmark_title": "Digital Transformation: An Overview of the Current State of the Art of Research",
+    "reference_doi": "10.1177/21582440211047576",
+    "authors": "Sascha Kraus, Paul Jones, Norbert Kailer, Alexandra Weinmann, Nuria Chaparro-Banegas, Norat Roig-Tierno",
+    "year": 2021,
+    "journal": "SAGE Open",
+    "search_query": "\"digital transformation\" OR \"digital change\"",
+    "year_range": [
+        2010,
+        2020
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_institutions": [
+            {"institution": "Politecnico di Milano", "rank": 1},
+            {"institution": "Ludwig-Maximilians-Universität München", "rank": 2},
+            {"institution": "Norwegian University of Science and Technology", "rank": 3}
+        ],
+        "top_keywords": [
+            "digital transformation",
+            "big data",
+            "artificial intelligence",
+            "data analytics",
+            "digital strategy",
+            "supply chain management",
+            "leadership",
+            "value creation",
+            "business models"
+        ],
+        "clusters": [
+            {
+                "cluster_name": "Cluster A: Digital Business Transformation",
+                "keywords": ["digital strategy", "business models", "value creation", "supply chain management"]
+            },
+            {
+                "cluster_name": "Cluster B: Technology as a Driver of DT",
+                "keywords": ["big data", "artificial intelligence", "data analytics", "cloud computing", "internet of things"]
+            },
+            {
+                "cluster_name": "Cluster C: Institutional and Societal Implications",
+                "keywords": ["employment", "organizational change", "automation", "governance"]
+            }
+        ]
+    }
+}

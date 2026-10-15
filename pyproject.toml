@@ -1,9 +1,19 @@
 [project]
 name = "opensciencepipe"
-version = "0.1.0"
-description = "End-to-end framework for autonomous science mapping and systematic evidence synthesis."
+version = "1.0.0"
+description = "An end-to-end computational framework for autonomous bibliometric science mapping and informetrics."
 readme = "README.md"
 requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+  { name = "João Garcia Farinha" },
+  { name = "Carlos Duarte" }
+]
+
+[project.urls]
+Homepage = "https://github.com/JohnGF/OpenSciencePipe"
+Repository = "https://github.com/JohnGF/OpenSciencePipe"
+Issues = "https://github.com/JohnGF/OpenSciencePipe/issues"
 dependencies = [
   "bertopic>=0.16.0",
   "networkx>=3.0",

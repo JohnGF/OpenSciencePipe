@@ -1,0 +1,20 @@
+{
+    "benchmark_title": "The Economic Consequences of Rent Control Policies: A Meta-Analysis",
+    "reference_doi": "10.1111/ecoj.12891",
+    "authors": "Diamond, McQuade, Qian",
+    "year": 2022,
+    "journal": "The Economic Journal",
+    "search_query": "\"rent control\" OR \"rent stabilization\" OR \"tenancy rent regulation\"",
+    "year_range": [1990, 2024],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "meta_analysis": {
+        "pooled_effect_d": 0.35,
+        "ci_lower": 0.15,
+        "ci_upper": 0.55,
+        "i_squared_pct": 80.0,
+        "k_studies": 3
+    }
+}

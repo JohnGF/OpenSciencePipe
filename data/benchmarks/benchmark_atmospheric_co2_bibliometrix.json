@@ -1,0 +1,33 @@
+{
+    "benchmark_title": "The Rising Threat of Atmospheric CO2: A Review on the Causes, Impacts, and Mitigation Strategies",
+    "reference_doi": "10.3390/environments10040066",
+    "authors": "Leonel J. R. Nunes",
+    "year": 2023,
+    "journal": "Environments",
+    "search_query": "\"atmospheric CO2\" OR \"carbon dioxide emissions\" OR \"greenhouse gases mitigation\"",
+    "year_range": [
+        2010,
+        2023
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "China", "rank": 2},
+            {"country": "United Kingdom", "rank": 3},
+            {"country": "Germany", "rank": 4},
+            {"country": "Australia", "rank": 5}
+        ],
+        "top_keywords": [
+            "carbon dioxide",
+            "climate change",
+            "greenhouse gas",
+            "mitigation",
+            "emissions",
+            "renewable energy"
+        ]
+    }
+}

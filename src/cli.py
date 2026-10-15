@@ -1,6 +1,7 @@
 import logging
 import argparse
 import os
+import sys
 
 def _load_dotenv_if_exists(dotenv_path: str = ".env"):
     if os.path.exists(dotenv_path):
@@ -62,6 +63,10 @@ def main():
     parser.add_argument("--skip-percolation", action="store_true", help="Skip percolation analysis stage")
 
 
+    # Key Management & Onboarding
+    parser.add_argument("--setup-keys", action="store_true", help="Launch interactive API keys setup wizard")
+    parser.add_argument("--check-keys", action="store_true", help="Diagnose and validate configured API credentials")
+
     # Project Orchestration Options
     parser.add_argument("--project-dir", type=str, help="Path to project directory for end-to-end orchestration")
     parser.add_argument("--skip-collection", action="store_true", help="Skip data collection when running a project")
@@ -79,6 +84,16 @@ def main():
     parser.add_argument("--validate-bib", type=str, help="Validate citations file (.bib, .csv, .json, .tex, .md) against Crossref/OpenAlex to flag hallucinations")
 
     args = parser.parse_args()
+
+    if args.setup_keys:
+        from scripts.setup_keys import run_interactive_wizard
+        run_interactive_wizard()
+        return
+
+    if args.check_keys:
+        from scripts.validate_keys import validate_all_keys
+        success, _ = validate_all_keys(verbose=True)
+        sys.exit(0 if success else 1)
 
     if args.validate_bib:
         from src.core.biblio_validator import BiblioValidator
@@ -102,6 +117,9 @@ def main():
         session = InteractiveVizSession(output_dir=args.output)
         session.run_menu()
         return
+
+    if (args.query or args.query_file) and not os.environ.get("OPENALEX_EMAIL") and not os.path.exists(".env"):
+        print("[INFO] Running in public rate-limited mode. For higher throughput, configure polite access with: python scripts/setup_keys.py")
 
     from src.orchestrators.pipeline_manager import PipelineManager
 

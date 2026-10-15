@@ -1,0 +1,22 @@
+{
+    "benchmark_title": "A bibliometric analysis of the 100 most-influential papers in the field of anti-diabetic drugs",
+    "reference_doi": "10.2144/fsoa-2023-0230",
+    "authors": "Fatima Azam et al.",
+    "year": 2024,
+    "journal": "Future Science OA",
+    "search_query": "\"anti-diabetic drugs\" OR \"diabetes mellitus\" OR metformin OR insulin OR \"GLP-1\" OR \"SGLT2 inhibitors\"",
+    "year_range": [1990, 2023],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "United Kingdom", "rank": 2},
+            {"country": "Germany", "rank": 3},
+            {"country": "Canada", "rank": 4},
+            {"country": "Italy", "rank": 5}
+        ]
+    }
+}

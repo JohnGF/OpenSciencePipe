@@ -50,6 +50,8 @@ pnpm-debug.log*
 # ==========================================
 data/*
 !data/.gitkeep
+!data/benchmarks/
+!data/benchmarks/**
 pipeline_results*/
 pipeline_*_results/
 outputs/

@@ -1,0 +1,34 @@
+{
+    "benchmark_title": "Bibliometric analysis and visualization of top papers in dentistry from 2012 to 2022 based on essential science indicators",
+    "reference_doi": "10.1002/cre2.832",
+    "authors": "Amene Taghdisi kashani, Zahra Batooli, Mostafa Mozafari",
+    "year": 2024,
+    "journal": "Clinical and Experimental Dental Research",
+    "search_query": "dentistry OR \"periodontal disease\" OR \"dental implants\" OR periodontitis OR \"peri-implantitis\"",
+    "year_range": [2012, 2022],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_authors": [
+            {"author": "Sanz M", "rank": 1},
+            {"author": "Tonetti MS", "rank": 2}
+        ],
+        "top_institutions": [
+            {"institution": "University of London", "rank": 1},
+            {"institution": "University of Bern", "rank": 2}
+        ],
+        "top_keywords": [
+            "periodontitis",
+            "dental implants",
+            "periodontal disease",
+            "mechanical properties",
+            "peri-implantitis",
+            "oral health",
+            "dental caries",
+            "dental materials",
+            "3D printing"
+        ]
+    }
+}

@@ -1,0 +1,59 @@
+{
+    "benchmark_title": "Global prevalence of nosocomial infection: A systematic review and meta-analysis",
+    "reference_doi": "10.1371/journal.pone.0274248",
+    "authors": "Alireza Rafiei, et al.",
+    "year": 2023,
+    "journal": "PLOS ONE",
+    "tool_cohort": "Manual (Dual-Reviewer)",
+    "search_query": "(\"cross infection\" OR \"cross infections\" OR \"healthcare associated infection\" OR \"nosocomial infection\" OR \"hospital infection\")",
+    "year_range": [
+        2000,
+        2021
+    ],
+    "screening": {
+        "ground_truth_included_dois": [
+            "10.1371/journal.",
+            "10.1186/s13756-021-00889-9",
+            "10.2807/1560-7917.ES.2021",
+            "10.1016/j.idh.2021.06.004",
+            "10.1017/ice.2019.351",
+            "10.3897/folmed.62.e50437",
+            "10.1007/s00264-020-04798-1",
+            "10.7416/ai.2020.2359",
+            "10.1016/j.ajic.2020.12.013",
+            "10.1186/s12879-020-05482-w",
+            "10.1111/scs.12730",
+            "10.1371/journal.pmed.1000097",
+            "10.1097/MLR",
+            "10.2147/DHPS.S107344",
+            "10.1016/j.jhin.2021.04.023",
+            "10.1007/s11356-021-12828-7",
+            "10.1080/14787210"
+        ],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {
+                "country": "United States",
+                "rank": 1
+            },
+            {
+                "country": "China",
+                "rank": 2
+            },
+            {
+                "country": "India",
+                "rank": 3
+            },
+            {
+                "country": "Iran",
+                "rank": 4
+            },
+            {
+                "country": "Italy",
+                "rank": 5
+            }
+        ]
+    }
+}

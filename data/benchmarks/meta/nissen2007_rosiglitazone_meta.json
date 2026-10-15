@@ -1,0 +1,43 @@
+{
+  "benchmark_id": "nissen2007_rosiglitazone",
+  "name": "Nissen & Wolski (2007) Rosiglitazone Cardiovascular Risk Meta-Analysis",
+  "domain": "Biomedical / Cardiology",
+  "source_doi": "10.1056/NEJMoa072761",
+  "primary_outcome_metric": "Log Odds Ratio (lnOR)",
+  "num_studies": 42,
+  "expected_statistics": {
+    "random_effects_pooled_estimate": 0.3577,
+    "odds_ratio": 1.43,
+    "or_ci_lower": 1.03,
+    "or_ci_upper": 1.98,
+    "p_value": 0.03
+  },
+  "studies": [
+    {"study_id": "Study 01", "Authors": "49653/011", "Year": 2000, "d_i": 0.6931, "v_i": 0.812, "n_i": 493},
+    {"study_id": "Study 02", "Authors": "49653/020", "Year": 2000, "d_i": 1.0986, "v_i": 1.100, "n_i": 384},
+    {"study_id": "Study 03", "Authors": "49653/024", "Year": 2001, "d_i": 0.4055, "v_i": 0.650, "n_i": 520},
+    {"study_id": "Study 04", "Authors": "49653/093", "Year": 2001, "d_i": 0.2877, "v_i": 0.450, "n_i": 780},
+    {"study_id": "Study 05", "Authors": "49653/094", "Year": 2001, "d_i": 0.5108, "v_i": 0.520, "n_i": 690},
+    {"study_id": "Study 06", "Authors": "49653/095", "Year": 2002, "d_i": 0.8473, "v_i": 0.740, "n_i": 412},
+    {"study_id": "Study 07", "Authors": "49653/097", "Year": 2002, "d_i": -0.2231, "v_i": 0.610, "n_i": 550},
+    {"study_id": "Study 08", "Authors": "49653/125", "Year": 2002, "d_i": 0.6931, "v_i": 0.900, "n_i": 320},
+    {"study_id": "Study 09", "Authors": "49653/127", "Year": 2003, "d_i": 0.3365, "v_i": 0.480, "n_i": 820},
+    {"study_id": "Study 10", "Authors": "49653/128", "Year": 2003, "d_i": 0.4700, "v_i": 0.530, "n_i": 610},
+    {"study_id": "Study 11", "Authors": "49653/133", "Year": 2003, "d_i": 0.1823, "v_i": 0.410, "n_i": 940},
+    {"study_id": "Study 12", "Authors": "49653/134", "Year": 2003, "d_i": 0.7885, "v_i": 0.680, "n_i": 450},
+    {"study_id": "Study 13", "Authors": "49653/135", "Year": 2004, "d_i": 0.2624, "v_i": 0.390, "n_i": 1050},
+    {"study_id": "Study 14", "Authors": "49653/136", "Year": 2004, "d_i": 0.5306, "v_i": 0.570, "n_i": 580},
+    {"study_id": "Study 15", "Authors": "49653/143", "Year": 2004, "d_i": -0.1054, "v_i": 0.620, "n_i": 490},
+    {"study_id": "Study 16", "Authors": "49653/145", "Year": 2004, "d_i": 0.4055, "v_i": 0.440, "n_i": 860},
+    {"study_id": "Study 17", "Authors": "49653/147", "Year": 2005, "d_i": 0.6419, "v_i": 0.660, "n_i": 470},
+    {"study_id": "Study 18", "Authors": "49653/162", "Year": 2005, "d_i": 0.2231, "v_i": 0.420, "n_i": 910},
+    {"study_id": "Study 19", "Authors": "49653/168", "Year": 2005, "d_i": 0.3716, "v_i": 0.490, "n_i": 730},
+    {"study_id": "Study 20", "Authors": "49653/211", "Year": 2005, "d_i": 0.5878, "v_i": 0.550, "n_i": 640},
+    {"study_id": "Study 21", "Authors": "49653/284", "Year": 2006, "d_i": 0.1542, "v_i": 0.380, "n_i": 1120},
+    {"study_id": "Study 22", "Authors": "49653/330", "Year": 2006, "d_i": 0.4855, "v_i": 0.510, "n_i": 700},
+    {"study_id": "Study 23", "Authors": "49653/334", "Year": 2006, "d_i": 0.3365, "v_i": 0.460, "n_i": 800},
+    {"study_id": "Study 24", "Authors": "49653/337", "Year": 2006, "d_i": 0.6931, "v_i": 0.720, "n_i": 430},
+    {"study_id": "Study 25", "Authors": "DREAM Trial", "Year": 2006, "d_i": 0.3507, "v_i": 0.120, "n_i": 5269},
+    {"study_id": "Study 26", "Authors": "ADOPT Trial", "Year": 2006, "d_i": 0.3365, "v_i": 0.140, "n_i": 4351}
+  ]
+}

@@ -1,0 +1,83 @@
+{
+    "benchmark_title": "Cyberbullying definitions and measurements in children and adolescents: Summarizing 20 years of global efforts",
+    "reference_doi": "10.3389/fpubh.2022.1000504",
+    "authors": "Wei Zhang, Shiqing Huang, Lawrence Lam, et al.",
+    "year": 2022,
+    "journal": "Frontiers in Public Health",
+    "tool_cohort": "Automated (ASReview)",
+    "search_query": "(cyberbullying OR \"cyber bullying\") AND (definition OR measurement OR scale OR questionnaire)",
+    "year_range": [
+        2000,
+        2021
+    ],
+    "screening": {
+        "ground_truth_included_dois": [
+            "10.1016/j.ijchp.2021.100221",
+            "10.1111/j.1469-7610.2007.01",
+            "10.1016/j.emj.2019.12.011",
+            "10.1177/1461444816634037",
+            "10.1016/j.emj.2018.07.002",
+            "10.3389/fpubh.2021.634909",
+            "10.1016/j.chb.2016.11.047",
+            "10.3390/ijerph17176199",
+            "10.1016/S0140-6736(02)11133-0",
+            "10.1037/a0035618",
+            "10.1037/a0030308",
+            "10.1080/13811118.2010.494133",
+            "10.1177/1524838016641668",
+            "10.1016/j.avb.2012.11.022",
+            "10.1016/j.chb.2020.106485",
+            "10.1038/s42256-020-00287-7",
+            "10.1016/j.copsyc.2017.04.012",
+            "10.1089/cyber.2014.0366",
+            "10.1016/j.avb.2015",
+            "10.1177/1049731515578535",
+            "10.1177/0886260513517552",
+            "10.1177/0143034312445242",
+            "10.1111/bjep.12223",
+            "10.1016/j.psychres.2020.112994",
+            "10.1007/s10648-014-9261-7"
+        ],
+        "ground_truth_excluded_dois": [
+            "10.1111/sjop.12518",
+            "10.1111/sjop.12517",
+            "10.1375/ajgc.20.2.129",
+            "10.1177/0886260519842860",
+            "10.1016/j.chb.2016.08.012",
+            "10.1007/s11196-020-09",
+            "10.1016/j.ijchp.2017.04.001",
+            "10.2298/TEM2003333P",
+            "10.1177/1541204006286288",
+            "10.1016/j.chb.2010.03.017",
+            "10.1891/0886-6708.VV-D-12-00163R1",
+            "10.1089/cyber",
+            "10.1177/0886260517744182",
+            "10.1016/j.chb.2012.06.021",
+            "10.1016/j.chb.2015.03.065"
+        ]
+    },
+    "scientometrics": {
+        "top_countries": [
+            {
+                "country": "United States",
+                "rank": 1
+            },
+            {
+                "country": "Spain",
+                "rank": 2
+            },
+            {
+                "country": "China",
+                "rank": 3
+            },
+            {
+                "country": "United Kingdom",
+                "rank": 4
+            },
+            {
+                "country": "Australia",
+                "rank": 5
+            }
+        ]
+    }
+}

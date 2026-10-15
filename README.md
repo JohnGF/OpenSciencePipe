@@ -26,7 +26,21 @@ biblio-pipeline --query "brain-computer interface"
 
 ## Quick Start (Run in Seconds)
 
-Choose the setup that fits your workflow:
+### Step 0: API Credentials Setup (Optional, 30 Seconds)
+OpenSciencePipe queries open scholarly literature (OpenAlex, Crossref, PubMed) out of the box with zero configuration. To unlock maximum harvesting throughput via dedicated polite pools (up to 10 req/s), set your contact email:
+
+```bash
+# Guided interactive onboarding wizard:
+python scripts/setup_keys.py
+
+# Or diagnose and test configured credentials at any time:
+biblio-pipeline --check-keys
+```
+See [API Keys & Providers Guide](docs/API_KEYS.md) for full instructions on open polite pools and optional institutional keys (Scopus, Web of Science).
+
+---
+
+Choose the execution environment that fits your workflow:
 
 ### Option 1: All-in-One GPU Container (Zero Setup — Recommended)
 Pre-configured with NVIDIA CUDA 12.8, RAPIDS 25.06 (`cugraph`, `cudf`), PyTorch CUDA, and all dependencies. No Python version issues, no CUDA driver conflicts, and no compilation needed.
@@ -218,7 +232,7 @@ uv run --with pytest python -m pytest tests/
 pytest tests/
 ```
 
-All 37 test suites pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
+All 43 unit and integration tests pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
 
 ---
 
@@ -229,8 +243,8 @@ If you use OpenSciencePipe in your research, please cite our landmark manuscript
 ```bibtex
 @article{farinha2026opensciencepipe,
   author    = {João Garcia Farinha and Carlos Duarte},
-  title     = {OpenSciencePipe: An End-to-End Framework for Autonomous Science Mapping and Systematic Evidence Synthesis},
-  journal   = {Journal of Informetrics},
+  title     = {OpenSciencePipe: An End-to-End Computational Framework for Autonomous Bibliometric Science Mapping},
+  journal   = {Quantitative Science Studies},
   year      = {2026},
   note      = {Under Review}
 }
