@@ -9,16 +9,11 @@ authors = [
   { name = "João Garcia Farinha" },
   { name = "Carlos Duarte" }
 ]
-
-[project.urls]
-Homepage = "https://github.com/JohnGF/OpenSciencePipe"
-Repository = "https://github.com/JohnGF/OpenSciencePipe"
-Issues = "https://github.com/JohnGF/OpenSciencePipe/issues"
 dependencies = [
   "bertopic>=0.16.0",
   "networkx>=3.0",
   "python-louvain>=0.16",
-  "pandas>=2.0.0,<2.2.0",
+  "pandas>=2.2.0",
   "fastapi>=0.110.0",
   "uvicorn>=0.27.0",
   "python-multipart>=0.0.9",
@@ -31,7 +26,7 @@ dependencies = [
   "altair>=5.0.0",
   "openpyxl>=3.1.0",
   "scikit-learn>=1.3.0",
-  "numpy>=1.24.0,<2.0.0",
+  "numpy>=1.24.0",
   "httpx>=0.27.0",
   "tenacity>=8.0.0",
   "pytest>=8.0.0",
@@ -41,6 +36,11 @@ dependencies = [
   "torchaudio>=2.5.1,<2.9",
   "pymupdf>=1.28.0",
 ]
+
+[project.urls]
+Homepage = "https://github.com/JohnGF/OpenSciencePipe"
+Repository = "https://github.com/JohnGF/OpenSciencePipe"
+Issues = "https://github.com/JohnGF/OpenSciencePipe/issues"
 
 [project.scripts]
 opensciencepipe = "src.pipeline:main"

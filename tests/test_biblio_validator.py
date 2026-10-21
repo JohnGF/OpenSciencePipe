@@ -78,10 +78,12 @@ class TestBiblioValidator(unittest.TestCase):
         self.assertEqual(res_mismatch["status"], "HALLUCINATED_DOI_MISMATCH")
         self.assertTrue(res_mismatch["is_hallucination_suspect"])
 
-        # Case 3: Completely non-existent DOI
+        # Case 3: Completely non-existent DOI and fake paper
+        validator.query_openalex_title = MagicMock(return_value=None)
+        validator.query_crossref_title = MagicMock(return_value=None)
         res_fake_doi = validator.verify_entry({
             "cite_key": "fake_doi",
-            "title": "Quantum Brain Teleportation",
+            "title": "Quantum Brain Teleportation For Telepathic Kittens 9999",
             "doi": "10.99999/fake.doi.123",
             "year": 2024
         })

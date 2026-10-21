@@ -4,22 +4,45 @@ import httpx
 import logging
 from typing import Dict, Tuple
 
+# Path to cloud-unlock RAM-disk credentials (KeePassXC-backed tmpfs)
+_CLOUD_UNLOCK_PATH = "/run/user/1000/credentials/api_keys.env"
+
 # Simple .env parser using standard library
 def load_env(env_path: str = None) -> Dict[str, str]:
+    """Load credentials from either .env or cloud-unlock RAM-disk.
+
+    Priority:
+      1. ``.env`` file (standard local configuration)
+      2. ``/run/user/1000/credentials/api_keys.env`` (cloud-unlock tmpfs)
+    ``.env`` files can be in the standard ``KEY=value`` format or the ``cloud-unlock``
+    ``set -gx KEY \"value\"`` fish shell format.
+    """
     if env_path is None:
         env_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")
     env_vars = {}
-    if os.path.exists(env_path):
-        with open(env_path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if line and not line.startswith("#") and "=" in line:
-                    key, val = line.split("=", 1)
-                    k = key.strip()
-                    v = val.strip().strip('"').strip("'")
-                    env_vars[k] = v
-                    if k not in os.environ:
-                        os.environ[k] = v
+    for target_path in (env_path, _CLOUD_UNLOCK_PATH):
+        if target_path and os.path.exists(target_path):
+            with open(target_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        # Standard .env format: KEY=value
+                        key, val = line.split("=", 1)
+                        k = key.strip()
+                        v = val.strip().strip('"').strip("'")
+                        env_vars[k] = v
+                        if k not in os.environ:
+                            os.environ[k] = v
+                    elif line.startswith("set -gx "):
+                        # cloud-unlock fish format: set -gx KEY "value"
+                        line = line[len("set -gx "):]
+                        k, v = line.split(None, 1)
+                        k, v = k.strip(), v.strip().strip('"')
+                        env_vars[k] = v
+                        if k not in os.environ:
+                            os.environ[k] = v
     return env_vars
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s - %(message)s")

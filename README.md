@@ -57,10 +57,54 @@ docker run --gpus all --rm -it -v $(pwd):/app:z opensciencepipe \
 
 #### Podman:
 ```bash
-podman build -t opensciencepipe -f Containerfile .
-podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z opensciencepipe \
+# Build the local container image once
+podman build -t localhost/opensciencepipe -f Containerfile .
+
+# Run directly
+podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z localhost/opensciencepipe \
   biblio-pipeline --query "brain-computer interface" --limit 200
 ```
+
+#### 100% Local AI Pod (BERTopic + Ollama LLM Buckets — Zero API Costs):
+For completely offline, zero-cloud synthesis with local AI:
+- **Local BERTopic:** Contextual Sentence-BERT embeddings, UMAP dimension reduction, and HDBSCAN density clustering with outlier isolation (Topic $-1$).
+- **Local LLM (Ollama):** Local open-weight models (e.g. `llama3.2:3b`, `qwen2.5:3b`) for zero-shot study screening and automated thematic bucket/paradigm classification.
+
+Launch the unified pod with one command:
+```bash
+# 1. Start the shared Local AI Pod (launches Ollama + OpenSciencePipe networking):
+./scripts/start_local_ai_pod.sh llama3.2:3b
+
+# 2A. Run directly on your host machine against the local AI pod:
+# Using local virtualenv:
+.venv/bin/biblio-pipeline --file data/publications.csv \
+                          --mode systematic \
+                          --screen-llm \
+                          --llm-model llama3.2:3b \
+                          --output outputs/my_topics
+
+# Or using uv:
+uv run biblio-pipeline --file data/publications.csv \
+                       --mode systematic \
+                       --screen-llm \
+                       --llm-model llama3.2:3b \
+                       --output outputs/my_topics
+
+# 2B. Or run inside the pod using the container:
+podman run --pod openscience-ai-pod --device nvidia.com/gpu=all --rm -it \
+  -v $(pwd):/app:z localhost/opensciencepipe \
+  biblio-pipeline --file data/publications.csv \
+                  --mode systematic \
+                  --screen-llm \
+                  --llm-model llama3.2:3b \
+                  --output outputs/my_topics
+
+# 3. Clean up when finished:
+./scripts/start_local_ai_pod.sh stop
+```
+Outputs include `tables/annex_llm_screening.tex` (thematic focus share), `tables/annex_bertopic_details.tex` (macro/micro clusters), and `data/topic_info.csv`.
+
+
 
 ---
 
@@ -90,15 +134,56 @@ biblio-pipeline --query "brain-computer interface" --limit 100
 
 ---
 
-## The 3 Operational Modes
+## Core Applications: For Researchers vs. For Universities & Institutions
 
-OpenSciencePipe adapts to your research question via the `--mode` flag:
+OpenSciencePipe serves two distinct scholarly use cases: individual researchers synthesizing literature, and academic institutions tracking research impact and international partnerships.
 
-| Mode | Command Example | Primary Output |
+### 1. For Researchers (Topic Discovery & Systematic Evidence Synthesis)
+
+Designed for scientists, PhD candidates, and review authors needing rigorous, reproducible science mapping and evidence synthesis:
+
+| Research Workflow | CLI Flag | Capabilities & Deliverables |
 | :--- | :--- | :--- |
-| **Macro Science Mapping** (`--mode biblio`) | `biblio-pipeline --query "microplastics" --mode biblio` | GPU Louvain community graphs, PageRank centrality, Sentence-BERT topics, and IEEEtran report |
-| **PRISMA Systematic Review** (`--mode systematic`) | `biblio-pipeline --query "stroke rehabilitation" --mode systematic` | Local LLM zero-shot screening, inclusion/exclusion audit, and PRISMA 2020 flow diagram |
-| **Quantitative Meta-Analysis** (`--mode meta`) | `biblio-pipeline --file clinical_data.csv --mode meta` | DerSimonian–Laird random-effects pooling ($\tau^2$, $I^2$, Cochran $Q$), Forest & Funnel plots |
+| **Macro Science Mapping** | `--mode biblio` | GPU-accelerated Louvain community graphs (`cuGraph`), PageRank centrality, Sentence-BERT NLP with HDBSCAN noise isolation (Topic $-1$), and camera-ready IEEEtran/Elsevier paper scaffold (`paper_scaffold.pdf`). |
+| **PRISMA Systematic Review** | `--mode systematic` | Autonomous local LLM screening (Ollama `llama3.2:3b` at $T=0.0$), deterministic PICOS criteria filtering, and automated PRISMA 2020 flow diagrams. |
+| **Quantitative Meta-Analysis** | `--mode meta` | PDF table and statistical variable extraction, DerSimonian–Laird random-effects pooling ($\tau^2$, $I^2$, Cochran $Q$), and publication-grade Forest and Funnel plots. |
+
+```bash
+# Science mapping and thematic evolution
+biblio-pipeline --query "brain-computer interface" --mode biblio
+
+# PRISMA systematic review with local zero-shot LLM screening
+biblio-pipeline --query "stroke rehabilitation" --mode systematic
+
+# Quantitative random-effects meta-analysis
+biblio-pipeline --file clinical_trials.csv --mode meta
+```
+
+---
+
+### 2. For Universities & Research Institutions (Institutional Intelligence & Collaboration Mapping)
+
+Designed for deans, rectors, research directors, and strategic planning offices needing granular bibliometrics, international partner tracking, and accreditation evidence:
+
+| Institutional Need | Tool / Command | Strategic Output |
+| :--- | :--- | :--- |
+| **Institutional Profiling** | `biblio-pipeline --institution ...` | Profiles scientific volume, international collaboration rate (% papers with foreign co-authors), and top partner countries for any faculty or school. |
+| **Geopolitical Collaboration** | `scripts/institution_country_collab.py` | Granular breakdown of joint publications with partner nations (e.g. tracking collaborations with China, US, EU, UK) in any given calendar year. |
+| **Research Unit Disambiguation** | `scripts/generate_fcul_china_analysis.py` | Disambiguates multi-campus or hybrid FCT units (e.g., separating FCUL vs. IST laboratories in joint institutes like CQE and MARE) and unifies Portuguese/English affiliation variants. |
+| **Scientist Dyads & Connections** | Lead Researcher Mapping | Maps lead principal investigators, citation impact, and specific author-to-author co-authorship pairs (*Scientist Dyads*) between domestic and foreign researchers. |
+| **Executive PDF Dossiers** | `scripts/compile_fcul_china_report.py` | Assembles raw publication CSVs, bipartite network plots, and leader tables into a camera-ready executive PDF report ready for institutional accreditation and evaluation. |
+
+```bash
+# Rapid institutional co-authorship breakdown by country
+biblio-pipeline --institution "Universidade de Lisboa" --faculty "Faculdade de Ciências" --year 2023
+
+# Deep bipartite co-authorship graph & scientist-level data export (e.g. FCUL + China)
+python scripts/generate_fcul_china_analysis.py
+
+# Compile publication-grade 5-page institutional PDF report with embedded figures & tables
+python scripts/compile_fcul_china_report.py
+# Output: outputs/fcul_china_2023/FCUL_China_2023_Bibliometric_Report.pdf
+```
 
 ---
 

@@ -15,12 +15,50 @@ from src.core.collectors.biorxiv import BioRxivCollector
 
 logger = logging.getLogger(__name__)
 
+# cloud-unlock RAM-disk tmpfs path (KeePassXC-backed credentials)
+_CLOUD_UNLOCK_PATH = "/run/user/1000/credentials/api_keys.env"
+
 PEER_REVIEWED_SOURCES = ["openalex", "semantic_scholar", "crossref", "pubmed", "scopus", "web_of_science", "ieee", "acm"]
 PREPRINT_SOURCES = ["arxiv", "biorxiv"]
+
+
+def _load_credentials() -> None:
+    """Load credentials from .env first, then fall back to cloud-unlock tmpfs.
+
+    Supports both standard ``KEY=value`` and ``set -gx KEY "value"`` formats.
+    Existing environment variables are never overwritten.
+    """
+    for target_path in (".env", _CLOUD_UNLOCK_PATH):
+        if not target_path or not os.path.exists(target_path):
+            continue
+        try:
+            with open(target_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line or line.startswith("#"):
+                        continue
+                    if "=" in line:
+                        # Standard .env format: KEY=value
+                        k, v = line.split("=", 1)
+                        k, v = k.strip(), v.strip().strip("'\"")
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+                    elif line.startswith("set -gx "):
+                        # cloud-unlock fish format: set -gx KEY "value"
+                        line = line[len("set -gx "):]
+                        k, v = line.split(None, 1)
+                        k, v = k.strip(), v.strip().strip('"')
+                        if k and k not in os.environ:
+                            os.environ[k] = v
+        except Exception:
+            pass
 
 class UnifiedCollector:
     def __init__(self, config: Optional[Dict] = None):
         self.config = config or {}
+        
+        # Load credentials from .env file + cloud-unlock tmpfs before reading env
+        _load_credentials()
         
         # Priority: passed config > environment variables
         oa_email = self.config.get("openalex_email") or os.environ.get("OPENALEX_EMAIL")

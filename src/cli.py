@@ -3,20 +3,47 @@ import argparse
 import os
 import sys
 
+# Path to cloud-unlock RAM-disk credentials (KeePassXC-backed tmpfs)
+_CLOUD_UNLOCK_PATH = "/run/user/1000/credentials/api_keys.env"
+
 def _load_dotenv_if_exists(dotenv_path: str = ".env"):
-    if os.path.exists(dotenv_path):
-        try:
-            with open(dotenv_path, "r", encoding="utf-8") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line or line.startswith("#") or "=" not in line:
-                        continue
-                    k, v = line.split("=", 1)
-                    k, v = k.strip(), v.strip().strip("'\"")
-                    if k and k not in os.environ:
-                        os.environ[k] = v
-        except Exception:
-            pass
+    """Load credentials from .env first, then optionally fall back to cloud-unlock
+    RAM-disk credentials (tmpfs). This supports two workflows:
+      1. Standard: place keys in a local ``.env`` file (copied from ``.env.example``)
+      2. Secure: unlock KeePassXC database via ``cloud-unlock`` which exports keys
+         to a tmpfs file at ``/run/user/1000/credentials/api_keys.env``
+    Keys already present in the environment (``os.environ``) are never overwritten.
+    """
+    # Priority 1: standard local .env file
+    for target_path in (dotenv_path, _CLOUD_UNLOCK_PATH):
+        if target_path and os.path.exists(target_path):
+            try:
+                with open(target_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if not line or line.startswith("#"):
+                            continue
+                        if "=" not in line and "\t" not in line and " " not in line:
+                            continue
+                        if "=" in line:
+                            # Standard .env format: KEY=value
+                            k, v = line.split("=", 1)
+                            k, v = k.strip(), v.strip().strip("'\"")
+                            if k and k not in os.environ:
+                                os.environ[k] = v
+                        elif "\t" in line:
+                            # cloud-unlock fish format: set -gx KEY "value"
+                            parts = line.split(None, 2)
+                            if len(parts) >= 3 and parts[1].startswith("set") and parts[1].endswith("gx"):
+                                k = parts[1][1:]
+                            if line.startswith("set -gx "):
+                                line = line[len("set -gx "):]
+                                k, v = line.split(None, 1)
+                                k, v = k.strip(), v.strip().strip('"')
+                                if k and k not in os.environ:
+                                    os.environ[k] = v
+            except Exception:
+                pass
 
 def main():
     _load_dotenv_if_exists()
@@ -83,6 +110,11 @@ def main():
     # Bibliographic Validation & Hallucination Auditing
     parser.add_argument("--validate-bib", type=str, help="Validate citations file (.bib, .csv, .json, .tex, .md) against Crossref/OpenAlex to flag hallucinations")
 
+    # Institutional Intelligence & Collaboration Options
+    parser.add_argument("--institution", type=str, help="Target institution for bibliometrics (e.g. 'Universidade de Lisboa')")
+    parser.add_argument("--faculty", type=str, help="Sub-unit or faculty name (e.g. 'Faculdade de Ciências')")
+    parser.add_argument("--year", type=int, default=2023, help="Publication year for institutional analysis")
+
     args = parser.parse_args()
 
     if args.setup_keys:
@@ -116,6 +148,36 @@ def main():
         from scripts.interactive_viz import InteractiveVizSession
         session = InteractiveVizSession(output_dir=args.output)
         session.run_menu()
+        return
+
+    if args.institution:
+        from scripts.institution_country_collab import find_institution_id, get_country_collaborations
+        import pandas as pd
+        inst_id = None
+        inst_name = args.institution
+        inst_info = find_institution_id(args.institution)
+        if inst_info:
+            inst_id = inst_info["id"]
+            inst_name = inst_info["display_name"]
+        
+        target_desc = f"{args.faculty} - {inst_name}" if args.faculty else inst_name
+        print(f"\nAnalyzing bibliometrics for: {target_desc} (Year: {args.year})")
+        res = get_country_collaborations(
+            institution_id=inst_id,
+            faculty_affiliation=args.faculty,
+            year=args.year,
+            top_n=20
+        )
+        total_works = res["total_publications"]
+        intl_works = res.get("international_publications", 0)
+        intl_rate = res.get("international_rate", 0.0)
+        print(f"Total publications: {total_works}")
+        print(f"International co-authored publications: {intl_works} ({intl_rate}%)\n")
+        if total_works > 0:
+            print("Top Collaborating Countries:")
+            print(pd.DataFrame(res["countries"]).to_string(index=False))
+            print("\nTop Collaborating Institutions:")
+            print(pd.DataFrame(res["institutions"]).to_string(index=False))
         return
 
     if (args.query or args.query_file) and not os.environ.get("OPENALEX_EMAIL") and not os.path.exists(".env"):
