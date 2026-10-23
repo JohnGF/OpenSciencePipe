@@ -57,7 +57,7 @@ Traditional bibliometric science mapping workflows frequently rely on desktop ap
 \end{highlights}
 
 \begin{keyword}
-OpenSciencePipe \sep Bibliometrics \sep Science mapping \sep Neural topic modeling \sep BERTopic \sep GPU acceleration \sep RAPIDS cuGraph \sep Informetrics \sep Scholarly data
+OpenSciencePipe \sep Bibliometrics \sep Science mapping \sep Neural topic modeling \sep BERTopic \sep Reproducibility \sep Scalability \sep Informetrics \sep Scholarly data
 \end{keyword}
 
 \end{frontmatter}
@@ -79,31 +79,31 @@ Whereas existing science mapping environments require manual parameter calibrati
 \section{Related Work}
 \label{sec:related_work}
 
-\subsection{Foundations of Science Mapping and Informetrics}
+\subsection{Science Mapping}
 Quantitative science mapping emerged to uncover macro-level knowledge structures within scientific specialties. Methodological foundations originate in bibliographic coupling \cite{kessler1963bibliographic} and co-citation analysis \cite{small1973co}, where Small and Griffith \cite{small1974structure} established that citation graph topologies reflect the intellectual and social consensus of a discipline. In parallel, co-word analysis was formulated by Callon et al. \cite{callon1983co} to map conceptual dynamics through lexical co-occurrences. Later, Cobo et al. \cite{cobo2011science, cobo2012scimat} formalized these distinct relational modalities (citation, co-citation, and co-word networks) into a unified scientometric workflow spanning retrieval, preprocessing, network extraction, normalization, spatial layout, and cluster analysis.
 
-\subsection{Contemporary Informetric Ecosystems and Operational Limits}
+\subsection{Existing Tooling}
 Over the past three decades, the informetrics community has developed specialized tools targeting distinct sub-problems of literature analysis. These tools can be organized into five operational classes:
 
-\paragraph{Exploratory Science Mappers} Contemporary bibliometric mapping is primarily anchored by three desktop suites: \textbf{VOSviewer} \cite{van2010software}, which optimizes the Visualization of Similarities (VOS) layout normalized by association strength to map co-authorship and co-occurrence; \textbf{CiteSpace} \cite{chen2006citespace}, which detects progressive scientific frontiers and pivotal transition nodes using Kleinberg's burst detection \cite{kleinberg2003bursty} across time-sliced networks; and \textbf{Bibliometrix} (\texttt{biblioshiny}) \cite{aria2017bibliometrix}, an extensive R package evaluating classical empirical laws (Lotka, Bradford, Zipf) and strategic Callon thematic diagrams. Despite their visual clarity, these tools operate as isolated GUI desktop applications constrained by workstation CPU memory and manual batch exports.
+\paragraph{Exploratory Mappers} Contemporary bibliometric mapping is primarily anchored by three desktop suites: \textbf{VOSviewer} \cite{van2010software}, which optimizes the Visualization of Similarities (VOS) layout normalized by association strength to map co-authorship and co-occurrence; \textbf{CiteSpace} \cite{chen2006citespace}, which detects progressive scientific frontiers and pivotal transition nodes using Kleinberg's burst detection \cite{kleinberg2003bursty} across time-sliced networks; and \textbf{Bibliometrix} (\texttt{biblioshiny}) \cite{aria2017bibliometrix}, an extensive R package evaluating classical empirical laws (Lotka, Bradford, Zipf) and strategic Callon thematic diagrams. Despite their visual clarity, these tools operate as isolated GUI desktop applications constrained by workstation CPU memory and manual batch exports.
 
-\paragraph{Longitudinal Thematic Evolution Engines} Dedicated platforms like \textbf{SciMAT} \cite{cobo2012scimat} and the \textbf{Sci2 Tool} \cite{borner2010science} model longitudinal science mapping by dividing bibliographic data into sequential time intervals, evaluating Callon centrality versus density to track how thematic clusters merge, split, or perish across eras. However, they require manual configuration between stages.
+\paragraph{Longitudinal Engines} Dedicated platforms like \textbf{SciMAT} \cite{cobo2012scimat} and the \textbf{Sci2 Tool} \cite{borner2010science} model longitudinal science mapping by dividing bibliographic data into sequential time intervals, evaluating Callon centrality versus density to track how thematic clusters merge, split, or perish across eras. However, they require manual configuration between stages.
 
-\paragraph{Direct Citation Genealogies and Historiographs} Tools such as \textbf{CitNetExplorer} \cite{van2014citnetexplorer} and \textbf{HistCite} \cite{garfield2004histcite} render directed chronological citation networks to trace direct parent-to-descendant intellectual lineages (Garfield historiographs). Modern web services (e.g., Connected Papers, Litmaps) provide seed-paper neighborhood expansion. Nevertheless, these platforms remain tied to proprietary Web of Science flat-file formats or single-seed queries rather than end-to-end corpus synthesis.
+\paragraph{Citation Genealogies} Tools such as \textbf{CitNetExplorer} \cite{van2014citnetexplorer} and \textbf{HistCite} \cite{garfield2004histcite} render directed chronological citation networks to trace direct parent-to-descendant intellectual lineages (Garfield historiographs). Modern web services (e.g., Connected Papers, Litmaps) provide seed-paper neighborhood expansion. Nevertheless, these platforms remain tied to proprietary Web of Science flat-file formats or single-seed queries rather than end-to-end corpus synthesis.
 
-\paragraph{Large-Scale Graph and Community Engines} General complex network engines like \textbf{Gephi} \cite{bastian2009gephi} and \textbf{Pajek} \cite{batagelj1998pajek} provide ForceAtlas2 layouts and Louvain/Leiden modularity for large graphs. While powerful, they are domain-agnostic, require complex intermediate graph conversions (\texttt{.gexf}, \texttt{.net}), and exhibit severe memory bottlenecks and UI latency when handling dense co-citation graphs exceeding $10^5$ edges on commodity hardware.
+\paragraph{Graph Engines} General complex network engines like \textbf{Gephi} \cite{bastian2009gephi} and \textbf{Pajek} \cite{batagelj1998pajek} provide ForceAtlas2 layouts and Louvain/Leiden modularity for large graphs. While powerful, they are domain-agnostic, require complex intermediate graph conversions (\texttt{.gexf}, \texttt{.net}), and exhibit severe memory bottlenecks and UI latency when handling dense co-citation graphs exceeding $10^5$ edges on commodity hardware.
 
-\paragraph{Scripted Extraction Utilities and API Wrappers} Programmatic utilities including \textbf{Bibexcel} \cite{persson2009bibexcel}, \textbf{metaknowledge} \cite{mclevey2017metaknowledge}, and \textbf{pybliometrics} \cite{rose2019pybliometrics} automate bibliographic matrix extraction or wrap proprietary APIs (such as Elsevier Scopus). However, they function strictly as extraction aids, requiring researchers to write  glue code or manually connect extraction with downstream statistical modeling or visualization.
+\paragraph{API Wrappers} Programmatic utilities including \textbf{Bibexcel} \cite{persson2009bibexcel}, \textbf{metaknowledge} \cite{mclevey2017metaknowledge}, and \textbf{pybliometrics} \cite{rose2019pybliometrics} automate bibliographic matrix extraction or wrap proprietary APIs (such as Elsevier Scopus). However, they function strictly as extraction aids, requiring researchers to write  glue code or manually connect extraction with downstream statistical modeling or visualization.
 
-\subsection{Evidence Synthesis, Active Screening, and Meta-Analysis Tools}
+\subsection{Evidence Synthesis}
 In empirical evidence synthesis, the PRISMA 2020 guidelines \cite{page2021prisma} specify protocols for systematic identification, screening, eligibility auditing, and study inclusion. While active-learning platforms like \textbf{ASReview} \cite{van2021active} and \textbf{Rayyan} \cite{ouzzani2016rayyan} have accelerated title and abstract triage through machine-assisted prioritization, they remain isolated screening silos dependent on manual CSV/RIS imports. For quantitative synthesis, statistical packages such as Cochrane \textbf{RevMan} \cite{revman2020} and R \textbf{\texttt{metafor}} \cite{viechtbauer2010conducting} provide inverse-variance and random-effects models (e.g., DerSimonian--Laird \cite{dersimonian1986meta}, REML), but remain entirely disconnected from the upstream search, harvesting, and deduplication phases of the research lifecycle.
 
-\subsection{Deep Learning, Dense Embeddings, and Density-Based Noise Isolation}
+\subsection{Neural Embeddings}
 Recent advances in natural language processing (NLP) address long-standing limitations in lexical bibliometrics. Classical frequency-based approaches, including co-word matrices and Latent Dirichlet Allocation (LDA) \cite{blei2003latent}, rely on bag-of-words assumptions that ignore syntactic context, polysemy, and vocabulary mismatch. Pretrained transformer architectures project text into dense continuous vector spaces encoding semantic context (BERT \cite{devlin2018bert}, Sentence-BERT \cite{reimers2019sentence}). 
 
 Building upon these representations, BERTopic \cite{grootendorst2022bertopic} coordinates three complementary stages: (i) encoding title and abstract corpora into dense contextual vectors, (ii) reducing dimensionality via UMAP \cite{mcinnes2018umap}, and (iii) grouping semantically coherent documents into clusters using HDBSCAN \cite{campello2013density}. Crucially, HDBSCAN isolates peripheral or multidisciplinary literature into an explicit noise pool (Topic~$-1$). Integrating dense contextual representations with density-based clustering provides a principled alternative to bag-of-words methods, capturing cohesive thematic clusters without forcing peripheral literature into artificial groupings.
 
-\subsection{Systematic Ecosystem Comparison and Evaluation Metrics}
+\subsection{Comparison Metrics}
 Table~\ref{tab:ecosystem_comparison} synthesizes the relationship between existing tool families, their primary operational limits, their direct OpenSciencePipe counterparts, and the quantitative metrics used to evaluate them in this study.
 
 \begin{table*}[t]
@@ -129,16 +129,16 @@ Automated Publication Orchestration & \textit{No legacy software equivalent} (Ma
 }
 \end{table*}
 
-\subsection{Methodological and Architectural Capabilities Integrated in OpenSciencePipe}
+\subsection{Design Overview}
 Beyond addressing the operational silos of legacy tools, OpenSciencePipe integrates six cohesive methodological capabilities into a single reproducible engine. Their empirical performance is quantified in Section~\ref{sec:results}; here we describe how each capability is architected:
 
 \begin{enumerate}
-    \item \textbf{Unified Ingestion and Reproducible Execution Pipeline:} While existing tools require fragmented script wrappers or manual GUI exports across disparate file formats, OpenSciencePipe establishes an end-to-end declarative framework executing federated API harvesting across open scholarly indices (OpenAlex, Crossref, Semantic Scholar, PubMed), token-sorted Levenshtein deduplication, and automated reporting from a single query specification.
-    \item \textbf{GPU-Resident Graph Analytics:} Citation and co-authorship graphs are stored in a Compressed Sparse Row (CSR) layout in device memory using NVIDIA RAPIDS \texttt{cugraph} and \texttt{cudf}. Adjacency traversal for Louvain community detection and PageRank executes via contiguous memory access and massively parallel edge relaxation rather than single-threaded CPU graph traversals, with zero host-device transfer penalties between algorithms.
-    \item \textbf{Density-Based Noise Rejection in Thematic Modeling:} Dense sentence embeddings are reduced with UMAP and clustered via HDBSCAN, defining clusters as regions of high local density separated by sparse boundaries. Documents lying outside dense manifolds are assigned to an explicit noise pool (Topic~$-1$) rather than forced into artificial topics as required by traditional centroid or Dirichlet models, preserving distinct topic centroids and high vocabulary diversity.
-    \item \textbf{Schema-Constrained Local Screening with Auditability:} Candidate records can be evaluated by a local open-weight LLM governed by greedy decoding ($T = 0.0$) and constrained to a structured JSON schema. By enforcing deterministic schema compliance and logging explicit inclusion rationales, the engine avoids commercial API dependencies, prevents data leakage, and generates a reproducible audit trail for triage decisions.
-    \item \textbf{Downstream Evidence Synthesis Interfaces:} The framework provides modular interfaces bridging bibliometric discovery with downstream systematic review screening and meta-analytic pooling, establishing an extensible bridge evaluated in companion work.
-    \item \textbf{Automated Reproducible Report Scaffolding:} Figures, formatted \LaTeX{} tables, and bibliography keys are emitted directly by analysis modules and assembled into camera-ready manuscript templates, ensuring complete synchronization between source data, analysis code, and published figures.
+    \item \textbf{Ingestion Pipeline:} While existing tools require fragmented script wrappers or manual GUI exports across disparate file formats, OpenSciencePipe establishes an end-to-end declarative framework executing federated API harvesting across open scholarly indices (OpenAlex, Crossref, Semantic Scholar, PubMed), token-sorted Levenshtein deduplication, and automated reporting from a single query specification.
+    \item \textbf{Graph Analytics:} Citation and co-authorship graphs are stored in a Compressed Sparse Row (CSR) layout in device memory using NVIDIA RAPIDS \texttt{cugraph} and \texttt{cudf}. Adjacency traversal for Louvain community detection and PageRank executes via contiguous memory access and massively parallel edge relaxation rather than single-threaded CPU graph traversals, with zero host-device transfer penalties between algorithms.
+    \item \textbf{Thematic Modeling:} Dense sentence embeddings are reduced with UMAP and clustered via HDBSCAN, defining clusters as regions of high local density separated by sparse boundaries. Documents lying outside dense manifolds are assigned to an explicit noise pool (Topic~$-1$) rather than forced into artificial topics as required by traditional centroid or Dirichlet models, preserving distinct topic centroids and high vocabulary diversity.
+    \item \textbf{Evidence Screening:} Candidate records can be evaluated by a local open-weight LLM governed by greedy decoding ($T = 0.0$) and constrained to a structured JSON schema. By enforcing deterministic schema compliance and logging explicit inclusion rationales, the engine avoids commercial API dependencies, prevents data leakage, and generates a reproducible audit trail for triage decisions.
+    \item \textbf{Evidence Synthesis:} The framework provides modular interfaces bridging bibliometric discovery with downstream systematic review screening and meta-analytic pooling, establishing an extensible bridge evaluated in companion work.
+    \item \textbf{Report Scaffolding:} Figures, formatted \LaTeX{} tables, and bibliography keys are emitted directly by analysis modules and assembled into camera-ready manuscript templates, ensuring complete synchronization between source data, analysis code, and published figures.
 \end{enumerate}
 
 \section{The OpenSciencePipe Computational Architecture}
@@ -177,7 +177,7 @@ OpenSciencePipe is structured as a modular, asynchronous computational framework
     \textbf{Canonical Schema Validation ($\mathcal{P}_i$)}\par
     Title, Abstract, Authors, Year, Affiliation, DOI, Citations
 };
-\node[tierlabel, above=0.22cm of apis.north west, anchor=south west] (t1_label) {Tier 1: Multi-Source Harvesting \& Ingestion};
+\node[tierlabel, above=0.22cm of apis.north west, anchor=south west] (t1_label) {1 \textperiodcentered\ Ingestion};
 \begin{scope}[on background layer]
     \node[tierbox, fit=(t1_label) (apis) (pydantic)] (tier1) {};
 \end{scope}
@@ -191,7 +191,7 @@ OpenSciencePipe is structured as a modular, asynchronous computational framework
     \textbf{Token-Sort String Matching}\par
     Normalized Levenshtein distance ($\mathrm{Sim} \ge 0.92$)
 };
-\node[tierlabel, above=0.22cm of dedup_doi.north west, anchor=south west] (t2_label) {Tier 2: Two-Stage Record Deduplication};
+\node[tierlabel, above=0.22cm of dedup_doi.north west, anchor=south west] (t2_label) {2 \textperiodcentered\ Deduplication};
 \begin{scope}[on background layer]
     \node[tierbox, fit=(t2_label) (dedup_doi) (dedup_fuzzy)] (tier2) {};
 \end{scope}
@@ -210,7 +210,7 @@ OpenSciencePipe is structured as a modular, asynchronous computational framework
     \textbf{Author Disambiguation}\par
     Three-tier disambiguation protocol: ORCID, affiliation, co-author network
 };
-\node[tierlabel, above=0.22cm of g_build.north west, anchor=south west] (t3_label) {Tier 3: GPU-Accelerated Network Topologies (RAPIDS cuGraph)};
+\node[tierlabel, above=0.22cm of g_build.north west, anchor=south west] (t3_label) {3 \textperiodcentered\ Graph Analytics};
 \begin{scope}[on background layer]
     \node[tierbox, fit=(t3_label) (g_build) (disambig)] (tier3) {};
 \end{scope}
@@ -228,14 +228,14 @@ OpenSciencePipe is structured as a modular, asynchronous computational framework
     Eligibility triage \& PRISMA flow accounting\par
     DerSimonian--Laird pooling ($I^2$, effect size)
 };
-\node[tierlabel, above=0.22cm of bertopic.north west, anchor=south west] (t4_label) {Tier 4: Dual Semantic Discovery \& Evidence Synthesis};
+\node[tierlabel, above=0.22cm of bertopic.north west, anchor=south west] (t4_label) {4 \textperiodcentered\ Thematics};
 \begin{scope}[on background layer]
     \node[tierbox, fit=(t4_label) (bertopic) (prisma)] (tier4) {};
 \end{scope}
 
 % Tier 5: Output Generation
 \node[box=14.4cm, fill=green!10] (compilation) at (0, -11.6) {
-    \textbf{Tier 5: Automated Scientific Compilation \& Output Generation}\par
+    \textbf{5 \textperiodcentered\ Compilation}\par
     Validated \LaTeX\ tables $\to$ Publication-grade vector plots $\to$ Automated PDF typesetting
 };
 
@@ -257,21 +257,21 @@ OpenSciencePipe is structured as a modular, asynchronous computational framework
 \label{fig:architecture}
 \end{figure}
 
-\subsection{Tier 1: Multi-Source API Ingestion and Canonical Schema}
+\subsection{Multi-Source Ingestion}
 Coordinated by the \texttt{DataOrchestrator} module, OpenSciencePipe interfaces asynchronously with open scholarly REST endpoints, including OpenAlex \cite{priem2022openalex}, Crossref \cite{hendricks2020crossref}, Semantic Scholar \cite{kinney2023semantic}, and PubMed \cite{sayers2022database}, alongside authenticated developer endpoints such as Elsevier Scopus and IEEE Xplore. Retrieved records are validated and mapped into a strongly typed canonical publication model:
 \begin{equation}
 \mathcal{P}_i = \langle \text{Title}_i, \text{Abstract}_i, \text{Authors}_i, \text{Year}_i, \text{Affiliations}_i, \text{DOI}_i, \text{Citations}_i \rangle
 \end{equation}
 This ingestion layer abstracts disparate vendor schemas into a uniform internal representation, ensuring consistent downstream processing regardless of data provenance.
 
-\subsection{Tier 2: Two-Stage Record Deduplication}
+\subsection{Record Deduplication}
 Multi-source querying inherently introduces duplicate and near-duplicate records with heterogeneous metadata. OpenSciencePipe resolves duplicates via a two-stage deduplication protocol. First, primary matching performs exact identifier normalization by resolving Digital Object Identifiers (DOIs), stripping URI prefixes (e.g., \texttt{https://doi.org/}), removing extraneous whitespace, and standardizing casing. Second, for records lacking DOIs or containing typographical noise, the pipeline evaluates title similarity via token-sorted Levenshtein distance. Titles are lowercased, stripped of non-alphanumeric punctuation, and split into word tokens that are sorted lexicographically before string reconstruction. The edit distance between normalized strings $T'_a$ and $T'_b$ is measured via the Levenshtein metric \cite{levenshtein1966binary}:
 \begin{equation}
 \text{Sim}(T'_a, T'_b) = 1 - \frac{\text{Lev}(T'_a, T'_b)}{\max(|T'_a|, |T'_b|)}
 \end{equation}
 where $|T'|$ denotes string character length. Candidate record pairs satisfying $\text{Sim}(T'_a, T'_b) \ge 0.92$ are merged, consolidating citation counts and resolving author affiliations into the most complete canonical entry.
 
-\subsection{Tier 3: GPU-Accelerated Network Topologies via cuGraph}
+\subsection{Network Analysis}
 \label{sec:tier3}
 Network extraction and topological analysis scale natively to large bibliometric corpora using NVIDIA RAPIDS (\texttt{cudf} and \texttt{cugraph}). By utilizing memory-conscious chunking and Compressed Sparse Row (CSR) representations, the framework processes graphs with tens of thousands of publications on standard consumer GPUs.
 
@@ -289,20 +289,20 @@ where $\mathbf{M}$ is the column-stochastic transition matrix, $d = 0.85$ is the
 
 To prevent artificial inflation or fragmentation of vertex degrees in co-authorship graphs, author entities are disambiguated prior to network construction. The pipeline links persistent identifiers (such as ORCID and OpenAlex author IDs) where available. For records lacking persistent identifiers, disambiguation is achieved through a multi-attribute similarity function combining normalized author surname with first-name initial, publication co-authorship context, institutional affiliation signatures, and temporal overlap. Ambiguous instances that fail to satisfy confidence thresholds are partitioned conservatively to prevent over-representing authors who share common surnames.
 
-\subsection{Tier 4A: Unsupervised Neural Thematic Discovery and Noise Rejection}
+\subsection{Thematic Modeling}
 To capture thematic structure beyond frequency-based bag-of-words representations, the NLP engine within OpenSciencePipe implements a three-stage neural topic discovery pipeline. First, title and abstract corpora are projected into a continuous dense semantic space $\mathbf{e}_i \in \mathbb{R}^{384}$ using the \texttt{all-MiniLM-L6-v2} sentence transformer \cite{reimers2019sentence}. Second, UMAP \cite{mcinnes2018umap} performs non-linear manifold dimensionality reduction down to $\mathbb{R}^{5}$, preserving both local metric neighborhoods and global continuum geometry while reducing dimensionality for density estimation. Third, HDBSCAN \cite{campello2013density} identifies clusters based on continuous density distributions rather than geometric centroid proximity.
 
 A key feature of this architecture is explicit noise isolation. Unlike hard-partitioning algorithms (such as $k$-means or standard LDA) that force every document into a topic cluster, HDBSCAN classifies publications residing in sparse boundary regions as noise ($\text{Topic} = -1$). Isolating peripheral or multidisciplinary literature prevents boundary contamination of substantive domain clusters.
 
-\subsection{Modular Downstream Interfaces: Systematic Screening and Meta-Analysis}
+\subsection{Downstream Interfaces and Compilation}
+\label{sec:tier5}
 Beyond unsupervised exploratory science mapping, OpenSciencePipe integrates modular downstream interfaces bridging macroscopic bibliometric discovery with microscopic systematic evidence synthesis. Managed by the \texttt{SystematicOrchestrator} module, candidate literature records can be screened via deterministic regular-expression filtering (\texttt{GrepRelevanceFilter}), continuous semantic embedding similarity (\texttt{EmbeddingRelevanceFilter}), or local zero-shot inference with open-weight models via Ollama under structured JSON schema constraints. For quantitative synthesis, the companion \texttt{MetaOrchestrator} provides statistical pooling interfaces implementing the DerSimonian--Laird random-effects model \cite{dersimonian1986meta}, generating forest plots and funnel plots within the execution environment. Because systematic review screening and clinical effect-size extraction follow distinct confirmatory methodologies, their dedicated empirical benchmark evaluation is detailed in companion work \cite{page2021prisma}.
 
-\subsection{Tier 5: Automated Scientific Compilation and Manuscript Generation}
 To ensure end-to-end reproducibility and eliminate manual transcription errors, the central pipeline manager coordinates \texttt{LatexExporter} and visualization services to synthesize all analytical outputs into publication-ready formats. 
 
 The compilation engine generates a complete manuscript (\nolinkurl{paper_scaffold.pdf}). It maps and typesets up to 25 publication-grade vector figures, synchronizes computed statistical metrics into validated \LaTeX\ tabular environments, formats structured PRISMA 2020 summaries, and resolves cross-references autonomously. A companion local interface (\texttt{run\_local.py}) is provided for interactive inspection.
 
-\subsubsection{Specialized Informetric and Synthesis Visual Taxonomy}
+\subsubsection{Figure Taxonomy}
 Beyond standard co-authorship graphs and forest plots, the visualization engine produces a suite of domain-diagnostic figures. Evidence Gap Maps (EGMs) present 2D bubble matrices cross-tabulating intervention modalities against clinical or technological outcomes to reveal unexplored research voids under the Campbell/3ie framework. Longitudinal dynamics are captured through Thematic Evolution Sankey Diagrams, which trace how thematic clusters divide, merge, or decay across chronological epochs, and Kleinberg Burst Timelines, which employ 2-state automatons to detect accelerations in citation momentum and emergent terminology bursts \cite{kleinberg2003bursty}. Algorithmic transferability is mapped via Method-Application Matrices that bicluster computational techniques against practical target domains. Finally, Percolation Phase Transition Diagnostics quantify giant connected component emergence via the Molloy--Reed criterion, detecting the tipping point where fragmented subfields transition into an integrated scientific discipline.
 
 As illustrated in Figure~\ref{fig:science_mapping_outputs}, representative exploratory science mapping outputs include GPU-partitioned circular community chord diagrams (panel~a) and global collaboration choropleth maps (panel~b).
@@ -337,31 +337,31 @@ The distribution of benchmark corpora across software ecosystems mirrors empiric
 
 \input{tables/tab_publication_benchmark_validation_matrix.tex}
 
-\subsection{Quantitative Evaluation Metrics}
+\subsection{Evaluation Metrics}
 We formalize a multi-tier evaluation framework spanning macro-structural concordance, neural topic quality, zero-shot screening accuracy, and meta-analytic synthesis agreement:
 
-\subsubsection{Top-\texorpdfstring{$K$}{K} Geopolitical Hierarchy Concordance}
+\subsubsection{Top-$K$ Concordance}
 To assess whether OpenSciencePipe replicates published national collaboration patterns extracted from author country attributions, we evaluate set overlap against published benchmark rankings across open and proprietary databases \cite{visser2021large, martin2021google}. For nation set $\mathcal{E}$ at benchmark depth $K$ ($K=15$ for multi-thousand-paper collections; $K=5$ for compact field reviews), topological overlap is measured by:
 \begin{equation}
 \text{Overlap}_K(\mathcal{E}) = \frac{|\mathcal{R}_{\text{pipeline}}^{(K)}(\mathcal{E}) \cap \mathcal{R}_{\text{benchmark}}^{(K)}(\mathcal{E})|}{|\mathcal{R}_{\text{benchmark}}^{(K)}(\mathcal{E})|} \times 100\%
 \end{equation}
 Set-based top-$K$ overlap directly quantifies the proportion of benchmark-identified leading research nations recovered by the pipeline's automated multi-source harvesting without conditioning on rank permutations of truncated intersections, providing a scale-independent measure of macro-structural retrieval fidelity.
 
-\subsubsection{Topic Diversity (\texorpdfstring{$\text{TD}$}{TD})}
+\subsubsection{Topic Diversity}
 Following topic modeling evaluation standards in continuous embedding spaces \cite{dieng2020topic}, topic diversity ($\text{TD}$) measures the lexical uniqueness across discovered themes. For $K$ topics, each represented by its top-$M$ vocabulary terms ($M=10$), topic diversity is quantified by the proportion of unique words across all topic lists:
 \begin{equation}
 \text{TD} = \frac{|\bigcup_{k=1}^K \mathcal{W}_k^{(M)}|}{K \times M} \in [0, 1]
 \end{equation}
 where $\text{TD} = 1.0$ indicates completely distinct topic vocabularies with zero term overlap, and lower values denote mutual lexical redundancy across discovered clusters.
 
-\subsubsection{Topic Coherence via Normalized Pointwise Mutual Information (\texorpdfstring{$C_{\text{NPMI}}$}{C\_NPMI})}
+\subsubsection{Topic Coherence}
 Semantic coherence of each discovered topic is evaluated through corpus-level co-occurrence of top terms using Normalized Pointwise Mutual Information ($C_{\text{NPMI}}$) \cite{bouma2009normalized, roder2015exploring}. While NPMI serves as a standard automated baseline for lexical interpretability, its correlation with human semantic ratings varies across dense neural representations \cite{hoyle2021automated}:
 \begin{equation}
 \label{eq:npmi}
 C_{\text{NPMI}}(\mathcal{W}_k) = \frac{2}{M(M-1)} \sum_{i=1}^{M-1} \sum_{j=i+1}^M \frac{\log \frac{P(w_i, w_j) + \epsilon}{P(w_i)P(w_j)}}{-\log(P(w_i, w_j) + \epsilon)}
 \end{equation}
 
-\subsubsection{Graph Community Modularity (\texorpdfstring{$Q$}{Q}) and Computational Latency}
+\subsubsection{Modularity and Latency}
 To evaluate graph community partitioning fidelity and computational scalability, we evaluate Newman's modularity metric $Q$ \cite{blondel2008fast, traag2019louvain} across co-authorship networks:
 \begin{equation}
 Q = \frac{1}{2m} \sum_{ij} \left( A_{ij} - \frac{k_i k_j}{2m} \right) \delta(c_i, c_j)
@@ -371,7 +371,7 @@ where $A_{ij}$ represents the collaborative edge weight between author nodes $i$
 \section{Empirical Results and Comparative Findings}
 \label{sec:results}
 
-\subsection{Thematic Diversity, Semantic Coherence, and Noise Rejection}
+\subsection{Topic Quality}
 Table~\ref{tab:validation_thematic_clustering} summarizes thematic clustering performance and geopolitical topological alignment across the benchmark suite.
 
 \input{tables/tab_validation_thematic_clustering.tex}
@@ -382,17 +382,17 @@ Second, the HDBSCAN Topic~$-1$ density-based noise rejection mechanism isolated 
 
 Third, the pipeline adapts to corpus scale dynamics. In compact corpora ($N < 500$), OpenSciencePipe extracts 2--4 primary clusters, avoiding over-segmentation. Conversely, in large-scale literature collections such as the 57,601-paper Electrophysiology benchmark, the architecture discovers 381 granular sub-themes while maintaining strong lexical separation ($\text{TD} = 0.6236$).
 
-\subsection{Geopolitical Macro-Structural Concordance}
+\subsection{Geopolitical Concordance}
 As reported in Table~\ref{tab:validation_thematic_clustering}, evaluation across geopolitical dimensions demonstrated high retrieval fidelity against published ground-truth rankings. On large scientometric corpora, OpenSciencePipe achieves robust macro-structural alignment: recovering $93.3\%$ ($14/15$) of the Top-15 publishing nations on the $>50{,}000$-paper Electrophysiology corpus and $100.0\%$ ($15/15$) of the Top-15 publishing nations on the clinical ChatGPT benchmark \cite{barrington2023rise}. On compact domain-specific corpora with published Top-5 rankings, the pipeline consistently captures the dominant national contributors, achieving $80.0\%$ ($4/5$) recovery in Soil Microplastics, Environmental Science, Sustainable Business, and Public Health, and $60.0\%$ ($3/5$) in Blockchain and Distance Learning.
 
 Discrepancies in top-nation inclusion primarily reflect operational coverage boundaries between open and proprietary citation databases rather than algorithmic error \cite{visser2021large, martin2021google}. For instance, in compact specialized benchmarks originally harvested from Scopus or Web of Science (such as Leading Universities or Mobile Commerce), proprietary platforms weight national attributions through fractional institutional affiliations, whereas OpenAlex directly weights author-level institutional geocoding. In small top-5 ranking subsets where publication volume thresholds are separated by only a handful of papers, minor differences in indexing coverage naturally alter boundary rankings. Set-based top-$K$ overlap transparently reports these differences without imposing artificial rank-order assumptions on small sample depths.
 
 While national-level geopolitical attributions map to standardized ISO entities across databases, institutional-level rank concordance was excluded from the primary quantitative benchmark suite. In proprietary commercial databases (Web of Science and Scopus), institutional rankings rely on proprietary entity-resolution algorithms that aggregate diverse departmental strings, multi-campus university systems, and affiliated teaching hospitals under unified corporate parent hierarchies. In contrast, open bibliographic platforms (such as OpenAlex and Crossref) structure affiliations through persistent Research Organization Registry (ROR) identifiers or raw institutional strings \cite{visser2021large, martin2021google}. Evaluating institutional ranking fidelity across distinct platforms therefore conflates algorithmic pipeline concordance with database-specific parent-child organizational taxonomies. Consequently, we restrict macro-structural validation to unambiguous, standardized national-level publication topologies.
 
-\subsection{Computational Scalability: GPU vs. CPU Performance}
+\subsection{Computational Scalability}
 To assess computational scalability, community detection and centrality calculations were benchmarked on the 57,601-document Electrophysiology co-authorship network (comprising 118,338 author nodes and 569,295 collaborative edges). Benchmarks were executed under controlled conditions on an AMD Ryzen 7 3700X CPU (8 cores, 16 threads, 3.6--4.4\,GHz, 32\,GB host RAM) and an NVIDIA GeForce RTX 2060 GPU (6\,GB GDDR6 VRAM, Turing architecture). The single-threaded CPU baseline using NetworkX required 28.0 minutes (1,680.0 seconds) to complete Louvain community partitioning and PageRank computation, with host RAM utilization exceeding 12\,GB due to Python object overhead. In contrast, using NVIDIA RAPIDS \texttt{cugraph}, the identical workflow executed in \textbf{0.84 seconds} on GPU hardware, delivering a $2{,}000\times$ speedup over the CPU baseline while achieving equivalent community modularity ($Q = 0.9009$). Graph representations reside entirely within on-device Compressed Sparse Row (CSR) memory, removing the computational bottleneck that historically constrained science mapping to small or moderately sized literature samples.
 
-\subsection{Head-to-Head Algorithmic Baselines: Neural Thematic Modeling vs. Classical LDA}
+\subsection{Algorithmic Baselines}
 \label{sec:head_to_head_baselines}
 To establish empirical baselines against classical scientometric paradigms, Table~\ref{tab:baseline_thematic_graph} reports head-to-head evaluations of thematic modeling and graph community partitioning across five benchmark corpora spanning compact, domain-specific, and large-scale literature collections.
 
@@ -404,10 +404,9 @@ In co-authorship graph analytics, GPU acceleration via \texttt{cugraph} provides
 
 \section{Discussion}
 \label{sec:discussion}
-\subsection{Bridging Science Mapping and Evidence Synthesis}
-Although science mapping and systematic reviews analyze the same underlying scholarly literature, they have historically required completely separate software ecosystems: exploratory tools for topological mapping (e.g., VOSviewer, Bibliometrix) and dedicated statistical platforms for evidence synthesis (e.g., RevMan, metafor). This separation forces researchers into redundant data harvesting, inconsistent preprocessing, and manual file handling. OpenSciencePipe provides a unified computational pipeline where a single canonical corpus branches directly into either macro-level network extraction or micro-level eligibility screening and statistical pooling.
+The design and evaluation described above support a single interpretive claim: exploratory topology and confirmatory synthesis are separable stages of one workflow, not competing software categories. Section~\ref{sec:tier5} established that a canonical corpus can branch into screening and pooling without manual re-export; this section examines what that consolidation implies for open science practice and where the evidence base for it ends.
 
-\subsection{Comparative Functional Audit: Workflow Migration and Usability Trade-offs}
+\subsection{Usability Audit}
 The quantitative concordance evidence is reported in Section~\ref{sec:results}; this subsection instead audits what a researcher gives up and gains when migrating from legacy tools, focusing on onboarding cost, cognitive friction, and workflow control.
 
 \paragraph{Onboarding and Interface Overhead}
@@ -419,22 +418,22 @@ Legacy mappers assume that the user has already assembled a flat file from a com
 \paragraph{Topic Modeling and Screening Workflows}
 Moving from classical LDA to embedding-based clustering changes how analysts interpret results: instead of inspecting forced topic lists, they review an explicit noise pool and decide whether peripheral literature merits separate attention. For screening, Rayyan and ASReview keep a human in every labeling decision, which preserves reviewer judgment but sustains the labor burden. OpenSciencePipe instead screens autonomously via local open-weight LLMs with structured JSON schema constraints ($T=0.0$), trading some interpretive control for a large reduction in routine labeling; the deterministic audit trace lets reviewers inspect decisions afterwards. Likewise, replacing RevMan or \texttt{metafor} data entry with automated parameter extraction removes transcription errors but moves verification to the extraction stage.
 
-\paragraph{Trade-offs and Residual Advantages of Legacy Tools}
+\paragraph{Legacy Trade-offs}
 Migration is not uniformly beneficial. Interactive tools offer immediate visual exploration, manual relabeling of clusters, and decades of community documentation that a command-line pipeline cannot match. A declarative workflow also demands comfort with a terminal and, for GPU acceleration, a compatible NVIDIA device. We therefore position OpenSciencePipe as a complement for reproducible, large-scale, or repeated analyses, while small one-off explorations may remain better served by a GUI.
 
-\paragraph{Where OpenSciencePipe Introduces Genuinely New Capabilities}
+\paragraph{Novel Capabilities}
 To our knowledge, no legacy tool spans the continuum from programmatic multi-source harvesting to camera-ready manuscript compilation. A single declarative terminal command or API query executes the complete workflow: multi-source open harvesting $\to$ token-sorted Levenshtein deduplication $\to$ GPU Louvain community partitioning $\to$ neural topic modeling with Topic~$-1$ noise rejection $\to$ camera-ready \LaTeX{} manuscript compilation with synchronized vector plots and tables.
 
-\subsection{Implications for Open Science and Informetrics}
+\subsection{Open Science}
 The high concordance observed between OpenSciencePipe and published benchmarks originally executed on Web of Science or Scopus confirms the maturity of open scholarly metadata. By building on public endpoints such as OpenAlex and Crossref, the framework removes the dependency on expensive proprietary database subscriptions.
 As demonstrated on corpora exceeding 50,000 publications, OpenSciencePipe executes without relying on commercial cloud language model APIs. Combined with GPU network processing optimized for older consumer graphics cards with 6~GB of memory, the entire workflow operates locally at zero marginal cost. This minimal barrier to entry enables independent scholars and institutions with limited research budgets to perform large-scale, fully reproducible science mapping and systematic reviews.
 
-\subsection{Informetric Validity and Database Coverage Boundaries}
+\subsection{Validity Bounds}
 A fundamental methodological consideration in informetric replication is the operational boundary between algorithmic concordance and database coverage divergence. Comparative investigations by Visser et al. \cite{visser2021large} and Mart{\'i}n-Mart{\'i}n et al. \cite{martin2021google} established that while proprietary commercial databases (Web of Science and Scopus) maintain selective core indexing, open bibliographic platforms (OpenAlex, Crossref) provide broader coverage of open-access literature, conference proceedings, and non-Anglophone scholarship. Consequently, observing high set overlap (recovering 80.0\% to 100.0\% of leading publishing nations across major benchmarks) against published WoS- and Scopus-derived baselines confirms that OpenSciencePipe recovers consistent macro-level geopolitical topologies across distinct data infrastructures, demonstrating that open metadata can support reproducible informetric science mapping without commercial database lock-in.
 
 Furthermore, a persistent challenge in automated informetric workflows is author homonymy and entity splitting. While OpenSciencePipe disambiguates authors via the multi-signal protocol detailed in Section~\ref{sec:tier3}, residual name variants and homonymous merges remain visible in dense collaborative network topologies, particularly when common surnames lack persistent ORCID linkages or institutional metadata. Benchmarking automated disambiguation accuracy against verified gold-standard author registries (such as ORCID-curated sub-graphs) remains an important focus for ongoing development.
 
-\subsection{Limitations and Future Work}
+\subsection{Limitations}
 While OpenSciencePipe automates the pipeline from API query to \LaTeX{} manuscript synthesis, human oversight remains essential for qualitative contextualization and domain-specific interpretation. Several engineering and methodological avenues will be pursued in future work. 
 
 First, regarding dual interface ecosystems and GUI enhancements, ongoing work focuses on embedding interactive graph curation controls directly into the web visualizer studio, bridging headless cluster execution with exploratory visual filtering. Second, for multi-modal full-text PDF extraction, current bibliometric parsing extracts metadata from rich abstracts and open-access metadata harvested via Unpaywall and PMC; incorporating vision-language parsing will allow the autonomous extraction of high-resolution figures, tabular data, and citation context directly from complex multi-column PDFs. Third, the development of living bibliometric citation monitors utilizing persistent webhook triggers and scheduled API polling will enable dynamic monitoring that autonomously alerts researchers to newly indexed landmark publications, updating living science maps and collaborative networks in real time.
