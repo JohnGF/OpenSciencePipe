@@ -1,25 +1,17 @@
 <div align="center">
 
-<<<<<<< HEAD
 # OpenSciencePipe
-=======
-[![Build Status](https://img.shields.io/badge/build-passing-success)](https://github.com/JohnGF/bibliometric)
-[![Version](https://img.shields.io/badge/version-0.1.0-blue)](https://github.com/JohnGF/bibliometric)
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue)](https://www.python.org/)
-[![License](https://img.shields.io/badge/license-MIT-green)](https://opensource.org/licenses/MIT)
-
-A modular, schema-driven Python pipeline for advanced bibliometric research. It supports autonomous metadata scraping, cross-source deduplication, dynamic keyword CAGR analysis, NLP-based topic clustering (BERTopic), and co-authorship network visualization.
->>>>>>> origin/main
 
 **Automated Bibliometric Science Mapping & Reproducible Report Generation**
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24165758.svg)](https://doi.org/10.5281/zenodo.24165758)
+[![CI](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![NVIDIA RAPIDS](https://img.shields.io/badge/RAPIDS-cuGraph%20%7C%20cuDF%20%7C%20cuML-76B900?logo=nvidia&logoColor=white)](https://rapids.ai/)
 [![Container: Docker & Podman](https://img.shields.io/badge/container-Docker%20%7C%20Podman-2496ED?logo=docker&logoColor=white)](Containerfile)
-[![CI](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml)
-[![Test Suite](https://img.shields.io/badge/tests-43%20passed%20(100%25)-brightgreen.svg)](tests/)
-[![Target Journal](https://img.shields.io/badge/manuscript-Journal%20of%20Informetrics-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
+[![Test Suite](https://img.shields.io/badge/tests-49%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Target Journal](https://img.shields.io/badge/manuscript-Quantitative%20Science%20Studies-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
 
 <p align="center">
   <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe harvests open scholarly literature, constructs GPU-accelerated co-authorship networks, models contextual neural themes with explicit noise isolation, and compiles a camera-ready LaTeX manuscript.
