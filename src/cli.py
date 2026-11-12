@@ -3,6 +3,8 @@ import argparse
 import os
 import sys
 
+from src.orchestrators.pipeline_manager import PipelineManager
+
 # Path to cloud-unlock RAM-disk credentials (KeePassXC-backed tmpfs)
 _CLOUD_UNLOCK_PATH = "/run/user/1000/credentials/api_keys.env"
 
@@ -182,8 +184,6 @@ def main():
 
     if (args.query or args.query_file) and not os.environ.get("OPENALEX_EMAIL") and not os.path.exists(".env"):
         print("[INFO] Running in public rate-limited mode. For higher throughput, configure polite access with: python scripts/setup_keys.py")
-
-    from src.orchestrators.pipeline_manager import PipelineManager
 
     active_query = args.query
     if args.query_file and os.path.exists(args.query_file):

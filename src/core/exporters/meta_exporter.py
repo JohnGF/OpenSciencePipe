@@ -78,7 +78,7 @@ def export_meta_tables(output_dir: str = "pipeline_results", force: bool = False
             bias = res.get("publication_bias", {})
             
             tex = [
-                "\\subsection{Quantitative Synthesis \& Heterogeneity Diagnostics}",
+                r"\subsection{Quantitative Synthesis \& Heterogeneity Diagnostics}",
                 "\\begin{table}[htbp]",
                 "\\caption{Statistical Meta-Analytic Pooled Estimates and Model Fit}",
                 "\\label{tab:meta_summary}",
