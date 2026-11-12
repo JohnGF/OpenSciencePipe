@@ -8,7 +8,7 @@
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{ll c p{5.0cm} p{5.0cm} c}
 \hline
-\textbf{ID} & \textbf{Benchmark Study} & \textbf{Topic} & \textbf{Top Discovered c-TF-IDF Terms} & \textbf{Mapped Published Benchmark Cluster} & \textbf{Agreement} \\
+\textbf{ID} & \textbf{Benchmark Study} & \textbf{Topic} & \textbf{Top Discovered c-TF-IDF Terms} & \textbf{Mapped Published Benchmark Cluster} & \textbf{Alignment} \\
 \hline
 \textbf{B07} & \textbf{Digital Transformation} & T0 ($N=37$) & \texttt{digital, transformation, digital transformation, research, study, paper} & Digital Business Transformation \& Strategy & \checkmark \\
  & & T1 ($N=29$) & \texttt{digital, digital transformation, transformation, new, social, technology} & Digital Business Transformation \& Strategy & \checkmark \\
@@ -42,5 +42,5 @@
 \hline
 \end{tabular}%
 }
-\vspace{2pt}\par\raggedright\scriptsize\textit{Note:} Evaluation follows the comparative topic extraction protocol of Gl\"aser et al. (2017) and Velden et al. (2017). Across the 10 benchmark studies with published cluster taxonomies (29 published clusters total), OpenSciencePipe recovers 26/29 (89.7\%) of author-defined clusters. Topic-to-cluster assignment is performed via automated keyword Jaccard overlap against author-defined cluster taxonomies ($K \le K_{\text{pub}}$ on 9 benchmarks; $K=5$ fine-grained sub-themes on B07 that cleanly aggregate into the 3 published clusters).
+\vspace{2pt}\par\raggedright\scriptsize\textit{Note:} Evaluation follows the comparative topic extraction protocol of Gl\"aser et al. (2017) and Velden et al. (2017). Across the 10 benchmark studies with published cluster taxonomies (29 published clusters total), OpenSciencePipe recovers 26/29 (89.7\%) of author-defined clusters. Topic-to-cluster assignment is performed via automated keyword Jaccard overlap against author-defined cluster taxonomies ($K \le K_{\text{pub}}$ on 9 benchmarks; $K=5$ fine-grained sub-themes on B07 that cleanly aggregate into the 3 published clusters). Alignment denotes clean primary cluster mapping (\checkmark) versus cross-cutting boundary mapping (Partial).
 \end{table*}

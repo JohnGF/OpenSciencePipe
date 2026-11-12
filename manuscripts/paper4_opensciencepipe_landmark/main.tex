@@ -365,7 +365,7 @@ C_{\text{NPMI}}(\mathcal{W}_k) = \frac{2}{M(M-1)} \sum_{i=1}^{M-1} \sum_{j=i+1}^
 To evaluate graph community partitioning fidelity and computational scalability, we evaluate Newman-Girvan modularity $Q$ (Eq.~\ref{eq:modularity}) \cite{blondel2008fast, traag2019louvain} across co-authorship networks. Scalability is evaluated via wall-clock speedup $S = t_{\text{CPU}} / t_{\text{GPU}}$, benchmarking single-threaded NetworkX execution against device-resident GPU cuGraph execution under identical graph structures.
 
 \subsubsection{Geopolitical Coverage Concordance}
-As a secondary check of macro-structural data alignment across open and proprietary platforms \cite{visser2021large, martin2021google}, we evaluate set overlap of leading publishing nations against published benchmark rankings. For nation set $\mathcal{E}$ at benchmark depth $K$ ($K=15$ for the decadal electrophysiology benchmark B09; $K=5$ for domain reviews):
+As a secondary check of macro-structural data alignment across open and proprietary platforms \cite{visser2021large, martin2021google}, we evaluate set overlap of leading publishing nations against published benchmark rankings. For nation set $\mathcal{E}$ at benchmark depth $K$ ($K=5$ across evaluated domain benchmarks):
 \begin{equation}
 \text{Overlap}_K(\mathcal{E}) = \frac{|\mathcal{R}_{\text{pipeline}}^{(K)}(\mathcal{E}) \cap \mathcal{R}_{\text{benchmark}}^{(K)}(\mathcal{E})|}{|\mathcal{R}_{\text{benchmark}}^{(K)}(\mathcal{E})|} \times 100\%
 \end{equation}
