@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software in your research, please cite both the software and the accompanying manuscript."
-title: "OpenSciencePipe: An End-to-End Computational Framework for Autonomous Bibliometric Science Mapping"
+title: "OpenSciencePipe: An End-to-End Computational Framework for Automated Bibliometric Science Mapping"
 version: 1.0.0
 date-released: 2026-10-15
 url: "https://github.com/JohnGF/OpenSciencePipe"
@@ -18,7 +18,7 @@ preferred-citation:
       given-names: "João"
     - family-names: "Duarte"
       given-names: "Carlos"
-  title: "OpenSciencePipe: An End-to-End Computational Framework for Autonomous Bibliometric Science Mapping"
+  title: "OpenSciencePipe: An End-to-End Computational Framework for Automated Bibliometric Science Mapping"
   year: 2026
   url: "https://github.com/JohnGF/OpenSciencePipe"
   notes: "Under review"

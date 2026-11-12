@@ -324,7 +324,7 @@ class Visualization:
             )
 
             ax.set_title(
-                "Global Research Output & Institutional Heatmap by Country",
+                "Global Research Output by Country",
                 fontsize=16,
                 pad=15,
                 fontweight="bold",

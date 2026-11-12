@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\centering
+\small
+\caption{Functional Capability Matrix: OpenSciencePipe versus Representative Legacy Scientometric and Science Mapping Tools}
+\label{tab:tool_capability_matrix}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c c c c c c c}
+\hline
+\textbf{Analytical Capability} & \textbf{VOSviewer} & \textbf{CiteSpace} & \textbf{Bibliometrix} & \textbf{SciMAT} & \textbf{Gephi} & \textbf{CitNetExplorer} & \textbf{OpenSciencePipe} \\
+\hline
+\multicolumn{8}{l}{\textbf{Data Ingestion \& Workflow Orchestration}} \\
+Federated multi-source API harvesting & Partial & -- & Partial & -- & -- & -- & \checkmark \\
+Interactive GUI exploration (pan, zoom, layout) & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & Partial \\
+Headless CLI / programmatic batch execution & -- & -- & \checkmark & -- & Partial & -- & \checkmark \\
+Automated publication-grade \LaTeX\ compilation & -- & -- & -- & -- & -- & -- & \checkmark \\
+\hline
+\multicolumn{8}{l}{\textbf{Network Topology \& Citation Analytics}} \\
+GPU-accelerated graph community detection ($>10^5$ nodes) & -- & -- & -- & -- & -- & -- & \checkmark \\
+Direct citation genealogy tracing (historiographs) & -- & -- & \checkmark & -- & -- & \checkmark & \checkmark \\
+Document \& author co-citation analysis (DCA/ACA) & \checkmark & \checkmark & \checkmark & Partial & -- & -- & Partial \\
+\hline
+\multicolumn{8}{l}{\textbf{Thematic \& Temporal Modeling}} \\
+Density-based neural topic discovery (HDBSCAN / Topic~$-1$) & -- & -- & -- & -- & -- & -- & \checkmark \\
+Multi-period longitudinal cluster evolution tracking & Partial & \checkmark & \checkmark & \checkmark & -- & -- & Partial \\
+Temporal citation burst detection (Kleinberg) & -- & \checkmark & Partial & -- & -- & -- & -- \\
+\hline
+\multicolumn{8}{l}{\scriptsize \textit{Legend:} \checkmark{} = native first-class capability; Partial = secondary support, script-assisted, or single-source mode; -- = not supported.} \\
+\end{tabular}%
+}
+\vspace{2pt}\par\raggedright\scriptsize\textit{Note:} The matrix reports functional science mapping capabilities across informetric suites. Quantitative empirical results on thematic coherence, diversity, runtime scalability, and topological metrics are reported in Tables~\ref{tab:benchmark_tool_distribution}, \ref{tab:thematic_validation}, and~\ref{tab:baseline_thematic_graph}.
+\end{table*}

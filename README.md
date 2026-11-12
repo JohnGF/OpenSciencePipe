@@ -2,7 +2,7 @@
 
 # OpenSciencePipe
 
-**Autonomous Science Mapping & Systematic Evidence Synthesis**
+**Automated Bibliometric Science Mapping & Reproducible Report Generation**
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -13,7 +13,7 @@
 [![Target Journal](https://img.shields.io/badge/manuscript-Journal%20of%20Informetrics-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
 
 <p align="center">
-  <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe autonomously harvests open literature, maps networks, isolates topic noise, screens papers, pools effect sizes, and compiles a camera-ready PDF manuscript.
+  <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe harvests open scholarly literature, constructs GPU-accelerated co-authorship networks, models contextual neural themes with explicit noise isolation, and compiles a camera-ready LaTeX manuscript.
 </p>
 
 ```bash
