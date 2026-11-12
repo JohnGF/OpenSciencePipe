@@ -42,3 +42,21 @@ This list tracks planned enhancements and advanced features to elevate the bibli
 
 - [ ] **Co-Country Collaboration Network**:
   - Use parsed author affiliation countries to build a country-to-country undirected network where edges represent co-authorship. This visualizes international collaboration clusters and research partnerships.
+
+---
+
+## Priority 5: Repository Tree Reorganization & Path Decoupling
+
+- [ ] **Categorize `scripts/` with Symlink Preservation**:
+  - Partition 45+ flat scripts into functional subdirectories:
+    - `scripts/env/`: Environment runners and setup (`start_local_ai_pod.sh`, `start_dev_container.sh`, `setup_keys.py`, `serve_results.py`).
+    - `scripts/institutional/`: Institutional report generators (`generate_fcul_general_analysis.py`, `compile_fcul_general_report.py`, `generate_fcul_china_analysis.py`, `compile_fcul_china_report.py`, `institution_country_collab.py`).
+    - `scripts/benchmarks/`: Systematic benchmark replication suite (`run_all_benchmarks.py`, `auto_validate_benchmarks.py`, `run_screening_benchmarks.py`, `run_head_to_head_baselines.py`, `evaluate_clustering_benchmarks.py`).
+    - `scripts/domain_studies/`: BCI/Neurorehab manuscript scripts (`filter_bci_neurorehab.py`, `paradigm_shares.py`, `build_clean_corpus.py`, `generate_percolation_plot.py`).
+  - Maintain backwards-compatible relative symlinks in `scripts/` so in-text manuscript citations (`main.tex#L97`), `Makefile` commands, and `README.md` examples never break.
+- [ ] **Decouple Root `tables/` Output Target**:
+  - Update `scripts/auto_validate_benchmarks.py`, `scripts/run_head_to_head_baselines.py`, and `src/core/meta_validator.py` to write into dedicated output directories while retaining fallback links.
+- [ ] **Dataset & Output Namespace Partitioning**:
+  - Group benchmark replication inputs in `data/` and execution runs in `outputs/` into namespaced subfolders (`data/benchmarks/`, `outputs/benchmarks/`, `outputs/institutional/`) while updating or symlinking paths in `scripts/run_head_to_head_baselines.py` and manuscript audit trails.
+- [ ] **Release Artifact Quarantine**:
+  - Consolidate loose release packages (`zenodo_bundle/` and `zenodo_upload_Z_PENDING/`) into a unified `releases/` folder.

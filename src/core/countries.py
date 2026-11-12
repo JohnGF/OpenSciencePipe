@@ -108,3 +108,35 @@ class CountryAnalysis:
         if not res_df.empty:
             res_df = res_df.sort_values("Total_Count", ascending=False).reset_index(drop=True)
         return res_df
+
+
+def compute_rbo(l1: list, l2: list, p: float = 0.9) -> float:
+    """
+    Computes Rank-Biased Overlap (RBO) between two ranked lists according to Webber et al. (2010).
+    Handles non-conjoint / disjoint rankings without discarding items.
+    """
+    if not l1 or not l2:
+        return 0.0
+    k = max(len(l1), len(l2))
+    seen1, seen2 = set(), set()
+    rbo_sum = 0.0
+    for d in range(1, k + 1):
+        if d <= len(l1):
+            seen1.add(l1[d - 1])
+        if d <= len(l2):
+            seen2.add(l2[d - 1])
+        overlap = len(seen1 & seen2)
+        agreement = overlap / d
+        rbo_sum += agreement * (p ** (d - 1))
+    w_sum = sum(p ** (d - 1) for d in range(1, k + 1))
+    return float(rbo_sum / w_sum) if w_sum > 0 else 0.0
+
+
+def compute_jaccard_at_k(l1: list, l2: list, k: int = 10) -> float:
+    """
+    Computes Jaccard similarity at depth K between two ranked lists.
+    """
+    s1 = set(l1[:k])
+    s2 = set(l2[:k])
+    union_s = s1 | s2
+    return float(len(s1 & s2) / len(union_s)) if union_s else 0.0

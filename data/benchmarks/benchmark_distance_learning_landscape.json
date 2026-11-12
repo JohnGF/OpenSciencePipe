@@ -1,0 +1,30 @@
+{
+    "benchmark_title": "Distance Learning in Focus: A Bibliometric and Thematic Network Analysis of the Global Research Trends",
+    "reference_doi": "10.26803/ijlter.24.4.34",
+    "authors": "Jeannie C. Abantas et al.",
+    "year": 2025,
+    "journal": "International Journal of Learning, Teaching and Educational Research",
+    "search_query": "\"distance learning\" OR \"e-learning\" OR \"online learning\" OR \"remote learning\"",
+    "year_range": [2020, 2024],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "China", "rank": 2},
+            {"country": "Spain", "rank": 3},
+            {"country": "United Kingdom", "rank": 4},
+            {"country": "Indonesia", "rank": 5}
+        ],
+        "top_keywords": [
+            "distance learning",
+            "covid-19",
+            "higher education",
+            "e-learning",
+            "students",
+            "online learning"
+        ]
+    }
+}

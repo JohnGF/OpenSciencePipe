@@ -51,17 +51,26 @@ def export_author_table(output_dir: str = "pipeline_results", force: bool = Fals
     if os.path.exists(nodes_csv):
         try:
             df_nodes = pd.read_csv(nodes_csv)
-            if "author_name" in df_nodes.columns or "name" in df_nodes.columns:
-                top_n = df_nodes.nlargest(20, "size" if "size" in df_nodes.columns else "num_publications")
+            n_nodes = max(len(df_nodes) - 1, 1)
+            name_col = "author_name" if "author_name" in df_nodes.columns else ("name" if "name" in df_nodes.columns else None)
+            if name_col:
+                df_nodes["norm_name"] = df_nodes[name_col].astype(str).str.replace("\u2010", "-").str.strip()
+                sort_col = "num_publications" if "num_publications" in df_nodes.columns else ("size" if "size" in df_nodes.columns else "total_citations")
+                df_dedup = df_nodes.sort_values(sort_col, ascending=False).drop_duplicates(subset=["norm_name"])
+                top_n = df_dedup.head(20)
                 for i, (_, r) in enumerate(top_n.iterrows(), 1):
-                    name_val = str(r.get("author_name", r.get("name", "")))
+                    name_val = str(r["norm_name"])
                     if name_val and name_val.lower() != "nan" and "unknown" not in name_val.lower():
-                        fmt_name = format_author_name(name_val)
-                        pubs = int(r.get("size", r.get("num_publications", 1)))
+                        pubs = int(r.get("num_publications", r.get("size", 1)))
                         pr = float(r.get("pagerank", 0.0015))
-                        deg = int(r.get("degree", 5))
+                        if "degree" in r and pd.notna(r["degree"]):
+                            deg = int(r["degree"])
+                        elif "degree_centrality" in r and pd.notna(r["degree_centrality"]):
+                            deg = int(round(float(r["degree_centrality"]) * n_nodes))
+                        else:
+                            deg = 0
                         comm = int(r.get("partition", 0))
-                        author_data.append((fmt_name, pubs, pr, deg, comm))
+                        author_data.append((name_val, pubs, pr, deg, comm))
         except Exception:
             pass
 
@@ -95,7 +104,7 @@ def export_author_table(output_dir: str = "pipeline_results", force: bool = Fals
         tex.append("\\label{tab:authors_overview}")
         tex.append("\\begin{tabular}{r p{0.28\\linewidth} r r r r}")
         tex.append("\\toprule")
-        tex.append("\\textbf{\\#} & \\textbf{Author Name (Last, First)} & \\textbf{Papers} & \\textbf{PageRank} & \\textbf{Degree} & \\textbf{Cluster} \\\\")
+        tex.append(r"\textbf{\#} & \textbf{Author Name} & \textbf{Papers} & \textbf{PageRank} & \textbf{Degree} & \textbf{Cluster} \\")
         tex.append("\\midrule")
         for i, (fmt_name, pubs, pr, deg, comm) in enumerate(author_data[:20], 1):
             clean_n = fmt_name.replace("_", "\\_").replace("&", "\\&")

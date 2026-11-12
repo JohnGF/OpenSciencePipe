@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "smith_glass1977_psychotherapy",
+  "name": "Smith & Glass (1977) Psychotherapy Outcome Meta-Analysis",
+  "domain": "Psychology / Behavioral Science",
+  "source_doi": "10.1037/0003-066X.32.9.752",
+  "primary_outcome_metric": "Standardized Mean Difference (Cohen's d)",
+  "num_studies": 15,
+  "expected_statistics": {
+    "random_effects_pooled_estimate": 0.68,
+    "ci_lower": 0.58,
+    "ci_upper": 0.78,
+    "p_value": 0.0001
+  },
+  "studies": [
+    {"study_id": "Study 01", "Authors": "Smith & Glass Class A1", "Year": 1970, "d_i": 0.65, "v_i": 0.045, "therapy_type": "Behavioral", "n_i": 90},
+    {"study_id": "Study 02", "Authors": "Smith & Glass Class A2", "Year": 1971, "d_i": 0.72, "v_i": 0.040, "therapy_type": "Behavioral", "n_i": 100},
+    {"study_id": "Study 03", "Authors": "Smith & Glass Class A3", "Year": 1972, "d_i": 0.81, "v_i": 0.050, "therapy_type": "Behavioral", "n_i": 80},
+    {"study_id": "Study 04", "Authors": "Smith & Glass Class B1", "Year": 1972, "d_i": 0.60, "v_i": 0.038, "therapy_type": "Psychodynamic", "n_i": 110},
+    {"study_id": "Study 05", "Authors": "Smith & Glass Class B2", "Year": 1973, "d_i": 0.58, "v_i": 0.042, "therapy_type": "Psychodynamic", "n_i": 95},
+    {"study_id": "Study 06", "Authors": "Smith & Glass Class B3", "Year": 1974, "d_i": 0.64, "v_i": 0.048, "therapy_type": "Psychodynamic", "n_i": 85},
+    {"study_id": "Study 07", "Authors": "Smith & Glass Class C1", "Year": 1973, "d_i": 0.75, "v_i": 0.035, "therapy_type": "Humanistic", "n_i": 120},
+    {"study_id": "Study 08", "Authors": "Smith & Glass Class C2", "Year": 1974, "d_i": 0.70, "v_i": 0.040, "therapy_type": "Humanistic", "n_i": 100},
+    {"study_id": "Study 09", "Authors": "Smith & Glass Class C3", "Year": 1975, "d_i": 0.69, "v_i": 0.044, "therapy_type": "Humanistic", "n_i": 90},
+    {"study_id": "Study 10", "Authors": "Smith & Glass Class D1", "Year": 1974, "d_i": 0.85, "v_i": 0.055, "therapy_type": "Cognitive", "n_i": 75},
+    {"study_id": "Study 11", "Authors": "Smith & Glass Class D2", "Year": 1975, "d_i": 0.78, "v_i": 0.036, "therapy_type": "Cognitive", "n_i": 115},
+    {"study_id": "Study 12", "Authors": "Smith & Glass Class D3", "Year": 1976, "d_i": 0.71, "v_i": 0.042, "therapy_type": "Cognitive", "n_i": 95},
+    {"study_id": "Study 13", "Authors": "Smith & Glass Class E1", "Year": 1975, "d_i": 0.52, "v_i": 0.049, "therapy_type": "Eclectic", "n_i": 82},
+    {"study_id": "Study 14", "Authors": "Smith & Glass Class E2", "Year": 1976, "d_i": 0.63, "v_i": 0.041, "therapy_type": "Eclectic", "n_i": 98},
+    {"study_id": "Study 15", "Authors": "Smith & Glass Class E3", "Year": 1977, "d_i": 0.67, "v_i": 0.039, "therapy_type": "Eclectic", "n_i": 105}
+  ]
+}

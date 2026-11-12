@@ -1,0 +1,22 @@
+{
+    "benchmark_title": "Mobile commerce science mapping: A bibliometric analysis",
+    "reference_doi": "10.1016/j.iedeen.2026.100318",
+    "authors": "Blanca López-Catalán et al.",
+    "year": 2026,
+    "journal": "BRQ Business Research Quarterly",
+    "search_query": "\"mobile commerce\" OR \"m-commerce\" OR \"mobile shopping\" OR \"mobile banking\"",
+    "year_range": [2000, 2025],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "China", "rank": 1},
+            {"country": "United States", "rank": 2},
+            {"country": "India", "rank": 3},
+            {"country": "Taiwan", "rank": 4},
+            {"country": "United Kingdom", "rank": 5}
+        ]
+    }
+}

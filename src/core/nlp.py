@@ -88,9 +88,9 @@ class BERTopicPipeline:
         vectorizer_model = CountVectorizer(stop_words="english", min_df=min_df_val, ngram_range=(1, 2))
 
         if HAS_RAPIDS_CUML:
-            # RAPIDS-accelerated pipeline with fixed deterministic seed
-            umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0, random_state=42)
-            hdbscan_model = HDBSCAN(min_cluster_size=10, prediction_data=True)
+            # RAPIDS-accelerated pipeline with fixed deterministic seed and aligned cosine metric
+            umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0, metric="cosine", random_state=42)
+            hdbscan_model = HDBSCAN(min_cluster_size=10, cluster_selection_method="eom", prediction_data=True)
             self.topic_model = BERTopic(
                 embedding_model=self.model_name, 
                 umap_model=umap_model, 

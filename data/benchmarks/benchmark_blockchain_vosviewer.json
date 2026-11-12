@@ -1,0 +1,62 @@
+{
+    "benchmark_title": "A Bibliometric Analysis of Blockchain Technology Research Using VOSviewer",
+    "reference_doi": "10.3390/su14138206",
+    "authors": "Aleksandra Kuzior, Mariya Sira",
+    "year": 2022,
+    "journal": "Sustainability",
+    "search_query": "blockchain AND (technology OR smart contract OR cryptocurrency OR distributed ledger)",
+    "year_range": [
+        2015,
+        2022
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_authors": [
+            {
+                "author": "Zhang Y",
+                "rank": 1
+            },
+            {
+                "author": "Wang X",
+                "rank": 2
+            },
+            {
+                "author": "Li J",
+                "rank": 3
+            },
+            {
+                "author": "Liu Y",
+                "rank": 4
+            },
+            {
+                "author": "Kumar N",
+                "rank": 5
+            }
+        ],
+        "top_countries": [
+            {
+                "country": "China",
+                "rank": 1
+            },
+            {
+                "country": "United States",
+                "rank": 2
+            },
+            {
+                "country": "India",
+                "rank": 3
+            },
+            {
+                "country": "United Kingdom",
+                "rank": 4
+            },
+            {
+                "country": "Australia",
+                "rank": 5
+            }
+        ]
+    }
+}

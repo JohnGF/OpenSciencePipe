@@ -25,53 +25,79 @@ def compute_topic_diversity(topic_words: List[List[str]], top_k: int = 10) -> fl
     return float(len(set(all_words)) / len(all_words))
 
 
-def compute_cv_coherence_approx(topic_words: List[List[str]], corpus_texts: List[str], top_k: int = 10) -> float:
+def compute_cv_coherence_approx(
+    topic_words: List[List[str]],
+    corpus_texts: List[str],
+    top_k: int = 10,
+    epsilon: float = 1e-6
+) -> float:
     """
-    Computes standard Coherence (NPMI / Co-occurrence proxy) across corpus texts.
-    NPMI(w_i, w_j) = -1 + log(P(w_i)*P(w_j)) / log(P(w_i, w_j))
+    Computes standard Normalized Pointwise Mutual Information (C_NPMI) across corpus texts.
+    Follows Bouma (2009) and Roder et al. (2015) using epsilon smoothing matching Eq. 14:
+    NPMI(w_i, w_j) = log((P(w_i, w_j) + eps) / (P(w_i)*P(w_j))) / -log(P(w_i, w_j) + eps)
     """
     if not topic_words or not corpus_texts:
         return 0.0
 
-    # Tokenize corpus into simple word sets
-    docs = [set(str(doc).lower().split()) for doc in corpus_texts if pd.notna(doc)]
-    N = len(docs)
+    import re
+
+    # Preprocess corpus into lowercase text and token sets
+    valid_texts = [str(doc).lower() for doc in corpus_texts if pd.notna(doc) and str(doc).strip()]
+    N = len(valid_texts)
     if N == 0:
         return 0.0
 
-    def word_prob(w):
-        c = sum(1 for d in docs if w in d)
-        return max(c, 1) / N
+    doc_token_sets = [set(re.findall(r'\b[a-z0-9]+\b', text)) for text in valid_texts]
 
-    def joint_prob(w1, w2):
-        c = sum(1 for d in docs if w1 in d and w2 in d)
-        return c / N
+    def doc_contains(w: str, doc_idx: int) -> bool:
+        w_clean = w.lower().strip()
+        if " " in w_clean:
+            # Phrase check
+            return w_clean in valid_texts[doc_idx]
+        return w_clean in doc_token_sets[doc_idx]
+
+    # Precompute document frequencies for unique terms
+    unique_terms = set()
+    for words in topic_words:
+        for w in words[:top_k]:
+            unique_terms.add(w.lower().strip())
+
+    term_doc_hits = {}
+    for term in unique_terms:
+        hits = set()
+        for idx in range(N):
+            if doc_contains(term, idx):
+                hits.add(idx)
+        term_doc_hits[term] = hits
 
     coherences = []
     for words in topic_words:
-        words = words[:top_k]
+        words = [w.lower().strip() for w in words[:top_k] if w.strip()]
+        if len(words) < 2:
+            continue
         pairs = []
         for i in range(len(words)):
             for j in range(i + 1, len(words)):
-                w1, w2 = words[i].lower(), words[j].lower()
-                p_joint = joint_prob(w1, w2)
-                p1 = word_prob(w1)
-                p2 = word_prob(w2)
-                if p_joint > 0 and p1 > 0 and p2 > 0:
-                    try:
-                        denom = -np.log(p_joint)
-                        if denom != 0:
-                            npmi = (np.log(p_joint) - np.log(p1 * p2)) / denom
-                            if not np.isnan(npmi) and not np.isinf(npmi):
-                                pairs.append(npmi)
-                            else:
-                                pairs.append(-1.0)
-                        else:
-                            pairs.append(0.0)
-                    except Exception:
-                        pairs.append(-1.0)
-                else:
-                    pairs.append(-1.0)
+                w1, w2 = words[i], words[j]
+                hits1 = term_doc_hits.get(w1, set())
+                hits2 = term_doc_hits.get(w2, set())
+
+                c1 = len(hits1)
+                c2 = len(hits2)
+                c12 = len(hits1 & hits2)
+
+                p1 = max(c1, 1) / N
+                p2 = max(c2, 1) / N
+                p12 = c12 / N
+
+                num = np.log((p12 + epsilon) / (p1 * p2))
+                denom = -np.log(p12 + epsilon)
+                npmi = num / denom if denom != 0 else 0.0
+
+                # Bounded in [-1.0, 1.0]
+                npmi_clipped = float(np.clip(npmi, -1.0, 1.0))
+                pairs.append(npmi_clipped)
+
         if pairs:
             m_val = float(np.mean(pairs))
             if not np.isnan(m_val):

@@ -1,0 +1,79 @@
+{
+    "benchmark_title": "Effect of BCI-Controlled FES on Upper Limb Rehabilitation After Stroke: A Systematic Review and Meta-Analysis",
+    "reference_doi": "10.3389/fnhum.2024.1438095",
+    "authors": "Chunlin Ren, Xinmin Li, Qian Gao, et al.",
+    "year": 2024,
+    "journal": "Frontiers in Human Neuroscience",
+    "search_query": "(brain-computer interface OR BCI) AND (stroke OR poststroke) AND (rehabilitation OR upper limb OR functional electrical stimulation OR FES)",
+    "year_range": [
+        2010,
+        2024
+    ],
+    "screening": {
+        "ground_truth_included_dois": [
+            "10.1088/1741-2552/ad8838",
+            "10.1109/TNSRE.2024.3502135",
+            "10.1109/EMBC53108.2024.10781706",
+            "10.1109/EMBC53108.2024.10782372",
+            "10.1109/EMBC53108.2024.10782428"
+        ],
+        "ground_truth_excluded_dois": [
+            "10.3389/fneur.2024.1449729",
+            "10.3390/s24196366",
+            "10.4103/NRR.NRR-D-24-00641",
+            "10.1177/01622439231183215"
+        ]
+    },
+    "scientometrics": {
+        "top_authors": [
+            {
+                "author": "Cincotti F",
+                "rank": 1
+            },
+            {
+                "author": "Mattia D",
+                "rank": 2
+            },
+            {
+                "author": "Ming Dong",
+                "rank": 3
+            },
+            {
+                "author": "Guan Cuntai",
+                "rank": 4
+            }
+        ],
+        "top_countries": [
+            {
+                "country": "China",
+                "rank": 1
+            },
+            {
+                "country": "United States",
+                "rank": 2
+            },
+            {
+                "country": "Italy",
+                "rank": 3
+            },
+            {
+                "country": "Germany",
+                "rank": 4
+            }
+        ],
+        "top_institutions": [
+            {"institution": "Nanyang Technological University", "rank": 1},
+            {"institution": "Chinese Academy of Sciences", "rank": 2},
+            {"institution": "Tsinghua University", "rank": 3},
+            {"institution": "Aalborg University", "rank": 4},
+            {"institution": "University of Tübingen", "rank": 5}
+        ]
+    },
+    "meta_analysis": {
+        "pooled_effect_d": 0.50,
+        "ci_lower": 0.26,
+        "ci_upper": 0.73,
+        "i_squared_pct": 0.0,
+        "k_studies": 10
+    }
+}

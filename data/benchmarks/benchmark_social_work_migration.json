@@ -1,0 +1,22 @@
+{
+    "benchmark_title": "Social Work and Migration: A Bibliometric Analysis of Global Trends",
+    "reference_doi": "10.1177/21582440261477485",
+    "authors": "Ruth Zárate-Rueda et al.",
+    "year": 2026,
+    "journal": "SAGE Open",
+    "search_query": "\"social work\" AND (migration OR immigrants OR refugees OR asylum)",
+    "year_range": [2000, 2025],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "United Kingdom", "rank": 2},
+            {"country": "Canada", "rank": 3},
+            {"country": "Australia", "rank": 4},
+            {"country": "Spain", "rank": 5}
+        ]
+    }
+}

@@ -1,0 +1,22 @@
+{
+    "benchmark_title": "A bibliometric analysis of leading universities in innovation research",
+    "reference_doi": "10.1016/j.jik.2017.03.006",
+    "authors": "Christian A. Cancino, José M. Merigó, Freddy C. Coronado",
+    "year": 2017,
+    "journal": "Journal of Innovation & Knowledge",
+    "search_query": "innovation AND (university OR universities OR \"higher education\")",
+    "year_range": [1990, 2016],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "United Kingdom", "rank": 2},
+            {"country": "Netherlands", "rank": 3},
+            {"country": "Germany", "rank": 4},
+            {"country": "China", "rank": 5}
+        ]
+    }
+}

@@ -11,17 +11,18 @@
 A modular, schema-driven Python pipeline for advanced bibliometric research. It supports autonomous metadata scraping, cross-source deduplication, dynamic keyword CAGR analysis, NLP-based topic clustering (BERTopic), and co-authorship network visualization.
 >>>>>>> origin/main
 
-**Autonomous Science Mapping & Systematic Evidence Synthesis**
+**Automated Bibliometric Science Mapping & Reproducible Report Generation**
 
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![NVIDIA RAPIDS](https://img.shields.io/badge/RAPIDS-cuGraph%20%7C%20cuDF%20%7C%20cuML-76B900?logo=nvidia&logoColor=white)](https://rapids.ai/)
 [![Container: Docker & Podman](https://img.shields.io/badge/container-Docker%20%7C%20Podman-2496ED?logo=docker&logoColor=white)](Containerfile)
-[![Test Suite](https://img.shields.io/badge/tests-37%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![CI](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml)
+[![Test Suite](https://img.shields.io/badge/tests-43%20passed%20(100%25)-brightgreen.svg)](tests/)
 [![Target Journal](https://img.shields.io/badge/manuscript-Journal%20of%20Informetrics-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
 
 <p align="center">
-  <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe autonomously harvests open literature, maps networks, isolates topic noise, screens papers, pools effect sizes, and compiles a camera-ready PDF manuscript.
+  <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe harvests open scholarly literature, constructs GPU-accelerated co-authorship networks, models contextual neural themes with explicit noise isolation, and compiles a camera-ready LaTeX manuscript.
 </p>
 
 ```bash
@@ -34,7 +35,21 @@ biblio-pipeline --query "brain-computer interface"
 
 ## Quick Start (Run in Seconds)
 
-Choose the setup that fits your workflow:
+### Step 0: API Credentials Setup (Optional, 30 Seconds)
+OpenSciencePipe queries open scholarly literature (OpenAlex, Crossref, PubMed) out of the box with zero configuration. To unlock maximum harvesting throughput via dedicated polite pools (up to 10 req/s), set your contact email:
+
+```bash
+# Guided interactive onboarding wizard:
+python scripts/setup_keys.py
+
+# Or diagnose and test configured credentials at any time:
+biblio-pipeline --check-keys
+```
+See [API Keys & Providers Guide](docs/API_KEYS.md) for full instructions on open polite pools and optional institutional keys (Scopus, Web of Science).
+
+---
+
+Choose the execution environment that fits your workflow:
 
 ### Option 1: All-in-One GPU Container (Zero Setup — Recommended)
 Pre-configured with NVIDIA CUDA 12.8, RAPIDS 25.06 (`cugraph`, `cudf`), PyTorch CUDA, and all dependencies. No Python version issues, no CUDA driver conflicts, and no compilation needed.
@@ -51,10 +66,54 @@ docker run --gpus all --rm -it -v $(pwd):/app:z opensciencepipe \
 
 #### Podman:
 ```bash
-podman build -t opensciencepipe -f Containerfile .
-podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z opensciencepipe \
+# Build the local container image once
+podman build -t localhost/opensciencepipe -f Containerfile .
+
+# Run directly
+podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z localhost/opensciencepipe \
   biblio-pipeline --query "brain-computer interface" --limit 200
 ```
+
+#### 100% Local AI Pod (BERTopic + Ollama LLM Buckets — Zero API Costs):
+For completely offline, zero-cloud synthesis with local AI:
+- **Local BERTopic:** Contextual Sentence-BERT embeddings, UMAP dimension reduction, and HDBSCAN density clustering with outlier isolation (Topic $-1$).
+- **Local LLM (Ollama):** Local open-weight models (e.g. `llama3.2:3b`, `qwen2.5:3b`) for zero-shot study screening and automated thematic bucket/paradigm classification.
+
+Launch the unified pod with one command:
+```bash
+# 1. Start the shared Local AI Pod (launches Ollama + OpenSciencePipe networking):
+./scripts/start_local_ai_pod.sh llama3.2:3b
+
+# 2A. Run directly on your host machine against the local AI pod:
+# Using local virtualenv:
+.venv/bin/biblio-pipeline --file data/publications.csv \
+                          --mode systematic \
+                          --screen-llm \
+                          --llm-model llama3.2:3b \
+                          --output outputs/my_topics
+
+# Or using uv:
+uv run biblio-pipeline --file data/publications.csv \
+                       --mode systematic \
+                       --screen-llm \
+                       --llm-model llama3.2:3b \
+                       --output outputs/my_topics
+
+# 2B. Or run inside the pod using the container:
+podman run --pod openscience-ai-pod --device nvidia.com/gpu=all --rm -it \
+  -v $(pwd):/app:z localhost/opensciencepipe \
+  biblio-pipeline --file data/publications.csv \
+                  --mode systematic \
+                  --screen-llm \
+                  --llm-model llama3.2:3b \
+                  --output outputs/my_topics
+
+# 3. Clean up when finished:
+./scripts/start_local_ai_pod.sh stop
+```
+Outputs include `tables/annex_llm_screening.tex` (thematic focus share), `tables/annex_bertopic_details.tex` (macro/micro clusters), and `data/topic_info.csv`.
+
+
 
 ---
 
@@ -84,15 +143,56 @@ biblio-pipeline --query "brain-computer interface" --limit 100
 
 ---
 
-## The 3 Operational Modes
+## Core Applications: For Researchers vs. For Universities & Institutions
 
-OpenSciencePipe adapts to your research question via the `--mode` flag:
+OpenSciencePipe serves two distinct scholarly use cases: individual researchers synthesizing literature, and academic institutions tracking research impact and international partnerships.
 
-| Mode | Command Example | Primary Output |
+### 1. For Researchers (Topic Discovery & Systematic Evidence Synthesis)
+
+Designed for scientists, PhD candidates, and review authors needing rigorous, reproducible science mapping and evidence synthesis:
+
+| Research Workflow | CLI Flag | Capabilities & Deliverables |
 | :--- | :--- | :--- |
-| **Macro Science Mapping** (`--mode biblio`) | `biblio-pipeline --query "microplastics" --mode biblio` | GPU Louvain community graphs, PageRank centrality, Sentence-BERT topics, and IEEEtran report |
-| **PRISMA Systematic Review** (`--mode systematic`) | `biblio-pipeline --query "stroke rehabilitation" --mode systematic` | Local LLM zero-shot screening, inclusion/exclusion audit, and PRISMA 2020 flow diagram |
-| **Quantitative Meta-Analysis** (`--mode meta`) | `biblio-pipeline --file clinical_data.csv --mode meta` | DerSimonian–Laird random-effects pooling ($\tau^2$, $I^2$, Cochran $Q$), Forest & Funnel plots |
+| **Macro Science Mapping** | `--mode biblio` | GPU-accelerated Louvain community graphs (`cuGraph`), PageRank centrality, Sentence-BERT NLP with HDBSCAN noise isolation (Topic $-1$), and camera-ready IEEEtran/Elsevier paper scaffold (`paper_scaffold.pdf`). |
+| **PRISMA Systematic Review** | `--mode systematic` | Autonomous local LLM screening (Ollama `llama3.2:3b` at $T=0.0$), deterministic PICOS criteria filtering, and automated PRISMA 2020 flow diagrams. |
+| **Quantitative Meta-Analysis** | `--mode meta` | PDF table and statistical variable extraction, DerSimonian–Laird random-effects pooling ($\tau^2$, $I^2$, Cochran $Q$), and publication-grade Forest and Funnel plots. |
+
+```bash
+# Science mapping and thematic evolution
+biblio-pipeline --query "brain-computer interface" --mode biblio
+
+# PRISMA systematic review with local zero-shot LLM screening
+biblio-pipeline --query "stroke rehabilitation" --mode systematic
+
+# Quantitative random-effects meta-analysis
+biblio-pipeline --file clinical_trials.csv --mode meta
+```
+
+---
+
+### 2. For Universities & Research Institutions (Institutional Intelligence & Collaboration Mapping)
+
+Designed for deans, rectors, research directors, and strategic planning offices needing granular bibliometrics, international partner tracking, and accreditation evidence:
+
+| Institutional Need | Tool / Command | Strategic Output |
+| :--- | :--- | :--- |
+| **Institutional Profiling** | `biblio-pipeline --institution ...` | Profiles scientific volume, international collaboration rate (% papers with foreign co-authors), and top partner countries for any faculty or school. |
+| **Geopolitical Collaboration** | `scripts/institution_country_collab.py` | Granular breakdown of joint publications with partner nations (e.g. tracking collaborations with China, US, EU, UK) in any given calendar year. |
+| **Research Unit Disambiguation** | `scripts/generate_fcul_china_analysis.py` | Disambiguates multi-campus or hybrid FCT units (e.g., separating FCUL vs. IST laboratories in joint institutes like CQE and MARE) and unifies Portuguese/English affiliation variants. |
+| **Scientist Dyads & Connections** | Lead Researcher Mapping | Maps lead principal investigators, citation impact, and specific author-to-author co-authorship pairs (*Scientist Dyads*) between domestic and foreign researchers. |
+| **Executive PDF Dossiers** | `scripts/compile_fcul_china_report.py` | Assembles raw publication CSVs, bipartite network plots, and leader tables into a camera-ready executive PDF report ready for institutional accreditation and evaluation. |
+
+```bash
+# Rapid institutional co-authorship breakdown by country
+biblio-pipeline --institution "Universidade de Lisboa" --faculty "Faculdade de Ciências" --year 2023
+
+# Deep bipartite co-authorship graph & scientist-level data export (e.g. FCUL + China)
+python scripts/generate_fcul_china_analysis.py
+
+# Compile publication-grade 5-page institutional PDF report with embedded figures & tables
+python scripts/compile_fcul_china_report.py
+# Output: outputs/fcul_china_2023/FCUL_China_2023_Bibliometric_Report.pdf
+```
 
 ---
 
@@ -247,7 +347,7 @@ uv run --with pytest python -m pytest tests/
 pytest tests/
 ```
 
-All 37 test suites pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
+All 43 unit and integration tests pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
 
 ---
 
@@ -258,8 +358,8 @@ If you use OpenSciencePipe in your research, please cite our landmark manuscript
 ```bibtex
 @article{farinha2026opensciencepipe,
   author    = {João Garcia Farinha and Carlos Duarte},
-  title     = {OpenSciencePipe: An End-to-End Framework for Autonomous Science Mapping and Systematic Evidence Synthesis},
-  journal   = {Journal of Informetrics},
+  title     = {OpenSciencePipe: An End-to-End Computational Framework for Autonomous Bibliometric Science Mapping},
+  journal   = {Quantitative Science Studies},
   year      = {2026},
   note      = {Under Review}
 }

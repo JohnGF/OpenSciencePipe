@@ -233,7 +233,7 @@ JSON response:
                 data=req_data,
                 headers={"Content-Type": "application/json"}
             )
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 if resp.status == 200:
                     body = json.loads(resp.read().decode("utf-8"))
                     res = json.loads(body.get("response", "{}"))

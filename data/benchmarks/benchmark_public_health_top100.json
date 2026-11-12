@@ -1,0 +1,32 @@
+{
+    "benchmark_title": "The Top 100 Most Cited Scientific Papers in the Public, Environmental & Occupational Health Category of Web of Science: A Bibliometric and Visualized Analysis",
+    "reference_doi": "10.3390/ijerph19159645",
+    "authors": "Vicenç Hernández-González, Josep Maria Carné-Torrent, Carme Jové-Deltell, Álvaro Pano-Rodríguez, Joaquin Reverter-Masia",
+    "year": 2022,
+    "journal": "International Journal of Environmental Research and Public Health",
+    "search_query": "\"public health\" OR \"environmental health\" OR \"occupational health\" OR \"epidemiology\"",
+    "year_range": [1970, 2022],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_institutions": [
+            {"institution": "Harvard University", "rank": 1}
+        ],
+        "top_countries": [
+            {"country": "United States", "rank": 1},
+            {"country": "United Kingdom", "rank": 2},
+            {"country": "Canada", "rank": 3},
+            {"country": "Australia", "rank": 4},
+            {"country": "Germany", "rank": 5}
+        ],
+        "top_keywords": [
+            "bias",
+            "quality",
+            "extension",
+            "epidemiology",
+            "health"
+        ]
+    }
+}

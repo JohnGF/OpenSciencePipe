@@ -1,0 +1,35 @@
+{
+    "benchmark_title": "The Bibliometric Analysis of Microplastics in Soil Environments: Hotspots of Research and Trends of Development",
+    "reference_doi": "10.3390/su15097122",
+    "authors": "Tingting Yang, Jinning Liu, Hongfei Zhu, Lei Zhu, Tao Kong, Shanshan Tai",
+    "year": 2023,
+    "journal": "Sustainability",
+    "search_query": "microplastics AND (soil OR \"soil environment\" OR \"agricultural soil\")",
+    "year_range": [2010, 2023],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            {"country": "China", "rank": 1},
+            {"country": "United States", "rank": 2},
+            {"country": "Germany", "rank": 3},
+            {"country": "Australia", "rank": 4},
+            {"country": "Netherlands", "rank": 5}
+        ],
+        "top_institutions": [
+            {"institution": "Chinese Academy of Sciences", "rank": 1},
+            {"institution": "Centre National de la Recherche Scientifique", "rank": 2},
+            {"institution": "Wageningen University & Research", "rank": 3}
+        ],
+        "top_keywords": [
+            "microplastics",
+            "soil",
+            "accumulation",
+            "biodegradation",
+            "toxicity",
+            "heavy metals"
+        ]
+    }
+}

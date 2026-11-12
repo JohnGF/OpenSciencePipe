@@ -190,11 +190,29 @@ class OpenAlexCollector:
                 else:
                     authors.append(name)
             institutions = []
+            countries = []
+            partner_insts = []
+            fcul_flags = []
             for a in res.get("authorships", []):
+                author_is_fcul = False
                 for inst in a.get("institutions", []):
                     inst_name = inst.get("display_name", "")
+                    inst_country = inst.get("country_code") or ""
+                    inst_id = re.sub(r"^https?://openalex\.org/", "", str(inst.get("id") or "")).strip()
                     if inst_name and inst_name not in institutions:
                         institutions.append(inst_name)
+                    if inst_country and inst_country.upper() not in countries:
+                        countries.append(inst_country.upper())
+                    if inst_name not in partner_insts:
+                        partner_insts.append(f"{inst_name}|{inst_country}")
+                raw_affil = " ".join(a.get("raw_affiliation_strings") or []).lower()
+                if "faculdade de ci" in raw_affil or "fcul" in raw_affil:
+                    author_is_fcul = True
+                author_inst = {
+                    "name": a.get("author", {}).get("display_name", ""),
+                    "is_fcul": author_is_fcul,
+                }
+                fcul_flags.append(author_inst)
             
             keywords = [k.get("display_name", "") for k in res.get("keywords", [])]
             
@@ -212,6 +230,9 @@ class OpenAlexCollector:
                 "Author Keywords": "; ".join(filter(None, keywords)),
                 "Cite Count": res.get("cited_by_count", 0),
                 "References": "; ".join(referenced_works),
+                "Countries": countries,
+                "Partner_Institutions": partner_insts,
+                "Author_FCUL_Flags": fcul_flags,
                 "Source": "OpenAlex"
             }
             rows.append(row)

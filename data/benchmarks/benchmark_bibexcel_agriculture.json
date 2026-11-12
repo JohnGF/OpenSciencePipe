@@ -1,0 +1,35 @@
+{
+    "benchmark_title": "Drones in agriculture: A review and bibliometric analysis using Bibexcel and Pajek",
+    "reference_doi": "10.1016/j.compag.2022.107017",
+    "authors": "Rejeb et al.",
+    "year": 2022,
+    "journal": "Computers and Electronics in Agriculture",
+    "tool_cohort": "Bibexcel / Pajek",
+    "search_query": "(\"unmanned aerial vehicle\" OR \"drone\") AND \"agriculture\" AND \"bibliometric\"",
+    "year_range": [
+        2010,
+        2022
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            "China",
+            "United States",
+            "Spain",
+            "Italy",
+            "Brazil",
+            "Australia"
+        ],
+        "top_keywords": [
+            "precision agriculture",
+            "unmanned aerial vehicles",
+            "remote sensing",
+            "multispectral imaging",
+            "crop monitoring",
+            "vegetation index"
+        ]
+    }
+}

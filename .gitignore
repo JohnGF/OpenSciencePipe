@@ -50,6 +50,8 @@ pnpm-debug.log*
 # ==========================================
 data/*
 !data/.gitkeep
+!data/benchmarks/
+!data/benchmarks/**
 pipeline_results*/
 pipeline_*_results/
 outputs/
@@ -100,6 +102,8 @@ Thumbs.db
 # ==========================================
 # Temporary & Scratch Files
 # ==========================================
+*.zip
+*.tar.gz
 t
 tmp/
 temp/
@@ -111,3 +115,8 @@ temp/
 *.synctex.gz
 *.blg
 *.spl
+*.fls
+*.fdb_latexmk
+.aider*
+*.sqlite
+zenodo_upload_*/

@@ -1,0 +1,27 @@
+{
+    "benchmark_title": "Modified biochar: synthesis and mechanism for removal of environmental heavy metals",
+    "reference_doi": "10.1007/s44246-022-00007-3",
+    "authors": "Liu et al.",
+    "year": 2022,
+    "journal": "Carbon Research",
+    "search_query": "\"modified biochar\" OR \"biochar modification\" OR \"engineered biochar\" OR \"designer biochar\"",
+    "year_range": [
+        2008,
+        2022
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_keywords": [
+            "biochar",
+            "adsorption",
+            "heavy metals",
+            "water/waste water",
+            "pyrolysis",
+            "sorption",
+            "mechanism"
+        ]
+    }
+}

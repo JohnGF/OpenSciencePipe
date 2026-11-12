@@ -1,16 +1,18 @@
 \subsection{Deterministic Taxonomy Screening \& Noise Paradigms}
 \begin{table}[htbp]
-\caption{Keyword-Rule Noise Treatment Paradigm Categorization (clean corpus, $n=57{,}601$)}
+\caption{Keyword-Rule Noise Treatment Paradigm Categorization, BCI-neurorehab subset ($n=11{,}176$). Ordered first-hit rules published in \nolinkurl{scripts/paradigm_shares.py}; exclusive-vs-any-mention sensitivity in Table~\ref{tab:paradigm_sensitivity}.}
 \label{tab:llm_screening}
 \small
-\begin{tabular}{p{0.45\linewidth} r r}
+\begin{tabular}{p{0.48\linewidth} r r}
 \toprule
 \textbf{Noise Treatment Paradigm} & \textbf{Papers} & \textbf{Share (\%)} \\
 \midrule
-Artifact Filtering \& Removal & 55,011 & 95.5\% \\
-General BCI Analysis & 1,341 & 2.3\% \\
-Robust Latent Decoding & 731 & 1.3\% \\
-Noise-as-Information & 518 & 0.9\% \\
+P1 explicit filtering \& removal & 10,838 & 97.0\% \\
+Unclassified general & 263 & 2.4\% \\
+P2 robust latent decoding & 75 & 0.7\% \\
+P3 noise-as-information (exclusive) & 0 & 0.0\% \\
+\midrule
+\textit{P3 any-mention (for reference)} & 122 & 1.09\% \\
 \bottomrule
 \end{tabular}
 \end{table}

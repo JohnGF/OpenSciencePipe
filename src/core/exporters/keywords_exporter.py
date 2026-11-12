@@ -29,14 +29,19 @@ def export_keywords_table(output_dir: str = "pipeline_results", force: bool = Fa
     kw_rows = []
     if os.path.exists(cagr_csv):
         try:
+            import re
             df = pd.read_csv(cagr_csv)
-            for _, r in df.head(20).iterrows():
+            for _, r in df.iterrows():
                 kw = str(r.get("standardized_word", r.get("keyword", "")))
-                if kw and kw.lower() != "nan":
-                    cnt = int(r.get("last_year_count", r.get("count", r.get("total_count", 0))))
-                    cagr_val = float(r.get("cagr_percent", r.get("cagr", 0.0)))
-                    trend = "Emerging" if cagr_val > 15 else ("Established" if cagr_val > 0 else "Declining")
-                    kw_rows.append((kw, cnt, cagr_val, trend))
+                kw_clean = re.sub(r"\s*\([^)]*\)", "", kw).strip()
+                if not kw_clean or kw_clean.lower() in ["nan", "none", "key", "lock", "sea", "surveying", "pipeline", "software deployment", "programming language"]:
+                    continue
+                cnt = int(r.get("last_year_count", r.get("count", r.get("total_count", 0))))
+                cagr_val = float(r.get("cagr_percent", r.get("cagr", 0.0)))
+                trend = "Emerging" if cagr_val > 15 else ("Established" if cagr_val > 0 else "Declining")
+                kw_rows.append((kw_clean, cnt, cagr_val, trend))
+                if len(kw_rows) >= 20:
+                    break
         except Exception:
             pass
 
@@ -67,18 +72,19 @@ def export_keywords_table(output_dir: str = "pipeline_results", force: bool = Fa
         tex = []
         tex.append("\\subsection{Author Keywords Compound Annual Growth Rates (CAGR)}")
         tex.append("\\begin{table}[htbp]")
-        tex.append("\\caption{Author Keyword Growth Rates}")
+        tex.append("\\caption{Author Keyword Growth Rates and Terminal Year Volume}")
         tex.append("\\label{tab:keywords_cagr}")
         tex.append("\\small")
         tex.append("\\setlength{\\tabcolsep}{4pt}")
-        tex.append("\\begin{tabular}{p{0.30\\linewidth} r r r}")
+        tex.append("\\begin{tabular}{p{0.32\\linewidth} r r r}")
         tex.append("\\toprule")
-        tex.append("\\textbf{Keyword} & \\textbf{Total Count} & \\textbf{CAGR (\\%)} & \\textbf{Trend} \\\\")
+        tex.append("\\textbf{Keyword} & \\textbf{Terminal Vol. (2026)} & \\textbf{CAGR (\\%)} & \\textbf{Trend} \\\\")
         tex.append("\\midrule")
         for kw, cnt, cagr_val, trend in kw_rows[:20]:
             kw_clean = kw.replace("_", "\\_").replace("&", "\\&")
             tex.append(f"{kw_clean} & {cnt:,} & {cagr_val:.1f}\\% & {trend} \\\\")
         tex.append("\\bottomrule")
+        tex.append("\\multicolumn{4}{p{0.95\\linewidth}}{\\scriptsize \\textit{Note: Terminal volume reflects publications in the final observation epoch (2026); CAGR indicates annual growth across the active monitoring span.}} \\\\")
         tex.append("\\end{tabular}")
         tex.append("\\end{table}")
         with open(fpath, "w", encoding="utf-8") as f:

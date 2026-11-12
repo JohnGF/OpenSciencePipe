@@ -1,0 +1,35 @@
+{
+    "benchmark_title": "Forty-five years of Journal of Business Research: A bibliometric and network analysis using Gephi",
+    "reference_doi": "10.1016/j.jbusres.2019.10.039",
+    "authors": "Kumar et al.",
+    "year": 2019,
+    "journal": "Journal of Business Research",
+    "tool_cohort": "Gephi",
+    "search_query": "\"Journal of Business Research\" AND (\"bibliometric\" OR \"co-authorship\" OR \"modularity\")",
+    "year_range": [
+        1973,
+        2019
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            "United States",
+            "United Kingdom",
+            "Australia",
+            "Canada",
+            "France",
+            "China"
+        ],
+        "top_keywords": [
+            "business research",
+            "co-authorship",
+            "modularity",
+            "marketing",
+            "management",
+            "network analysis"
+        ]
+    }
+}

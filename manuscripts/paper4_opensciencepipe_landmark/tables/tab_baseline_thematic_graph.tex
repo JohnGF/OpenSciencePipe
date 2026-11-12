@@ -1,0 +1,42 @@
+\begin{table*}[t]
+\centering
+\scriptsize
+\renewcommand{\arraystretch}{0.90}
+\caption{Head-to-Head Baseline Comparison: Thematic Cluster Recovery (Human Ground Truth vs.\ Classical LDA vs.\ OpenSciencePipe) and Computational Graph Scalability}
+\label{tab:baseline_thematic_graph}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{l c c ccc ccc}
+\hline
+\multicolumn{9}{l}{\textbf{Panel A: Thematic Cluster Recovery across Ten Published Scientometric Benchmarks (Matched $K = K_{\text{pub}}$)}} \\
+\hline
+& & & \multicolumn{3}{c}{\textbf{Classical LDA Baseline (Blei et al., 2003)}} & \multicolumn{3}{c}{\textbf{OpenSciencePipe (BERTopic + HDBSCAN)}} \\
+\cline{4-6} \cline{7-9}
+\textbf{Benchmark Investigation} & \textbf{Docs ($N$)} & \textbf{Human Clusters ($K_{\text{pub}}$)} & \textbf{Recovered} & \textbf{Diversity ($\text{TD}$)} & \textbf{Outliers} & \textbf{Recovered} & \textbf{Diversity ($\text{TD}$)} & \textbf{Outliers} \\
+\hline
+B07: Digital Transformation & 387 & 3 & 1/3 (33.3\%) & 0.73 & 0.0\% & \textbf{3/3 (100.0\%)} & \textbf{0.74} & 48.9\% \\
+B03: Modified Biochar Heavy Metals & 390 & 3 & 2/3 (66.7\%) & 0.87 & 0.0\% & \textbf{3/3 (100.0\%)} & \textbf{0.87} & 28.1\% \\
+B12: Soil Microplastics & 196 & 3 & 1/3 (33.3\%) & 0.83 & 0.0\% & \textbf{2/3 (66.7\%)} & \textbf{0.90} & 0.8\% \\
+B04: Blockchain Technology & 198 & 3 & 1/3 (33.3\%) & 0.57 & 0.0\% & \textbf{2/3 (66.7\%)} & \textbf{0.80} & 5.6\% \\
+B08: Distance Learning Landscape & 195 & 3 & 2/3 (66.7\%) & 0.70 & 0.0\% & \textbf{3/3 (100.0\%)} & \textbf{0.83} & 56.5\% \\
+B10: Generative AI in Education & 360 & 3 & 2/3 (66.7\%) & 0.70 & 0.0\% & \textbf{2/3 (66.7\%)} & \textbf{0.67} & 15.0\% \\
+B14: Top 100 in Public Health & 200 & 3 & 1/3 (33.3\%) & 0.73 & 0.0\% & \textbf{3/3 (100.0\%)} & \textbf{0.90} & 33.8\% \\
+B16: Solar Power Generation & 190 & 2 & 1/2 (50.0\%) & 0.75 & 0.0\% & \textbf{2/2 (100.0\%)} & \textbf{0.80} & 41.8\% \\
+B17: Sustainable Business Performance & 197 & 3 & 2/3 (66.7\%) & 0.60 & 0.0\% & \textbf{3/3 (100.0\%)} & \textbf{0.77} & 47.9\% \\
+B15: Social Work and Migration & 171 & 3 & 2/3 (66.7\%) & 0.67 & 0.0\% & \textbf{3/3 (100.0\%)} & \textbf{0.87} & 9.5\% \\
+\hline
+\textbf{Total / Summary Mean} & \textbf{2,484} & \textbf{29} & \textbf{15/29 (51.7\%)} & \textbf{0.71} & \textbf{0.0\%} & \textbf{26/29 (89.7\%)} & \textbf{0.81} & \textbf{28.8\%} \\
+\hline
+\multicolumn{9}{l}{\textbf{Panel B: Graph Partitioning Scalability on Co-authorship Topologies (Louvain Modularity $Q$ and Partition Agreement)}} \\
+\hline
+\textbf{Corpus} & \textbf{Nodes} & \textbf{Edges} & \textbf{Comms} & \textbf{$Q_{\text{CPU}}$} & \textbf{$Q_{\text{GPU}}$} & \textbf{NMI} & \textbf{CPU (NetworkX)} & \textbf{GPU (cuGraph)} \\
+\hline
+B07: Digital Transformation & 842 & 2,104 & 18 & 0.9412 & 0.9415 & 0.961 & 0.08\,s & 3.8\,ms ($21\times$) \\
+B03: Modified Biochar & 912 & 2,480 & 22 & 0.9380 & 0.9383 & 0.958 & 0.11\,s & 4.1\,ms ($27\times$) \\
+B12: Soil Microplastics & 428 & 831 & 14 & 0.9668 & 0.9669 & 0.974 & 0.01\,s & 4.2\,ms ($2\times$) \\
+B04: Blockchain Technology & 278 & 341 & 11 & 0.9607 & 0.9607 & 0.982 & 0.01\,s & 3.4\,ms ($3\times$) \\
+B09: Decadal Electrophysiology Graph & 118,338 & 569,295 & 1,412 & 0.9009 & 0.9011 & 0.942 & 1,680.0\,s (28.0\,min) & \textbf{0.84\,s ($\approx 2{,}000\times$)} \\
+\hline
+\end{tabular}%
+}
+\vspace{2pt}\par\raggedright\scriptsize\textit{Note:} Evaluation follows the comparative topic extraction protocol of Gl\"aser et al. (2017) and Velden et al. (2017). In Panel A, classical Latent Dirichlet Allocation (LDA) is evaluated at matched $K = K_{\text{pub}}$ on the identical raw title and abstract texts. LDA outlier rate is $0.0\%$ due to Dirichlet mixture argmax forced allocation. OpenSciencePipe recovers 26 of 29 human clusters ($89.7\%$) versus 15 of 29 ($51.7\%$) for LDA, with superior topic diversity ($\overline{\text{TD}} = 0.81$ vs.\ $0.71$) achieved by isolating boundary documents into Topic~$-1$. Panel B benchmarks Louvain community detection on an AMD Ryzen 7 3700X CPU (NetworkX) versus NVIDIA RTX 2060 GPU (cuGraph). Modularity is reported independently for CPU ($Q_{\text{CPU}}$) and GPU ($Q_{\text{GPU}}$) alongside partition Normalized Mutual Information (NMI, Danon et al., 2005) across 10 independent repetitions ($0.84 \pm 0.02$\,s on device; host-to-device transfer adds 0.12\,s). On small graphs ($<1{,}000$ edges), CPU execution is already interactive (0.01--0.11\,s); GPU acceleration provides transformative operational scaling on dense networks exceeding $10^5$ edges.
+\end{table*}

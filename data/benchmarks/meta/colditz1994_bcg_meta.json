@@ -1,0 +1,34 @@
+{
+  "benchmark_id": "colditz1994_bcg_tuberculosis",
+  "name": "Colditz et al. (1994) BCG Vaccine Tuberculosis Efficacy",
+  "domain": "Biomedical / Epidemiology",
+  "source_doi": "10.1001/jama.1994.03510370054032",
+  "primary_outcome_metric": "Log Risk Ratio (lnRR)",
+  "num_studies": 13,
+  "expected_statistics": {
+    "random_effects_pooled_estimate": -0.7606,
+    "random_effects_ci_lower": -1.087,
+    "random_effects_ci_upper": -0.434,
+    "q_statistic": 95.68,
+    "q_p_value": 0.0001,
+    "i_squared_pct": 87.46,
+    "tau_squared": 0.3405,
+    "meta_regression_ablat_beta": -0.0212,
+    "meta_regression_ablat_p": 0.015
+  },
+  "studies": [
+    {"study_id": "Aronson 1948", "Authors": "Aronson", "Year": 1948, "d_i": -0.8893, "v_i": 0.3256, "ablat": 44, "alloc": "random"},
+    {"study_id": "Ferguson & Simes 1949", "Authors": "Ferguson & Simes", "Year": 1949, "d_i": -1.5854, "v_i": 0.1946, "ablat": 55, "alloc": "random"},
+    {"study_id": "Rosenthal et al 1960", "Authors": "Rosenthal et al", "Year": 1960, "d_i": -0.4660, "v_i": 0.0564, "ablat": 42, "alloc": "random"},
+    {"study_id": "Hart & Sutherland 1977", "Authors": "Hart & Sutherland", "Year": 1977, "d_i": -1.3713, "v_i": 0.0373, "ablat": 52, "alloc": "random"},
+    {"study_id": "Frimodt-Moller et al 1973", "Authors": "Frimodt-Moller et al", "Year": 1973, "d_i": -0.3394, "v_i": 0.0510, "ablat": 13, "alloc": "alternate"},
+    {"study_id": "Stein & Aronson 1953", "Authors": "Stein & Aronson", "Year": 1953, "d_i": -1.4564, "v_i": 0.0805, "ablat": 44, "alloc": "random"},
+    {"study_id": "Vandiviere et al 1973", "Authors": "Vandiviere et al", "Year": 1973, "d_i": -1.6338, "v_i": 0.2001, "ablat": 19, "alloc": "random"},
+    {"study_id": "TPT Madras 1980", "Authors": "TPT Madras", "Year": 1980, "d_i": 0.0120, "v_i": 0.0042, "ablat": 13, "alloc": "random"},
+    {"study_id": "Coetzee & Berjak 1968", "Authors": "Coetzee & Berjak", "Year": 1968, "d_i": -0.8166, "v_i": 0.0714, "ablat": 27, "alloc": "systematic"},
+    {"study_id": "Rosenthal et al 1961", "Authors": "Rosenthal et al", "Year": 1961, "d_i": -0.5255, "v_i": 0.0883, "ablat": 42, "alloc": "systematic"},
+    {"study_id": "Comstock et al 1974", "Authors": "Comstock et al", "Year": 1974, "d_i": -0.6622, "v_i": 0.0747, "ablat": 18, "alloc": "systematic"},
+    {"study_id": "Comstock & Webster 1969", "Authors": "Comstock & Webster", "Year": 1969, "d_i": -0.3883, "v_i": 0.0884, "ablat": 33, "alloc": "systematic"},
+    {"study_id": "Comstock et al 1976", "Authors": "Comstock et al", "Year": 1976, "d_i": -0.3471, "v_i": 0.0565, "ablat": 18, "alloc": "systematic"}
+  ]
+}

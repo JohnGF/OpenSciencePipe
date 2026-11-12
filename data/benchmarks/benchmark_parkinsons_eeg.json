@@ -1,0 +1,20 @@
+{
+    "benchmark_title": "Quantitative EEG Biomarkers in Parkinson's Disease: A Systematic Review and Meta-Analysis",
+    "reference_doi": "10.1038/s41598-023-47597-5",
+    "authors": "Vanbilsen et al.",
+    "year": 2023,
+    "journal": "Scientific Reports",
+    "search_query": "(EEG OR electroencephalography) AND \"Parkinson's disease\"",
+    "year_range": [2010, 2024],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "meta_analysis": {
+        "pooled_effect_d": 0.60,
+        "ci_lower": 0.40,
+        "ci_upper": 0.80,
+        "i_squared_pct": 75.0,
+        "k_studies": 65
+    }
+}

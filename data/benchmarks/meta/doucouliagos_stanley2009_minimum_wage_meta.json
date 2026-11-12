@@ -1,0 +1,31 @@
+{
+  "benchmark_id": "doucouliagos_stanley2009_minimum_wage",
+  "name": "Doucouliagos & Stanley (2009) Minimum Wage Employment Meta-Regression Analysis",
+  "domain": "Economics & Public Policy",
+  "source_doi": "10.1111/j.1467-8543.2009.00723.x",
+  "primary_outcome_metric": "Employment Elasticity (Beta)",
+  "num_studies": 14,
+  "expected_statistics": {
+    "random_effects_pooled_estimate": -0.015,
+    "ci_lower": -0.040,
+    "ci_upper": 0.010,
+    "p_value": 0.24,
+    "publication_bias_detected": true
+  },
+  "studies": [
+    {"study_id": "Card & Krueger 1994", "Authors": "Card & Krueger", "Year": 1994, "d_i": 0.02, "v_i": 0.0004, "time_period": "Modern", "n_i": 410},
+    {"study_id": "Neumark & Wascher 1992", "Authors": "Neumark & Wascher", "Year": 1992, "d_i": -0.15, "v_i": 0.0016, "time_period": "Historical", "n_i": 150},
+    {"study_id": "Katz & Krueger 1992", "Authors": "Katz & Krueger", "Year": 1992, "d_i": 0.01, "v_i": 0.0006, "time_period": "Historical", "n_i": 280},
+    {"study_id": "Brown et al 1982", "Authors": "Brown et al", "Year": 1982, "d_i": -0.10, "v_i": 0.0009, "time_period": "Historical", "n_i": 220},
+    {"study_id": "Baker et al 1999", "Authors": "Baker et al", "Year": 1999, "d_i": -0.02, "v_i": 0.0003, "time_period": "Modern", "n_i": 500},
+    {"study_id": "Burkhauser et al 2000", "Authors": "Burkhauser et al", "Year": 2000, "d_i": -0.08, "v_i": 0.0008, "time_period": "Modern", "n_i": 310},
+    {"study_id": "Dube et al 2007", "Authors": "Dube et al", "Year": 2007, "d_i": 0.00, "v_i": 0.0002, "time_period": "Modern", "n_i": 820},
+    {"study_id": "Sabia 2008", "Authors": "Sabia", "Year": 2008, "d_i": -0.06, "v_i": 0.0007, "time_period": "Modern", "n_i": 340},
+    {"study_id": "Addison et al 2009", "Authors": "Addison et al", "Year": 2009, "d_i": -0.01, "v_i": 0.0003, "time_period": "Modern", "n_i": 490},
+    {"study_id": "Gramlich 1976", "Authors": "Gramlich", "Year": 1976, "d_i": -0.09, "v_i": 0.0012, "time_period": "Historical", "n_i": 180},
+    {"study_id": "Welch 1978", "Authors": "Welch", "Year": 1978, "d_i": -0.12, "v_i": 0.0014, "time_period": "Historical", "n_i": 160},
+    {"study_id": "Mincer 1976", "Authors": "Mincer", "Year": 1976, "d_i": -0.11, "v_i": 0.0011, "time_period": "Historical", "n_i": 190},
+    {"study_id": "Bazen & Martin 1991", "Authors": "Bazen & Martin", "Year": 1991, "d_i": -0.04, "v_i": 0.0005, "time_period": "Historical", "n_i": 300},
+    {"study_id": "Dolado et al 1996", "Authors": "Dolado et al", "Year": 1996, "d_i": -0.01, "v_i": 0.0004, "time_period": "Modern", "n_i": 420}
+  ]
+}

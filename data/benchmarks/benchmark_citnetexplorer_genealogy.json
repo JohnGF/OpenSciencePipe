@@ -1,0 +1,35 @@
+{
+    "benchmark_title": "CitNetExplorer: Analyzing and visualizing direct citation networks and intellectual lineages",
+    "reference_doi": "10.1016/j.joi.2014.07.006",
+    "authors": "van Eck & Waltman",
+    "year": 2014,
+    "journal": "Journal of Informetrics",
+    "tool_cohort": "CitNetExplorer / HistCite",
+    "search_query": "\"direct citation\" AND (\"citation network\" OR \"scientometrics\" OR \"informetrics\")",
+    "year_range": [
+        2000,
+        2024
+    ],
+    "screening": {
+        "ground_truth_included_dois": [],
+        "ground_truth_excluded_dois": []
+    },
+    "scientometrics": {
+        "top_countries": [
+            "United States",
+            "Netherlands",
+            "China",
+            "United Kingdom",
+            "Spain",
+            "Germany"
+        ],
+        "top_keywords": [
+            "citation network",
+            "scientometrics",
+            "informetrics",
+            "clustering",
+            "visualization",
+            "direct citation"
+        ]
+    }
+}
