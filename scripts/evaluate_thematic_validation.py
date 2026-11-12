@@ -435,7 +435,7 @@ def evaluate_benchmark_alignment():
         f.write("\\hline\n")
         f.write("\\end{tabular}%\n")
         f.write("}\n")
-        f.write(f"\\vspace{{2pt}}\\par\\raggedright\\scriptsize\\textit{{Note:}} Evaluation follows the comparative topic extraction protocol of Gl\\\"aser et al. (2017) and Velden et al. (2017). Across the 10 benchmark studies with published cluster taxonomies ({total_published_clusters} published clusters total), OpenSciencePipe recovers {len(total_recovered_clusters)}/{total_published_clusters} ({overall_recovery:.1f}\\%) of author-defined clusters. Dual independent rater alignment achieves {po*100:.1f}\\% observed agreement ({matches}/{len(all_rater1_assignments)} concordant assignments; Cohen's $\\kappa = {kappa:.3f}$, indicating near-perfect inter-rater reliability).\n")
+        f.write(f"\\vspace{{2pt}}\\par\\raggedright\\scriptsize\\textit{{Note:}} Evaluation follows the comparative topic extraction protocol of Gl\\\"aser et al. (2017) and Velden et al. (2017). Across the 10 benchmark studies with published cluster taxonomies ({total_published_clusters} published clusters total), OpenSciencePipe recovers {len(total_recovered_clusters)}/{total_published_clusters} ({overall_recovery:.1f}\\%) of author-defined clusters. Topic-to-cluster assignment is performed via automated keyword Jaccard overlap against author-defined cluster taxonomies ($K \\le K_{{\\text{{pub}}}}$ on 9 benchmarks; $K=5$ fine-grained sub-themes on B07 that cleanly aggregate into the 3 published clusters).\n")
         f.write("\\end{table*}\n")
 
     print(f"Emitted LaTeX validation table to: {latex_path}")
