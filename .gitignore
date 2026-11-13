@@ -71,8 +71,8 @@ zenodo_bundle/
 *.svg
 *.html
 
-# Allow figures in manuscripts
-!manuscripts/**/figures/*
+# Unpublished manuscripts (kept locally, not tracked in public repo)
+manuscripts/
 
 
 # ==========================================

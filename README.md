@@ -11,7 +11,7 @@
 [![NVIDIA RAPIDS](https://img.shields.io/badge/RAPIDS-cuGraph%20%7C%20cuDF%20%7C%20cuML-76B900?logo=nvidia&logoColor=white)](https://rapids.ai/)
 [![Container: Docker & Podman](https://img.shields.io/badge/container-Docker%20%7C%20Podman-2496ED?logo=docker&logoColor=white)](Containerfile)
 [![Test Suite](https://img.shields.io/badge/tests-49%20passed%20(100%25)-brightgreen.svg)](tests/)
-[![Target Journal](https://img.shields.io/badge/manuscript-Quantitative%20Science%20Studies-orange.svg)](manuscripts/paper4_opensciencepipe_landmark/main.pdf)
+[![Target Journal](https://img.shields.io/badge/manuscript-Quantitative%20Science%20Studies-orange.svg)](https://direct.mit.edu/qss)
 
 <p align="center">
   <b>As simple as a search query.</b> Enter a research topic and OpenSciencePipe harvests open scholarly literature, constructs GPU-accelerated co-authorship networks, models contextual neural themes with explicit noise isolation, and compiles a camera-ready LaTeX manuscript.
