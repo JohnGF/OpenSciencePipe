@@ -17,7 +17,11 @@ ZENODO_API_URL = "https://zenodo.org/api"
 ZENODO_SANDBOX_URL = "https://sandbox.zenodo.org/api"
 
 def get_token() -> str:
-    token = os.environ.get("ZENODO_TOKEN") or os.environ.get("ZENODO_ACCESS_TOKEN")
+    token = (
+        os.environ.get("ZENODO_TOKEN")
+        or os.environ.get("ZENODO_ACCESS_TOKEN")
+        or os.environ.get("ZENODO_API")
+    )
     if not token:
         # Check secret-tool or file if available
         pass
@@ -64,6 +68,8 @@ def build_replication_bundle(output_zip: str = "opensciencepipe_qss_replication_
         "evaluate_thematic_validation.py",
         "evaluate_clustering_benchmarks.py",
         "run_head_to_head_baselines.py",
+        "regenerate_table5.py",
+        "extract_clusters_from_pdfs.py",
     ]
     for s in scripts_to_include:
         s_path = repo_root / "scripts" / s
