@@ -1,227 +1,36 @@
 #!/usr/bin/env python3
 """
-Thematic Validation Script: Comparing Discovered Neural Topics against Published Scientometric Clusters
-Follows the comparative topic extraction evaluation framework established by:
-- Gläser, Glänzel, & Scharnhorst (2017), Scientometrics 111(2): 981-998
-- Velden et al. (2017), Scientometrics 111(2): 1169-1221
+Thematic Validation Script: Comparing Discovered Neural Topics against Published Scientometric Clusters.
+Reads published cluster ground-truth definitions strictly from data/benchmarks/*.json (scientometrics.clusters).
 
-Evaluates 10 published scientometric benchmarks across diverse scientific domains:
-1. B07: Digital Transformation (Kraus et al., 2021)
-2. B03: Modified Biochar Heavy Metals (Liu et al., 2022)
-3. B12: Soil Microplastics (Yang et al., 2023)
-4. B04: Blockchain Technology (Kuzior & Sira, 2022)
-5. B08: Distance Learning Landscape (2025)
-6. B10: Generative AI in Education (Bahroun et al., 2023)
-7. B14: Top 100 in Public Health (Hernández-González et al., 2022)
-8. B16: Solar Power Generation (Lyu et al., 2024)
-9. B17: Sustainable Business Performance (Bota-Avram, 2023)
-10. B15: Social Work and Migration (Zárate-Rueda et al., 2026)
+Implements:
+- Minimum Jaccard similarity threshold (default tau = 0.10, with sensitivity at 0.05 and 0.15)
+- Many-to-one best-match and one-to-one Hungarian assignment (scipy.optimize.linear_sum_assignment)
+- Analytical chance floor: 1 - (1 - 1/K_pub)^K
+- Empirical permutation baseline (1,000 shuffles of topic keyword sets across benchmarks)
 """
 
 import os
+import json
 import ast
+import random
+import numpy as np
 import pandas as pd
-from typing import Dict, List
+from typing import Dict, List, Tuple
+from scipy.optimize import linear_sum_assignment
 
-# 1. Ground Truth Benchmark Definitions from Published Articles (10 Studies)
-BENCHMARK_GROUND_TRUTHS = {
-    "B07_digital_transformation": {
-        "id": "B07",
-        "title": "Digital Transformation (Kraus et al., 2021)",
-        "doi": "10.1177/21582440211047576",
-        "csv_path": "outputs/pipeline_results_benchmark_digital_transformation_kraus2021/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Digital Business Transformation & Strategy",
-                "keywords": {"digital", "transformation", "strategy", "business", "models", "value", "management", "companies"}
-            },
-            "C2": {
-                "name": "Enabling Digital Technologies & Architecture",
-                "keywords": {"big", "data", "analytics", "artificial", "intelligence", "cloud", "iot", "enterprise", "architecture", "ea"}
-            },
-            "C3": {
-                "name": "Socio-Organizational & Industrial Transformation",
-                "keywords": {"industry", "manufacturing", "smes", "firms", "small", "social", "work", "employment", "organizational"}
-            }
-        }
-    },
-    "B03_biochar_heavy_metals": {
-        "id": "B03",
-        "title": "Modified Biochar Heavy Metals (Liu et al., 2022)",
-        "doi": "10.1007/s44246-022-00007-3",
-        "csv_path": "outputs/pipeline_results_benchmark_biochar_citespace/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Biochar Pyrolysis & Biomass Synthesis",
-                "keywords": {"biochar", "pyrolysis", "biomass", "production", "carbon", "synthesis", "feedstock"}
-            },
-            "C2": {
-                "name": "Aqueous Adsorption & Surface Modification",
-                "keywords": {"adsorption", "surface", "modified", "modification", "wastewater", "treatment", "removal", "sorption"}
-            },
-            "C3": {
-                "name": "Heavy Metal Soil Immobilization",
-                "keywords": {"heavy", "metals", "soil", "metal", "contaminated", "soils", "remediation", "lead", "cadmium"}
-            }
-        }
-    },
-    "B12_microplastics_soil": {
-        "id": "B12",
-        "title": "Soil Microplastics (Yang et al., 2023)",
-        "doi": "10.3390/su15097122",
-        "csv_path": "outputs/pipeline_results_benchmark_microplastics_soil/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Soil Agronomic Interactions & Application",
-                "keywords": {"soil", "application", "fertilizer", "plant", "soils", "water", "growth", "agricultural"}
-            },
-            "C2": {
-                "name": "Plastic Film Residues & Environmental Fate",
-                "keywords": {"plastic", "residues", "environmental", "properties", "mulch", "films", "particles", "degradation"}
-            },
-            "C3": {
-                "name": "Ecotoxicity & Microbial Community Dynamics",
-                "keywords": {"toxicity", "microbial", "community", "enzyme", "earthworms", "microbiota", "biota"}
-            }
-        }
-    },
-    "B04_blockchain_business": {
-        "id": "B04",
-        "title": "Blockchain Technology (Kuzior & Sira, 2022)",
-        "doi": "10.3390/su14138206",
-        "csv_path": "outputs/pipeline_results_benchmark_blockchain_vosviewer/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Distributed Ledger & Smart Contracts",
-                "keywords": {"blockchain", "technology", "distributed", "smart", "ledger", "contracts", "contract", "consensus"}
-            },
-            "C2": {
-                "name": "IoT Integration & Decentralized Energy",
-                "keywords": {"iot", "smart", "data", "energy", "sensors", "decentralized", "mechanism", "devices"}
-            },
-            "C3": {
-                "name": "Cryptocurrencies & Financial Systems",
-                "keywords": {"cryptocurrency", "bitcoin", "finance", "banking", "transactions", "monetary"}
-            }
-        }
-    },
-    "B08_distance_learning": {
-        "id": "B08",
-        "title": "Distance Learning Landscape (2025)",
-        "doi": "10.26803/ijlter.24.4.34",
-        "csv_path": "outputs/pipeline_results_benchmark_distance_learning_landscape/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Open Distance Higher Education Governance",
-                "keywords": {"distance", "learning", "open", "education", "quality", "assessment", "higher", "institutions"}
-            },
-            "C2": {
-                "name": "Online Platforms & Blended Learning",
-                "keywords": {"online", "learning", "students", "course", "blended", "engagement", "pedagogy"}
-            },
-            "C3": {
-                "name": "Emergency Remote Teaching & Pandemic Shifts",
-                "keywords": {"pandemic", "covid", "covid 19", "teaching", "emergency", "remote", "disruption"}
-            }
-        }
-    },
-    "B10_genai_education": {
-        "id": "B10",
-        "title": "Generative AI in Education (Bahroun et al., 2023)",
-        "doi": "10.3390/su151712983",
-        "csv_path": "outputs/pipeline_results_benchmark_genai_education_vosviewer/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Generative AI & Learning Pedagogies in Education",
-                "keywords": {"chatgpt", "education", "learning", "students", "teaching", "pedagogy", "academic", "use"}
-            },
-            "C2": {
-                "name": "Artificial Intelligence Architectures & Generative Models",
-                "keywords": {"ai", "generative", "intelligence", "technologies", "artificial", "data", "models"}
-            },
-            "C3": {
-                "name": "Domain Applications & Clinical/Ethical Considerations",
-                "keywords": {"medical", "clinical", "healthcare", "ethics", "applications", "professional", "domain", "2023"}
-            }
-        }
-    },
-    "B14_public_health": {
-        "id": "B14",
-        "title": "Top 100 in Public Health (Hernández-González et al., 2022)",
-        "doi": "10.3390/ijerph19159645",
-        "csv_path": "outputs/pipeline_results_benchmark_public_health_top100/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Public Health & Occupational Safety Epidemiology",
-                "keywords": {"health", "occupational", "public", "workers", "environmental", "safety", "epidemiology"}
-            },
-            "C2": {
-                "name": "Work-Related Ergonomics & Musculoskeletal Strain",
-                "keywords": {"musculoskeletal", "study", "stress", "work", "physical", "mental", "strain", "ergonomic"}
-            },
-            "C3": {
-                "name": "Industrial Toxicological Exposure & Carcinogenic Risk",
-                "keywords": {"exposure", "studies", "workers", "exposed", "risk", "industry", "cancer", "toxicology"}
-            }
-        }
-    },
-    "B16_solar_power": {
-        "id": "B16",
-        "title": "Solar Power Generation (Lyu et al., 2024)",
-        "doi": "10.1007/s11356-023-31715-x",
-        "csv_path": "outputs/pipeline_results_benchmark_solar_power_generation/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Photovoltaic Power Systems & Renewable Generation",
-                "keywords": {"energy", "solar", "power", "pv", "generation", "electricity", "renewable", "systems"}
-            },
-            "C2": {
-                "name": "Inverter Control Dynamics & Grid Voltage Regulation",
-                "keywords": {"power", "solar", "pv", "voltage", "photovoltaic", "control", "inverter", "dc", "grid"}
-            }
-        }
-    },
-    "B17_sustainable_biz": {
-        "id": "B17",
-        "title": "Sustainable Business Performance (Bota-Avram, 2023)",
-        "doi": "10.1080/1331677x.2022.2096094",
-        "csv_path": "outputs/pipeline_results_benchmark_sustainable_business_performance/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Corporate Governance & Financial ESG Reporting",
-                "keywords": {"sustainability", "performance", "financial", "reporting", "corporate", "governance", "companies", "disclosure"}
-            },
-            "C2": {
-                "name": "Corporate Sustainability & Strategic Sustainable Development",
-                "keywords": {"sustainability", "sustainable", "corporate", "development", "strategy", "management", "stakeholders"}
-            },
-            "C3": {
-                "name": "SME Competitiveness & Enterprise Business Performance",
-                "keywords": {"sustainable", "performance", "business", "competitive", "advantage", "smes", "capabilities", "firms"}
-            }
-        }
-    },
-    "B15_social_work": {
-        "id": "B15",
-        "title": "Social Work and Migration (Zárate-Rueda et al., 2026)",
-        "doi": "10.1177/21582440261477485",
-        "csv_path": "outputs/pipeline_results_benchmark_social_work_migration/topic_info.csv",
-        "published_clusters": {
-            "C1": {
-                "name": "Social Work Practice & Vulnerable Population Services",
-                "keywords": {"social", "work", "practice", "workers", "services", "refugees", "interventions", "community"}
-            },
-            "C2": {
-                "name": "Transnational Migration, Asylum & Refugee Integration",
-                "keywords": {"asylum", "migration", "refugees", "seekers", "refugee", "migrants", "immigration", "country"}
-            },
-            "C3": {
-                "name": "Welfare State Systems & Structural Social Dynamics",
-                "keywords": {"welfare", "state", "modern", "cultural", "social", "policy", "society", "processes"}
-            }
-        }
-    }
-}
+BENCHMARK_SLUGS = [
+    ("B07", "Digital Transformation", "benchmark_digital_transformation_kraus2021"),
+    ("B03", "Modified Biochar Heavy Metals", "benchmark_biochar_citespace"),
+    ("B12", "Soil Microplastics", "benchmark_microplastics_soil"),
+    ("B04", "Blockchain Technology", "benchmark_blockchain_vosviewer"),
+    ("B08", "Distance Learning Landscape", "benchmark_distance_learning_landscape"),
+    ("B10", "Generative AI in Education", "benchmark_genai_education_vosviewer"),
+    ("B14", "Top 100 in Public Health", "benchmark_public_health_top100"),
+    ("B16", "Solar Power Generation", "benchmark_solar_power_generation"),
+    ("B17", "Sustainable Business Performance", "benchmark_sustainable_business_performance"),
+    ("B15", "Social Work and Migration", "benchmark_social_work_migration"),
+]
 
 
 def load_extracted_topics(csv_path: str) -> List[Dict]:
@@ -236,96 +45,182 @@ def load_extracted_topics(csv_path: str) -> List[Dict]:
             try:
                 words = ast.literal_eval(rep)
             except Exception:
-                words = [w.strip() for w in rep.strip("[]").replace("'", "").split(",")]
+                words = [w.strip(" '\"[]") for w in rep.split(",")]
+        elif isinstance(rep, list):
+            words = rep
         else:
             words = []
         topics.append({
             "topic_id": int(row["Topic"]),
             "count": int(row["Count"]),
             "name": str(row["Name"]),
-            "words": [w.lower() for w in words]
+            "words": [str(w).lower().strip() for w in words if str(w).strip()],
         })
     return topics
 
 
-def evaluate_benchmark_alignment():
+def tokenize_keywords(kw_list: List[str]) -> set:
+    tokens = set()
+    for kw in kw_list:
+        kw_l = kw.lower().strip()
+        if kw_l:
+            tokens.add(kw_l)
+            for part in kw_l.split():
+                tokens.add(part)
+    return tokens
+
+
+def jaccard(a: set, b: set) -> float:
+    if not a or not b:
+        return 0.0
+    return len(a & b) / len(a | b)
+
+
+def match_topics_to_clusters(
+    topic_word_sets: List[set],
+    cluster_word_sets: List[set],
+    threshold: float = 0.10,
+) -> Tuple[set, set, List[Tuple[int, int, float]]]:
+    """
+    Returns:
+      - recovered_many_to_one: set of cluster indices matched with Jaccard >= threshold
+      - recovered_hungarian: set of cluster indices matched 1-to-1 via Hungarian with Jaccard >= threshold
+      - per_topic_best: list of (topic_idx, best_cluster_idx, best_jaccard)
+    """
+    n_t = len(topic_word_sets)
+    n_c = len(cluster_word_sets)
+    if n_t == 0 or n_c == 0:
+        return set(), set(), []
+
+    sim_mat = np.zeros((n_t, n_c), dtype=float)
+    for i, tw in enumerate(topic_word_sets):
+        for j, cw in enumerate(cluster_word_sets):
+            sim_mat[i, j] = jaccard(tw, cw)
+
+    recovered_m2o = set()
+    per_topic_best = []
+    for i in range(n_t):
+        j_best = int(np.argmax(sim_mat[i]))
+        s_best = float(sim_mat[i, j_best])
+        per_topic_best.append((i, j_best, s_best))
+        if s_best >= threshold:
+            recovered_m2o.add(j_best)
+
+    row_ind, col_ind = linear_sum_assignment(-sim_mat)
+    recovered_hung = set()
+    for r, c in zip(row_ind, col_ind):
+        if sim_mat[r, c] >= threshold:
+            recovered_hung.add(int(c))
+
+    return recovered_m2o, recovered_hung, per_topic_best
+
+
+def evaluate_benchmark_alignment(threshold: float = 0.10):
     print("=" * 85)
-    print("THEMATIC VALIDATION AUDIT: TOPIC-TO-CLUSTER CONCORDANCE (GLASER ET AL. 2017)")
+    print(f"THEMATIC VALIDATION AUDIT (Jaccard threshold tau = {threshold:.2f})")
     print("=" * 85)
 
     results_table = []
-    total_published_clusters = 0
-    total_recovered_clusters = set()
+    evaluated_benchmarks = []
+    pending_benchmarks = []
 
-    for bench_id, b_meta in BENCHMARK_GROUND_TRUTHS.items():
-        bench_code = b_meta["id"]
-        title = b_meta["title"]
-        doi = b_meta["doi"]
-        csv_path = b_meta["csv_path"]
-        pub_clusters = b_meta["published_clusters"]
-        num_pub = len(pub_clusters)
-        total_published_clusters += num_pub
+    for bid, short_name, slug in BENCHMARK_SLUGS:
+        json_path = f"data/benchmarks/{slug}.json"
+        csv_path = f"outputs/pipeline_results_{slug}/topic_info.csv"
+        with open(json_path, "r", encoding="utf-8") as f:
+            b_meta = json.load(f)
+
+        clusters = b_meta.get("scientometrics", {}).get("clusters", [])
+        if not clusters:
+            pending_benchmarks.append(f"{bid} ({short_name})")
+            continue
 
         topics = load_extracted_topics(csv_path)
         if not topics:
-            print(f"[!] Warning: No extracted topics for {title}")
+            print(f"[!] Warning: No extracted topics for {bid}")
             continue
 
-        recovered_for_bench = set()
+        cluster_names = [c["cluster_name"] for c in clusters]
+        cluster_sets = [tokenize_keywords(c["keywords"]) for c in clusters]
+        topic_sets = [tokenize_keywords(t["words"][:10]) for t in topics]
 
-        for t in topics:
-            t_words = set(t["words"])
-            
-            # Algorithmic Jaccard Match against published cluster taxonomy
-            best_c = None
-            best_sim = -1.0
-            best_overlap = set()
-            for c_id, c_data in pub_clusters.items():
-                c_words = c_data["keywords"]
-                overlap = t_words & c_words
-                sim = len(overlap) / len(t_words | c_words) if (t_words | c_words) else 0.0
-                if sim > best_sim:
-                    best_sim = sim
-                    best_c = c_id
-                    best_overlap = overlap
+        rec_m2o, rec_hung, per_topic = match_topics_to_clusters(topic_sets, cluster_sets, threshold=threshold)
+        k_pub = len(clusters)
+        k_disc = len(topics)
+        chance_floor = 1.0 - (1.0 - 1.0 / k_pub) ** k_disc
 
-            c_name = pub_clusters[best_c]["name"]
-            recovered_for_bench.add(best_c)
-            total_recovered_clusters.add(f"{bench_id}_{best_c}")
+        evaluated_benchmarks.append({
+            "bid": bid,
+            "name": short_name,
+            "k_pub": k_pub,
+            "k_disc": k_disc,
+            "topic_sets": topic_sets,
+            "cluster_sets": cluster_sets,
+            "rec_m2o": len(rec_m2o),
+            "rec_hung": len(rec_hung),
+            "chance_floor": chance_floor,
+        })
 
-            # Clean primary alignment vs cross-cutting boundary alignment
-            # Topics with cross-cutting terms (e.g., medical applications in GenAI or diffuse practice terms)
-            # are classified as Partial alignment.
-            is_partial = (bench_code == "B10" and t["topic_id"] == 2) or (bench_code == "B15" and t["topic_id"] == 0)
-            alignment_status = "Partial" if is_partial else "\\checkmark"
-
+        for (t_idx, c_idx, sim) in per_topic:
+            t = topics[t_idx]
+            status = "\\checkmark" if sim >= threshold else "--"
             results_table.append({
-                "bench_id": bench_code,
-                "benchmark": title,
+                "bench_id": bid,
+                "benchmark": short_name,
                 "topic_id": t["topic_id"],
                 "docs": t["count"],
                 "topic_keywords": ", ".join(t["words"][:6]),
-                "mapped_cluster_id": best_c,
-                "mapped_cluster_name": c_name,
-                "overlap_terms": ", ".join(sorted(best_overlap)),
-                "overlap_count": len(best_overlap),
-                "jaccard_sim": best_sim,
-                "alignment": alignment_status
+                "mapped_cluster_name": cluster_names[c_idx],
+                "jaccard_sim": sim,
+                "alignment": status,
             })
 
-        rec_rate = (len(recovered_for_bench) / num_pub) * 100
-        print(f"-> {bench_code} {title}: Discovered {len(topics)} topics, recovered {len(recovered_for_bench)}/{num_pub} clusters ({rec_rate:.1f}%)")
+        print(
+            f"-> {bid} {short_name}: K={k_disc}, K_pub={k_pub}, "
+            f"M2O={len(rec_m2o)}/{k_pub}, Hungarian={len(rec_hung)}/{k_pub}, "
+            f"ChanceFloor={chance_floor*100:.1f}%"
+        )
 
-    clean_matches = sum(1 for r in results_table if r["alignment"] == "\\checkmark")
-    overall_recovery = (len(total_recovered_clusters) / total_published_clusters) * 100
+    if pending_benchmarks:
+        print("\n[!] Pending blind cluster extraction in data/benchmarks/*.json:")
+        for p in pending_benchmarks:
+            print(f"    - {p}")
 
-    print("=" * 85)
-    print(f"Overall Benchmark Cluster Recovery: {len(total_recovered_clusters)}/{total_published_clusters} ({overall_recovery:.1f}%)")
-    print(f"Total Discovered Neural Topics:     {len(results_table)}")
-    print(f"Clean Primary Alignments:           {clean_matches}/{len(results_table)} ({clean_matches/len(results_table)*100:.1f}%)")
-    print("=" * 85)
+    total_pub = sum(b["k_pub"] for b in evaluated_benchmarks)
+    total_m2o = sum(b["rec_m2o"] for b in evaluated_benchmarks)
+    total_hung = sum(b["rec_hung"] for b in evaluated_benchmarks)
+    expected_chance = sum(b["chance_floor"] * b["k_pub"] for b in evaluated_benchmarks)
 
-    # Emit LaTeX Table
+    # Sensitivity across thresholds
+    for tau in (0.05, 0.10, 0.15):
+        m2o_t = 0
+        hung_t = 0
+        for b in evaluated_benchmarks:
+            r_m, r_h, _ = match_topics_to_clusters(b["topic_sets"], b["cluster_sets"], threshold=tau)
+            m2o_t += len(r_m)
+            hung_t += len(r_h)
+        print(f"Sensitivity tau={tau:.2f}: M2O={m2o_t}/{total_pub} ({100*m2o_t/total_pub:.1f}%), Hungarian={hung_t}/{total_pub} ({100*hung_t/total_pub:.1f}%)")
+
+    # Permutation baseline (1,000 shuffles of topic sets across evaluated benchmarks)
+    all_topic_sets = [ts for b in evaluated_benchmarks for ts in b["topic_sets"]]
+    rng = random.Random(42)
+    perm_hung_scores = []
+    for _ in range(1000):
+        shuffled = list(all_topic_sets)
+        rng.shuffle(shuffled)
+        idx = 0
+        hits = 0
+        for b in evaluated_benchmarks:
+            k_d = b["k_disc"]
+            _, r_h, _ = match_topics_to_clusters(shuffled[idx:idx + k_d], b["cluster_sets"], threshold=threshold)
+            hits += len(r_h)
+            idx += k_d
+        perm_hung_scores.append(hits / total_pub * 100.0)
+
+    print(f"Analytical chance floor (unthresholded): {expected_chance:.1f}/{total_pub} ({100*expected_chance/total_pub:.1f}%)")
+    print(f"Permutation baseline (Hungarian, tau={threshold:.2f}, 1000 shuffles): {np.mean(perm_hung_scores):.1f}% +/- {np.std(perm_hung_scores):.1f}%")
+
+    # Emit LaTeX Table 6
     latex_path = "manuscripts/paper4_opensciencepipe_landmark/tables/tab_thematic_validation.tex"
     os.makedirs(os.path.dirname(latex_path), exist_ok=True)
     with open(latex_path, "w", encoding="utf-8") as f:
@@ -334,38 +229,40 @@ def evaluate_benchmark_alignment():
         f.write("\\centering\n")
         f.write("\\scriptsize\n")
         f.write("\\renewcommand{\\arraystretch}{0.88}\n")
-        f.write("\\caption{Thematic Validation: Alignment of Discovered Neural Topics with Published Benchmark Clusters Across 10 Scientometric Studies}\n")
+        f.write("\\caption{Thematic Validation: Alignment of Discovered Neural Topics with Verified Published Benchmark Clusters}\n")
         f.write("\\label{tab:thematic_validation}\n")
         f.write("\\resizebox{\\textwidth}{!}{%\n")
-        f.write("\\begin{tabular}{ll c p{5.0cm} p{5.0cm} c}\n")
+        f.write("\\begin{tabular}{ll c p{5.0cm} p{4.6cm} c c}\n")
         f.write("\\hline\n")
-        f.write("\\textbf{ID} & \\textbf{Benchmark Study} & \\textbf{Topic} & \\textbf{Top Discovered c-TF-IDF Terms} & \\textbf{Mapped Published Benchmark Cluster} & \\textbf{Alignment} \\\\\n")
+        f.write("\\textbf{ID} & \\textbf{Benchmark Study} & \\textbf{Topic} & \\textbf{Top Discovered c-TF-IDF Terms} & \\textbf{Mapped Published Benchmark Cluster} & \\textbf{Jaccard} & \\textbf{Match ($J \\ge 0.10$)} \\\\\n")
         f.write("\\hline\n")
-        
+
         curr_b = None
         for r in results_table:
-            b_label = r["benchmark"].split("(")[0].strip()
             topic_str = f"T{r['topic_id']} ($N={r['docs']}$)"
-            alignment_str = r["alignment"]
-            
-            # Clean keywords for LaTeX
             kw_clean = r["topic_keywords"].replace("_", " ")
-            c_name_clean = r["mapped_cluster_name"].replace("&", "\\&")
-            
+            c_name_clean = r["mapped_cluster_name"].replace("&", "\\&").replace("#", "\\#")
+            j_str = f"{r['jaccard_sim']:.3f}"
             if curr_b != r["benchmark"]:
                 curr_b = r["benchmark"]
-                f.write(f"\\textbf{{{r['bench_id']}}} & \\textbf{{{b_label}}} & {topic_str} & \\texttt{{{kw_clean}}} & {c_name_clean} & {alignment_str} \\\\\n")
+                f.write(f"\\textbf{{{r['bench_id']}}} & \\textbf{{{r['benchmark']}}} & {topic_str} & \\texttt{{{kw_clean}}} & {c_name_clean} & {j_str} & {r['alignment']} \\\\\n")
             else:
-                f.write(f" & & {topic_str} & \\texttt{{{kw_clean}}} & {c_name_clean} & {alignment_str} \\\\\n")
+                f.write(f" & & {topic_str} & \\texttt{{{kw_clean}}} & {c_name_clean} & {j_str} & {r['alignment']} \\\\\n")
 
         f.write("\\hline\n")
         f.write("\\end{tabular}%\n")
         f.write("}\n")
-        f.write(f"\\vspace{{2pt}}\\par\\raggedright\\scriptsize\\textit{{Note:}} Evaluation follows the comparative topic extraction protocol of Gl\\\"aser et al. (2017) and Velden et al. (2017). Across the 10 benchmark studies with published cluster taxonomies ({total_published_clusters} published clusters total), OpenSciencePipe recovers {len(total_recovered_clusters)}/{total_published_clusters} ({overall_recovery:.1f}\\%) of author-defined clusters. Topic-to-cluster assignment is performed via automated keyword Jaccard overlap against author-defined cluster taxonomies ($K \\le K_{{\\text{{pub}}}}$ on 9 benchmarks; $K=5$ fine-grained sub-themes on B07 that cleanly aggregate into the 3 published clusters). Alignment denotes clean primary cluster mapping (\\checkmark) versus cross-cutting boundary mapping (Partial).\n")
+        f.write(
+            f"\\vspace{{2pt}}\\par\\raggedright\\scriptsize\\textit{{Note:}} Evaluates the {len(evaluated_benchmarks)} benchmarks with verbatim published cluster definitions stored in \\texttt{{data/benchmarks/*.json}} "
+            f"({total_pub} published clusters total). At Jaccard threshold $\\tau = {threshold:.2f}$, OpenSciencePipe recovers "
+            f"{total_m2o}/{total_pub} ({100*total_m2o/total_pub:.1f}\\%) under many-to-one assignment and "
+            f"{total_hung}/{total_pub} ({100*total_hung/total_pub:.1f}\\%) under one-to-one Hungarian matching "
+            f"(permutation baseline: {np.mean(perm_hung_scores):.1f}\\% $\\pm$ {np.std(perm_hung_scores):.1f}\\%).\n"
+        )
         f.write("\\end{table*}\n")
 
     print(f"Emitted LaTeX validation table to: {latex_path}")
-    return results_table
+    return evaluated_benchmarks
 
 
 if __name__ == "__main__":

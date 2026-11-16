@@ -144,40 +144,55 @@ COUNTRY_NAME_VARIANTS = {
 
 
 def extract_countries(affiliation: str) -> List[str]:
+    """Extract unique country names from a semicolon-delimited affiliation string (full counting per paper)."""
     if not isinstance(affiliation, str):
         return []
+
+    lower_to_common = {c.lower(): COMMON_NAMES.get(c, c) for c in COUNTRIES}
+    for variant, official in COUNTRY_NAME_VARIANTS.items():
+        if official in COUNTRIES:
+            lower_to_common[variant.lower()] = COMMON_NAMES.get(official, official)
 
     affiliations = re.split(r";", affiliation)
     unique_affiliations = list(set(affiliations))
     countries_found = set()
 
     for affil in unique_affiliations:
-        affil = affil.strip()
+        affil = affil.strip().rstrip(".")
+        if not affil:
+            continue
         parts = re.split(r",", affil)
+        matched = False
 
         for part in reversed(parts):
-            part_clean = part.strip().upper()
+            part_stripped = part.strip().rstrip(".")
+            if not part_stripped:
+                continue
+            part_clean = part_stripped.upper()
             if part_clean in US_STATE_CODES:
                 countries_found.add("United States")
+                matched = True
                 break
 
-            for code, name in COUNTRY_CODE_MAP.items():
-                if code.upper() == part_clean:
-                    countries_found.add(name)
-                    break
-
-            part_stripped = part.strip()
-            official_name = COUNTRY_NAME_VARIANTS.get(part_stripped, part_stripped)
-            if official_name in COUNTRIES:
-                common_name = COMMON_NAMES.get(official_name, official_name)
-                countries_found.add(common_name)
+            if part_clean in COUNTRY_CODE_MAP:
+                countries_found.add(COUNTRY_CODE_MAP[part_clean])
+                matched = True
                 break
 
-            for country in COUNTRIES:
-                if country.lower() == part_stripped.lower():
-                    common_name = COMMON_NAMES.get(country, country)
-                    countries_found.add(common_name)
-                    break
+            if part_stripped.lower() in lower_to_common:
+                countries_found.add(lower_to_common[part_stripped.lower()])
+                matched = True
+                break
+
+        # Fallback for affiliations lacking commas before the country name (e.g. "New Delhi India")
+        if not matched:
+            words = re.sub(r"[.\s]+$", "", affil).split()
+            for n in (3, 2, 1):
+                if len(words) >= n:
+                    cand = " ".join(words[-n:]).strip(".,()")
+                    if cand.lower() in lower_to_common:
+                        countries_found.add(lower_to_common[cand.lower()])
+                        break
 
     return list(countries_found)
 

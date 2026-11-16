@@ -1,289 +1,352 @@
 #!/usr/bin/env python3
 """
-Direct Head-to-Head Baseline Evaluation Script:
-Compares OpenSciencePipe components against traditional bibliometric baselines:
-1. Panel A: Thematic Cluster Recovery across Ten Published Scientometric Benchmarks
-   - Evaluates classical Latent Dirichlet Allocation (LDA; Blei et al., 2003) at K = K_pub
-     against author-defined human cluster taxonomies and OpenSciencePipe (BERTopic + HDBSCAN).
-   - Evaluates Topic Diversity (TD; Dieng et al., 2020) and outlier rejection rates.
-2. Panel B: Graph Partitioning Scalability on Co-authorship Topologies
-   - Single-threaded CPU Louvain (NetworkX) vs GPU Louvain (cuGraph).
-   - Reports Nodes, Edges, Communities, Q_CPU, Q_GPU, NMI (Danon et al., 2005), and wall-clock runtimes.
-   - Hardware: CPU AMD Ryzen 7 3700X (8 cores, 16 threads), GPU NVIDIA GeForce RTX 2060 (6 GB VRAM).
+Direct Head-to-Head Baseline Evaluation Script (100% Computed, Zero Literals):
+1. Panel A: Real Latent Dirichlet Allocation (LDA; Blei et al., 2003) via scikit-learn
+   at K = K_pub across 5 random seeds (42..46), evaluated on:
+   - All documents with non-empty abstracts (LDA All)
+   - Matched non-outlier document count (LDA Matched-N)
+   Compared against OpenSciencePipe (BERTopic + HDBSCAN) using Hungarian matching
+   at Jaccard threshold tau = 0.10 and an exact McNemar test over published clusters.
+2. Panel B: Real NetworkX Louvain community detection on the actual co-authorship
+   graphs (network_nodes.csv / network_edges.csv) in outputs/.
+   If RAPIDS cuGraph is installed, also runs GPU Louvain and computes partition NMI.
 """
 
-import sys
 import os
+import sys
+import json
 import time
-import argparse
-import pandas as pd
 import numpy as np
+import pandas as pd
+import networkx as nx
+from scipy.stats import binomtest
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.decomposition import LatentDirichletAllocation
 
-# Panel A: Thematic Cluster Recovery Data (10 Published Benchmarks)
-THEMATIC_PANEL_DATA = [
-    {
-        "id": "B07",
-        "name": "B07: Digital Transformation",
-        "docs": 387,
-        "k_pub": 3,
-        "lda_recovered": "1/3 (33.3\\%)",
-        "lda_td": 0.73,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "3/3 (100.0\\%)",
-        "osp_td": 0.74,
-        "osp_outliers": "48.9\\%"
-    },
-    {
-        "id": "B03",
-        "name": "B03: Modified Biochar Heavy Metals",
-        "docs": 390,
-        "k_pub": 3,
-        "lda_recovered": "2/3 (66.7\\%)",
-        "lda_td": 0.87,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "3/3 (100.0\\%)",
-        "osp_td": 0.87,
-        "osp_outliers": "28.1\\%"
-    },
-    {
-        "id": "B12",
-        "name": "B12: Soil Microplastics",
-        "docs": 196,
-        "k_pub": 3,
-        "lda_recovered": "1/3 (33.3\\%)",
-        "lda_td": 0.83,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "2/3 (66.7\\%)",
-        "osp_td": 0.90,
-        "osp_outliers": "0.8\\%"
-    },
-    {
-        "id": "B04",
-        "name": "B04: Blockchain Technology",
-        "docs": 198,
-        "k_pub": 3,
-        "lda_recovered": "1/3 (33.3\\%)",
-        "lda_td": 0.57,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "2/3 (66.7\\%)",
-        "osp_td": 0.80,
-        "osp_outliers": "5.6\\%"
-    },
-    {
-        "id": "B08",
-        "name": "B08: Distance Learning Landscape",
-        "docs": 195,
-        "k_pub": 3,
-        "lda_recovered": "2/3 (66.7\\%)",
-        "lda_td": 0.70,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "3/3 (100.0\\%)",
-        "osp_td": 0.83,
-        "osp_outliers": "56.5\\%"
-    },
-    {
-        "id": "B10",
-        "name": "B10: Generative AI in Education",
-        "docs": 360,
-        "k_pub": 3,
-        "lda_recovered": "2/3 (66.7\\%)",
-        "lda_td": 0.70,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "2/3 (66.7\\%)",
-        "osp_td": 0.67,
-        "osp_outliers": "15.0\\%"
-    },
-    {
-        "id": "B14",
-        "name": "B14: Top 100 in Public Health",
-        "docs": 200,
-        "k_pub": 3,
-        "lda_recovered": "1/3 (33.3\\%)",
-        "lda_td": 0.73,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "3/3 (100.0\\%)",
-        "osp_td": 0.90,
-        "osp_outliers": "33.8\\%"
-    },
-    {
-        "id": "B16",
-        "name": "B16: Solar Power Generation",
-        "docs": 190,
-        "k_pub": 2,
-        "lda_recovered": "1/2 (50.0\\%)",
-        "lda_td": 0.75,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "2/2 (100.0\\%)",
-        "osp_td": 0.80,
-        "osp_outliers": "41.8\\%"
-    },
-    {
-        "id": "B17",
-        "name": "B17: Sustainable Business Performance",
-        "docs": 197,
-        "k_pub": 3,
-        "lda_recovered": "2/3 (66.7\\%)",
-        "lda_td": 0.60,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "3/3 (100.0\\%)",
-        "osp_td": 0.77,
-        "osp_outliers": "47.9\\%"
-    },
-    {
-        "id": "B15",
-        "name": "B15: Social Work and Migration",
-        "docs": 171,
-        "k_pub": 3,
-        "lda_recovered": "2/3 (66.7\\%)",
-        "lda_td": 0.67,
-        "lda_outliers": "0.0\\%",
-        "osp_recovered": "3/3 (100.0\\%)",
-        "osp_td": 0.87,
-        "osp_outliers": "9.5\\%"
-    }
-]
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from scripts.evaluate_thematic_validation import (
+    BENCHMARK_SLUGS,
+    load_extracted_topics,
+    tokenize_keywords,
+    match_topics_to_clusters,
+)
+from scripts.evaluate_clustering_benchmarks import compute_topic_diversity
 
-# Panel B: Graph Partitioning Scalability Data
-GRAPH_PANEL_DATA = [
-    {
-        "id": "B07",
-        "corpus": "B07: Digital Transformation",
-        "nodes": 842,
-        "edges": 2104,
-        "communities": 18,
-        "q_cpu": 0.9412,
-        "q_gpu": 0.9415,
-        "nmi": 0.961,
-        "cpu_time": "0.08\\,s",
-        "gpu_time": "3.8\\,ms ($21\\times$)"
-    },
-    {
-        "id": "B03",
-        "corpus": "B03: Modified Biochar",
-        "nodes": 912,
-        "edges": 2480,
-        "communities": 22,
-        "q_cpu": 0.9380,
-        "q_gpu": 0.9383,
-        "nmi": 0.958,
-        "cpu_time": "0.11\\,s",
-        "gpu_time": "4.1\\,ms ($27\\times$)"
-    },
-    {
-        "id": "B12",
-        "corpus": "B12: Soil Microplastics",
-        "nodes": 428,
-        "edges": 831,
-        "communities": 14,
-        "q_cpu": 0.9668,
-        "q_gpu": 0.9669,
-        "nmi": 0.974,
-        "cpu_time": "0.01\\,s",
-        "gpu_time": "4.2\\,ms ($2\\times$)"
-    },
-    {
-        "id": "B04",
-        "corpus": "B04: Blockchain Technology",
-        "nodes": 278,
-        "edges": 341,
-        "communities": 11,
-        "q_cpu": 0.9607,
-        "q_gpu": 0.9607,
-        "nmi": 0.982,
-        "cpu_time": "0.01\\,s",
-        "gpu_time": "3.4\\,ms ($3\\times$)"
-    },
-    {
-        "id": "B09",
-        "corpus": "B09: Decadal Electrophysiology Graph",
-        "nodes": 118338,
-        "edges": 569295,
-        "communities": 1412,
-        "q_cpu": 0.9009,
-        "q_gpu": 0.9011,
-        "nmi": 0.942,
-        "cpu_time": "1,680.0\\,s (28.0\\,min)",
-        "gpu_time": "\\textbf{0.84\\,s ($\\approx 2{,}000\\times$)}"
-    }
-]
+SEEDS = [42, 43, 44, 45, 46]
+JACCARD_THRESHOLD = 0.10
 
 
-def generate_latex_table(out_tex_path: str):
-    """Emits the synchronized two-panel Table 6 matching paper scaffold."""
-    os.makedirs(os.path.dirname(out_tex_path), exist_ok=True)
-    lines = []
-    lines.append("\\begin{table*}[t]")
-    lines.append("\\centering")
-    lines.append("\\scriptsize")
-    lines.append("\\renewcommand{\\arraystretch}{0.90}")
-    lines.append("\\caption{Head-to-Head Baseline Comparison: Thematic Cluster Recovery (Human Ground Truth vs.\\ Classical LDA vs.\\ OpenSciencePipe) and Computational Graph Scalability}")
-    lines.append("\\label{tab:baseline_thematic_graph}")
-    lines.append("\\resizebox{\\textwidth}{!}{%")
-    lines.append("\\begin{tabular}{l c c ccc ccc}")
-    lines.append("\\hline")
-    lines.append("\\multicolumn{9}{l}{\\textbf{Panel A: Thematic Cluster Recovery across Ten Published Scientometric Benchmarks (Published Baselines $K_{\\text{pub}}$)}} \\\\")
-    lines.append("\\hline")
-    lines.append("& & & \\multicolumn{3}{c}{\\textbf{Classical LDA Baseline (Blei et al., 2003)}} & \\multicolumn{3}{c}{\\textbf{OpenSciencePipe (BERTopic + HDBSCAN)}} \\\\")
-    lines.append("\\cline{4-6} \\cline{7-9}")
-    lines.append("\\textbf{Benchmark Investigation} & \\textbf{Docs ($N$)} & \\textbf{Human Clusters ($K_{\\text{pub}}$)} & \\textbf{Recovered} & \\textbf{Diversity ($\\text{TD}$)} & \\textbf{Outliers} & \\textbf{Recovered} & \\textbf{Diversity ($\\text{TD}$)} & \\textbf{Outliers} \\\\")
-    lines.append("\\hline")
+def run_lda_on_texts(texts: list, k_topics: int, seed: int, top_n: int = 10) -> list:
+    vec = CountVectorizer(
+        lowercase=True,
+        stop_words="english",
+        ngram_range=(1, 2),
+        min_df=2,
+        max_features=5000,
+    )
+    dtm = vec.fit_transform(texts)
+    vocab = vec.get_feature_names_out()
+    lda = LatentDirichletAllocation(
+        n_components=k_topics,
+        max_iter=20,
+        learning_method="batch",
+        random_state=seed,
+    )
+    lda.fit(dtm)
+    topic_words = []
+    for comp in lda.components_:
+        top_idx = comp.argsort()[-top_n:][::-1]
+        topic_words.append([vocab[i] for i in top_idx])
+    return topic_words
 
-    total_docs = sum(r["docs"] for r in THEMATIC_PANEL_DATA)
-    total_k_pub = sum(r["k_pub"] for r in THEMATIC_PANEL_DATA)
-    lda_td_mean = np.mean([r["lda_td"] for r in THEMATIC_PANEL_DATA])
-    osp_td_mean = np.mean([r["osp_td"] for r in THEMATIC_PANEL_DATA])
-    osp_out_mean = np.mean([float(r["osp_outliers"].replace("\\", "").replace("%", "")) for r in THEMATIC_PANEL_DATA])
 
-    for r in THEMATIC_PANEL_DATA:
-        lines.append(f"{r['name']} & {r['docs']} & {r['k_pub']} & {r['lda_recovered']} & {r['lda_td']:.2f} & {r['lda_outliers']} & \\textbf{{{r['osp_recovered']}}} & \\textbf{{{r['osp_td']:.2f}}} & {r['osp_outliers']} \\\\")
+def evaluate_panel_a():
+    panel_a = []
+    # For exact McNemar test across verified clusters (seed 42 LDA vs BERTopic)
+    mcnemar_b = 0  # BERTopic=1, LDA=0
+    mcnemar_c = 0  # BERTopic=0, LDA=1
 
-    lines.append("\\hline")
-    lines.append(f"\\textbf{{Total / Summary Mean}} & \\textbf{{{total_docs:,}}} & \\textbf{{{total_k_pub}}} & \\textbf{{15/29 (51.7\\%)}} & \\textbf{{{lda_td_mean:.2f}}} & \\textbf{{0.0\\%}} & \\textbf{{26/29 (89.7\\%)}} & \\textbf{{{osp_td_mean:.2f}}} & \\textbf{{{osp_out_mean:.1f}\\%}} \\\\")
-    lines.append("\\hline")
-    lines.append("\\multicolumn{9}{l}{\\textbf{Panel B: Graph Partitioning Scalability on Co-authorship Topologies (Louvain Modularity $Q$ and Partition Agreement)}} \\\\")
-    lines.append("\\hline")
-    lines.append("\\textbf{Corpus} & \\textbf{Nodes} & \\textbf{Edges} & \\textbf{Comms} & \\textbf{$Q_{\\text{CPU}}$} & \\textbf{$Q_{\\text{GPU}}$} & \\textbf{NMI} & \\textbf{CPU (NetworkX)} & \\textbf{GPU (cuGraph)} \\\\")
-    lines.append("\\hline")
+    for bid, short_name, slug in BENCHMARK_SLUGS:
+        json_path = f"data/benchmarks/{slug}.json"
+        csv_path = f"data/collected_{slug}.csv"
+        topic_path = f"outputs/pipeline_results_{slug}/topic_info.csv"
 
-    for g in GRAPH_PANEL_DATA:
-        nodes_str = f"{g['nodes']:,}"
-        edges_str = f"{g['edges']:,}"
-        comms_str = f"{g['communities']:,}"
-        lines.append(f"{g['corpus']} & {nodes_str} & {edges_str} & {comms_str} & {g['q_cpu']:.4f} & {g['q_gpu']:.4f} & {g['nmi']:.3f} & {g['cpu_time']} & {g['gpu_time']} \\\\")
+        with open(json_path, "r", encoding="utf-8") as f:
+            b_meta = json.load(f)
 
-    lines.append("\\hline")
-    lines.append("\\end{tabular}%")
-    lines.append("}")
-    lines.append("\\vspace{2pt}\\par\\raggedright\\scriptsize\\textit{Note:} Evaluation follows the comparative topic extraction protocol of Gl\\\"aser et al. (2017) and Velden et al. (2017). In Panel A, classical Latent Dirichlet Allocation (LDA) is evaluated at $K = K_{\\text{pub}}$ on identical raw title and abstract texts. LDA outlier rate is $0.0\\%$ due to Dirichlet mixture argmax forced allocation. OpenSciencePipe discovers natural density-based clusters without pre-specifying $K$ ($K \\le K_{\\text{pub}}$ across 9 benchmarks; $K=5$ fine-grained sub-themes on B07 that cleanly aggregate into the 3 published clusters), recovering 26 of 29 human clusters ($89.7\\%$) versus 15 of 29 ($51.7\\%$) for LDA, with superior topic diversity ($\\overline{\\text{TD}} = 0.81$ vs.\\ $0.71$) achieved by isolating boundary documents into Topic~$-1$. Panel B benchmarks Louvain community detection on an AMD Ryzen 7 3700X CPU (NetworkX) versus NVIDIA RTX 2060 GPU (cuGraph). Modularity is reported independently for CPU ($Q_{\\text{CPU}}$) and GPU ($Q_{\\text{GPU}}$) alongside partition Normalized Mutual Information (NMI, Danon et al., 2005) across 10 independent repetitions ($0.84 \\pm 0.02$\\,s on device; host-to-device transfer adds 0.12\\,s). On small graphs ($<1{,}000$ edges), CPU execution is already interactive (0.01--0.11\\,s); GPU acceleration provides transformative operational scaling on dense networks exceeding $10^5$ edges.")
-    lines.append("\\end{table*}")
+        clusters = b_meta.get("scientometrics", {}).get("clusters", [])
+        if not clusters:
+            continue
 
-    content = "\n".join(lines) + "\n"
-    with open(out_tex_path, "w", encoding="utf-8") as f:
-        f.write(content)
-    print(f"[+] Successfully wrote synchronized Table 6 to: {out_tex_path}")
+        df_corpus = pd.read_csv(csv_path)
+        texts = [
+            f"{t}. {a}".strip()
+            for t, a in zip(
+                df_corpus["Title"].fillna("").astype(str),
+                df_corpus["Abstract"].fillna("").astype(str),
+            )
+            if a.strip()
+        ]
+
+        topics = load_extracted_topics(topic_path)
+        df_topics_full = pd.read_csv(topic_path)
+        total_clustered = int(df_topics_full["Count"].sum())
+        out_row = df_topics_full[df_topics_full["Topic"] == -1]
+        out_count = int(out_row["Count"].values[0]) if not out_row.empty else 0
+        non_out_count = total_clustered - out_count
+        out_pct = (out_count / total_clustered * 100.0) if total_clustered > 0 else 0.0
+
+        cluster_sets = [tokenize_keywords(c["keywords"]) for c in clusters]
+        k_pub = len(clusters)
+
+        # BERTopic evaluation
+        osp_words = [t["words"][:10] for t in topics]
+        osp_sets = [tokenize_keywords(w) for w in osp_words]
+        _, osp_hung, _ = match_topics_to_clusters(osp_sets, cluster_sets, threshold=JACCARD_THRESHOLD)
+        osp_td = compute_topic_diversity(osp_words, top_k=10)
+
+        # LDA across 5 seeds (All non-empty abstract docs)
+        lda_all_rec = []
+        lda_all_td = []
+        lda_seed42_hung = set()
+        for seed in SEEDS:
+            w_list = run_lda_on_texts(texts, k_pub, seed)
+            w_sets = [tokenize_keywords(w) for w in w_list]
+            _, r_h, _ = match_topics_to_clusters(w_sets, cluster_sets, threshold=JACCARD_THRESHOLD)
+            lda_all_rec.append(len(r_h))
+            lda_all_td.append(compute_topic_diversity(w_list, top_k=10))
+            if seed == 42:
+                lda_seed42_hung = r_h
+
+        # LDA across 5 seeds (Matched-N = same non-outlier document count)
+        lda_match_rec = []
+        rng = np.random.default_rng(42)
+        n_sample = min(non_out_count, len(texts))
+        for seed in SEEDS:
+            idx = rng.choice(len(texts), size=n_sample, replace=False)
+            sub_texts = [texts[i] for i in idx]
+            w_list = run_lda_on_texts(sub_texts, k_pub, seed)
+            w_sets = [tokenize_keywords(w) for w in w_list]
+            _, r_h, _ = match_topics_to_clusters(w_sets, cluster_sets, threshold=JACCARD_THRESHOLD)
+            lda_match_rec.append(len(r_h))
+
+        for c_idx in range(k_pub):
+            in_osp = c_idx in osp_hung
+            in_lda = c_idx in lda_seed42_hung
+            if in_osp and not in_lda:
+                mcnemar_b += 1
+            elif not in_osp and in_lda:
+                mcnemar_c += 1
+
+        panel_a.append({
+            "id": bid,
+            "name": f"{bid}: {short_name}",
+            "docs_abs": len(texts),
+            "docs_non_out": non_out_count,
+            "k_pub": k_pub,
+            "lda_all_mean": float(np.mean(lda_all_rec)),
+            "lda_all_std": float(np.std(lda_all_rec)),
+            "lda_match_mean": float(np.mean(lda_match_rec)),
+            "lda_td": float(np.mean(lda_all_td)),
+            "osp_rec": len(osp_hung),
+            "osp_td": osp_td,
+            "osp_out": out_pct,
+        })
+
+    n_disc = mcnemar_b + mcnemar_c
+    mcnemar_p = float(binomtest(min(mcnemar_b, mcnemar_c), n_disc, 0.5).pvalue) if n_disc > 0 else 1.0
+    return panel_a, (mcnemar_b, mcnemar_c, mcnemar_p)
+
+
+def evaluate_panel_b():
+    graph_targets = [
+        ("B07", "B07: Digital Transformation", "outputs/pipeline_results_benchmark_digital_transformation_kraus2021"),
+        ("B03", "B03: Modified Biochar", "outputs/pipeline_results_benchmark_biochar_citespace"),
+        ("B12", "B12: Soil Microplastics", "outputs/pipeline_results_benchmark_microplastics_soil"),
+        ("B04", "B04: Blockchain Technology", "outputs/pipeline_results_benchmark_blockchain_vosviewer"),
+        ("EEG18k", "EEG Co-Authorship Subset", "outputs/pipeline_results_18k"),
+    ]
+    has_cugraph = False
+    try:
+        import cudf
+        import cugraph
+        from sklearn.metrics import normalized_mutual_info_score
+        has_cugraph = True
+    except ImportError:
+        pass
+
+    panel_b = []
+    for gid, label, out_dir in graph_targets:
+        nodes_p = os.path.join(out_dir, "network_nodes.csv")
+        edges_p = os.path.join(out_dir, "network_edges.csv")
+        if not (os.path.exists(nodes_p) and os.path.exists(edges_p)):
+            continue
+        edges_df = pd.read_csv(edges_p)
+        G = nx.Graph()
+        src_col = next((c for c in ["Source", "source"] if c in edges_df.columns), None)
+        dst_col = next((c for c in ["Target", "target", "destination", "Destination"] if c in edges_df.columns), None)
+        if not src_col or not dst_col:
+            continue
+        for _, row in edges_df.iterrows():
+            G.add_edge(row[src_col], row[dst_col])
+
+        t0 = time.perf_counter()
+        comms = nx.community.louvain_communities(G, seed=42)
+        cpu_s = time.perf_counter() - t0
+        q_cpu = nx.community.modularity(G, comms)
+
+        row_dict = {
+            "corpus": label,
+            "nodes": G.number_of_nodes(),
+            "edges": G.number_of_edges(),
+            "comms": len(comms),
+            "q_cpu": q_cpu,
+            "cpu_time": f"{cpu_s:.3f}\\,s" if cpu_s < 1.0 else f"{cpu_s:.2f}\\,s",
+            "has_cugraph": has_cugraph,
+            "q_gpu": None,
+            "nmi": None,
+            "gpu_time": None,
+        }
+
+        if has_cugraph:
+            node_list = sorted(G.nodes(), key=str)
+            node_to_idx = {n: i for i, n in enumerate(node_list)}
+            cpu_part = {}
+            for c_id, c_nodes in enumerate(comms):
+                for n in c_nodes:
+                    cpu_part[node_to_idx[n]] = c_id
+
+            edge_rows = [(node_to_idx[u], node_to_idx[v]) for u, v in G.edges()]
+            pdf_edges = pd.DataFrame(edge_rows, columns=["src", "dst"])
+            gdf_edges = cudf.DataFrame.from_pandas(pdf_edges)
+            G_gpu = cugraph.Graph()
+            G_gpu.from_cudf_edgelist(gdf_edges, source="src", destination="dst", renumber=False)
+
+            gpu_times = []
+            parts_df = None
+            q_gpu = 0.0
+            for _ in range(10):
+                tg0 = time.perf_counter()
+                parts_df, q_gpu = cugraph.louvain(G_gpu)
+                gpu_times.append(time.perf_counter() - tg0)
+
+            parts_pd = parts_df.to_pandas()
+            gpu_part = dict(zip(parts_pd["vertex"].astype(int), parts_pd["partition"].astype(int)))
+            common_v = sorted(cpu_part.keys() & gpu_part.keys())
+            y_cpu = [cpu_part[v] for v in common_v]
+            y_gpu = [gpu_part[v] for v in common_v]
+            nmi_val = float(normalized_mutual_info_score(y_cpu, y_gpu))
+
+            mean_gpu_s = float(np.mean(gpu_times))
+            speedup = cpu_s / mean_gpu_s if mean_gpu_s > 0 else 0.0
+            gpu_str = (
+                f"{mean_gpu_s*1000:.1f}\\,ms (${speedup:.1f}\\times$)"
+                if mean_gpu_s < 0.1
+                else f"{mean_gpu_s:.2f}\\,s (${speedup:.1f}\\times$)"
+            )
+            row_dict.update({
+                "q_gpu": float(q_gpu),
+                "nmi": nmi_val,
+                "gpu_time": gpu_str,
+            })
+
+        panel_b.append(row_dict)
+    return panel_b
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Head-to-Head Baseline Evaluation Script")
-    parser.add_argument("--output-tex", default="manuscripts/paper4_opensciencepipe_landmark/tables/tab_baseline_thematic_graph.tex",
-                        help="Path to emit LaTeX table")
-    args = parser.parse_args()
+    print("Running Panel A (Real LDA vs BERTopic across verified benchmarks)...")
+    panel_a, (mb, mc, mp) = evaluate_panel_a()
+    print("Running Panel B (Real NetworkX Louvain benchmarks)...")
+    panel_b = evaluate_panel_b()
 
-    print("=" * 85)
-    print("OPENSCIENCEPIPE HEAD-TO-HEAD BASELINE EVALUATION (PANEL A & PANEL B)")
-    print("=" * 85)
-    print("-> Panel A: Thematic Cluster Recovery across 10 Published Scientometric Benchmarks")
-    print("   Total Published Ground-Truth Clusters: 29")
-    print("   OpenSciencePipe Cluster Recovery:     26/29 (89.7%)")
-    print("   Classical LDA Baseline Recovery:      15/29 (51.7%)")
-    print("-> Panel B: Co-authorship Graph Topologies & cuGraph GPU Acceleration")
-    print("   Flagship Decadal Electrophysiology:    118,338 nodes, 569,295 edges")
-    print("   CPU NetworkX Louvain Runtime:          1,680.0 s (28.0 min)")
-    print("   GPU cuGraph Louvain Runtime:            0.84 s (~2,000x speedup)")
-    print("   Modularity Agreement:                  Q_CPU = 0.9009, Q_GPU = 0.9011 (NMI = 0.942)")
-    print("=" * 85)
+    total_docs = sum(r["docs_abs"] for r in panel_a)
+    total_k = sum(r["k_pub"] for r in panel_a)
+    total_osp = sum(r["osp_rec"] for r in panel_a)
+    total_lda_all = sum(r["lda_all_mean"] for r in panel_a)
+    total_lda_match = sum(r["lda_match_mean"] for r in panel_a)
+    mean_lda_td = float(np.mean([r["lda_td"] for r in panel_a]))
+    mean_osp_td = float(np.mean([r["osp_td"] for r in panel_a]))
+    mean_osp_out = float(np.mean([r["osp_out"] for r in panel_a]))
 
-    generate_latex_table(args.output_tex)
+    print(f"Panel A Summary (n={len(panel_a)} verified benchmarks, K_pub={total_k}):")
+    print(f"  LDA (All, 5-seed mean):       {total_lda_all:.1f}/{total_k} ({100*total_lda_all/total_k:.1f}%), TD={mean_lda_td:.2f}")
+    print(f"  LDA (Matched-N, 5-seed mean): {total_lda_match:.1f}/{total_k} ({100*total_lda_match/total_k:.1f}%)")
+    print(f"  OpenSciencePipe (Hungarian):  {total_osp}/{total_k} ({100*total_osp/total_k:.1f}%), TD={mean_osp_td:.2f}")
+    print(f"  Exact McNemar (b={mb}, c={mc}): p={mp:.4f}")
+
+    out_tex = "manuscripts/paper4_opensciencepipe_landmark/tables/tab_baseline_thematic_graph.tex"
+    lines = [
+        "% Auto-generated by scripts/run_head_to_head_baselines.py",
+        "\\begin{table*}[t]",
+        "\\centering",
+        "\\scriptsize",
+        "\\renewcommand{\\arraystretch}{0.90}",
+        "\\caption{Head-to-Head Baseline Comparison: Thematic Cluster Recovery (Classical LDA vs.\\ OpenSciencePipe) and CPU Graph Partitioning}",
+        "\\label{tab:baseline_thematic_graph}",
+        "\\resizebox{\\textwidth}{!}{%",
+        "\\begin{tabular}{l c c ccc ccc}",
+        "\\hline",
+        "\\multicolumn{9}{l}{\\textbf{Panel A: Thematic Cluster Recovery on Verified Ground-Truth Benchmarks (5-Seed LDA at $K = K_{\\text{pub}}$, Hungarian $\\tau = 0.10$)}} \\\\",
+        "\\hline",
+        "& & & \\multicolumn{3}{c}{\\textbf{Classical LDA (Blei et al., 2003)}} & \\multicolumn{3}{c}{\\textbf{OpenSciencePipe (BERTopic + HDBSCAN)}} \\\\",
+        "\\cline{4-6} \\cline{7-9}",
+        "\\textbf{Benchmark Investigation} & \\textbf{Docs ($N_{\\text{abs}}$)} & \\textbf{$K_{\\text{pub}}$} & \\textbf{Rec. (All)} & \\textbf{Rec. (Matched-$N$)} & \\textbf{TD} & \\textbf{Recovered} & \\textbf{TD} & \\textbf{Outliers} \\\\",
+        "\\hline",
+    ]
+    for r in panel_a:
+        lines.append(
+            f"{r['name']} & {r['docs_abs']} & {r['k_pub']} & "
+            f"{r['lda_all_mean']:.1f}/{r['k_pub']} ({100*r['lda_all_mean']/r['k_pub']:.1f}\\%) & "
+            f"{r['lda_match_mean']:.1f}/{r['k_pub']} ({100*r['lda_match_mean']/r['k_pub']:.1f}\\%) & "
+            f"{r['lda_td']:.2f} & "
+            f"\\textbf{{{r['osp_rec']}/{r['k_pub']} ({100*r['osp_rec']/r['k_pub']:.1f}\\%)}} & "
+            f"\\textbf{{{r['osp_td']:.2f}}} & {r['osp_out']:.1f}\\% \\\\"
+        )
+    lines.extend([
+        "\\hline",
+        (
+            f"\\textbf{{Total / Summary Mean}} & \\textbf{{{total_docs:,}}} & \\textbf{{{total_k}}} & "
+            f"\\textbf{{{total_lda_all:.1f}/{total_k} ({100*total_lda_all/total_k:.1f}\\%)}} & "
+            f"\\textbf{{{total_lda_match:.1f}/{total_k} ({100*total_lda_match/total_k:.1f}\\%)}} & "
+            f"\\textbf{{{mean_lda_td:.2f}}} & "
+            f"\\textbf{{{total_osp}/{total_k} ({100*total_osp/total_k:.1f}\\%)}} & "
+            f"\\textbf{{{mean_osp_td:.2f}}} & \\textbf{{{mean_osp_out:.1f}\\%}} \\\\"
+        ),
+        "\\hline",
+        "\\multicolumn{9}{l}{\\textbf{Panel B: Co-Authorship Graph Partitioning (NetworkX CPU vs.\\ RAPIDS cuGraph GPU Louvain)}} \\\\",
+        "\\hline",
+        "\\textbf{Corpus} & \\textbf{Nodes} & \\textbf{Edges} & \\textbf{Comms} & \\textbf{$Q_{\\text{CPU}}$} & \\textbf{$Q_{\\text{GPU}}$} & \\textbf{NMI} & \\textbf{CPU (NetworkX)} & \\textbf{GPU (cuGraph)} \\\\",
+        "\\hline",
+    ])
+    for g in panel_b:
+        if g["has_cugraph"] and g["q_gpu"] is not None:
+            lines.append(
+                f"{g['corpus']} & {g['nodes']:,} & {g['edges']:,} & {g['comms']:,} & "
+                f"{g['q_cpu']:.4f} & {g['q_gpu']:.4f} & {g['nmi']:.3f} & {g['cpu_time']} & {g['gpu_time']} \\\\"
+            )
+        else:
+            lines.append(
+                f"{g['corpus']} & {g['nodes']:,} & {g['edges']:,} & {g['comms']:,} & "
+                f"{g['q_cpu']:.4f} & -- & -- & {g['cpu_time']} & Container-only \\\\"
+            )
+    lines.extend([
+        "\\hline",
+        "\\end{tabular}%",
+        "}",
+        (
+            f"\\vspace{{2pt}}\\par\\raggedright\\scriptsize\\textit{{Note:}} Panel~A evaluates scikit-learn \\texttt{{LatentDirichletAllocation}} "
+            f"(English stop words, 1--2-grams, \\texttt{{min\\_df=2}}, 20 batch iterations, seeds 42--46) on both all non-empty abstract documents and "
+            f"matched non-outlier document counts against OpenSciencePipe using one-to-one Hungarian matching at Jaccard threshold $\\tau = 0.10$ "
+            f"(exact McNemar test between OpenSciencePipe and seed-42 LDA: $b={mb}, c={mc}, p={mp:.4f}$). "
+            f"Panel~B reports reproducible host CPU Louvain timings via NetworkX on the exported \\texttt{{network\\_edges.csv}} graphs; "
+            f"GPU \\texttt{{cuGraph}} execution requires the RAPIDS container environment."
+        ),
+        "\\end{table*}",
+    ])
+    with open(out_tex, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"Wrote {out_tex}")
 
 
 if __name__ == "__main__":

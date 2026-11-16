@@ -88,7 +88,7 @@ npm run dev
 ## 5. Development Standards
 - **Adding Sources**: New collectors should be added to `src/core/collectors/` and registered in `UnifiedCollector`.
 - **Validation**: Always validate data using `PublicationSchema` before processing.
-- **GPU Safety**: Ensure RAPIDS libraries (`cudf`, `cugraph`) are only called within the container environment.
+- **GPU Safety**: RAPIDS libraries (`cudf`, `cugraph`) are installed only inside the `biblio-pipeline` Podman container, not in the host `uv`/`.venv` environment. To run GPU scripts (`cugraph`, `cudf`), start the persistent dev container with `bash scripts/start_dev_container.sh` and execute via `podman exec biblio-dev python <script.py>` (e.g., `podman exec biblio-dev python scripts/run_head_to_head_baselines.py`).
 - **Modularity**: Keep core analysis logic independent of the UI or CLI entrypoints.
 - **Formatting**: Do not use emojis in any responses, code comments, logs, or documentation.
 

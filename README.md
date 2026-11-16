@@ -333,13 +333,38 @@ Run the regression and unit test suite:
 
 ```bash
 # Using uv (fastest)
-uv run --with pytest python -m pytest tests/
+uv run pytest -q
 
 # Using standard virtual environment
 pytest tests/
 ```
 
-All 43 unit and integration tests pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
+All 49 unit and integration tests pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
+
+### Reproducing Manuscript Tables (Tables 5–7)
+
+Each benchmark configuration in `data/benchmarks/*.json` records `corpus_provenance` (`harvest_date`, `sources`, `total_records`, `records_with_abstract`, and frozen `record_ids`).
+
+1. **Table 5 (Clustering Quality, Full-Corpus $C_{\text{NPMI}}$, and Country Concordance vs. Naive Baseline):**
+   ```bash
+   uv run python scripts/regenerate_table5.py
+   ```
+2. **Table 6 (Thematic Validation via Thresholded Hungarian Matching & Permutation Baseline):**
+   ```bash
+   uv run python scripts/evaluate_thematic_validation.py
+   ```
+   Reads published cluster definitions strictly from `data/benchmarks/*.json` (`scientometrics.clusters`).
+3. **Table 7 (5-Seed Classical LDA vs. BERTopic and CPU NetworkX vs. GPU cuGraph Louvain):**
+   - **With GPU (`cuGraph` + `cudf`) inside the RAPIDS container (recommended):**
+     ```bash
+     podman build -t biblio-pipeline -f Containerfile .
+     bash scripts/start_dev_container.sh
+     podman exec -u 0 biblio-dev python scripts/run_head_to_head_baselines.py
+     ```
+   - **CPU-only host (runs 5-seed LDA + NetworkX CPU Louvain):**
+     ```bash
+     uv run python scripts/run_head_to_head_baselines.py
+     ```
 
 ---
 
@@ -350,7 +375,7 @@ If you use OpenSciencePipe in your research, please cite our landmark manuscript
 ```bibtex
 @article{farinha2026opensciencepipe,
   author    = {João Garcia Farinha and Carlos Duarte},
-  title     = {OpenSciencePipe: An End-to-End Computational Framework for Autonomous Bibliometric Science Mapping},
+  title     = {OpenSciencePipe: An End-to-End Computational Framework for Automated Bibliometric Science Mapping},
   journal   = {Quantitative Science Studies},
   year      = {2026},
   note      = {Under Review}
