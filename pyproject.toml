@@ -1,6 +1,6 @@
 [project]
 name = "opensciencepipe"
-version = "1.0.0"
+version = "1.1.1"
 description = "An end-to-end computational framework for autonomous bibliometric science mapping and informetrics."
 readme = "README.md"
 requires-python = ">=3.10"

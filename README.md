@@ -4,7 +4,7 @@
 
 **Automated Bibliometric Science Mapping & Reproducible Report Generation**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24165758.svg)](https://doi.org/10.5281/zenodo.24165758)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24322866.svg)](https://doi.org/10.5281/zenodo.24322866)
 [![CI](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml/badge.svg)](https://github.com/JohnGF/OpenSciencePipe/actions/workflows/ci.yml)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue?logo=python&logoColor=white)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -52,8 +52,8 @@ Pre-configured with NVIDIA CUDA 12.8, RAPIDS 25.06 (`cugraph`, `cudf`), PyTorch 
 docker build -t opensciencepipe -f Containerfile .
 
 # Run an analysis directly
-docker run --gpus all --rm -it -v $(pwd):/app:z opensciencepipe \
-  biblio-pipeline --query "brain-computer interface" --limit 200
+docker run --gpus all --rm -it -v $(pwd):/app:z --entrypoint biblio-pipeline opensciencepipe \
+  --query "brain-computer interface" --limit 200
 ```
 
 #### Podman:
@@ -62,8 +62,8 @@ docker run --gpus all --rm -it -v $(pwd):/app:z opensciencepipe \
 podman build -t localhost/opensciencepipe -f Containerfile .
 
 # Run directly
-podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z localhost/opensciencepipe \
-  biblio-pipeline --query "brain-computer interface" --limit 200
+podman run --device nvidia.com/gpu=all --ipc=host --rm -it -v $(pwd):/app:z --entrypoint biblio-pipeline localhost/opensciencepipe \
+  --query "brain-computer interface" --limit 200
 ```
 
 #### 100% Local AI Pod (BERTopic + Ollama LLM Buckets — Zero API Costs):
@@ -95,8 +95,8 @@ uv run biblio-pipeline --file data/publications.csv \
 
 # 2B. Or run inside the pod using the container:
 podman run --pod openscience-ai-pod --device nvidia.com/gpu=all --rm -it \
-  -v $(pwd):/app:z localhost/biblio-pipeline \
-  biblio-pipeline --file data/publications.csv \
+  -v $(pwd):/app:z --entrypoint biblio-pipeline localhost/opensciencepipe \
+  --file data/publications.csv \
                   --mode systematic \
                   --screen-llm \
                   --llm-topic-naming \

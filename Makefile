@@ -60,11 +60,11 @@ pipeline:
 
 container-pipeline:
 	@echo "[+] Running full bibliometric pipeline inside Container with GPU acceleration..."
-	$(CONTAINER_ENGINE) run -it --rm $(GPU_FLAGS) $(MOUNT_FLAGS) $(IMAGE_NAME) --file $(DATASET_FILE) --output $(OUT_DIR)
+	$(CONTAINER_ENGINE) run -it --rm $(GPU_FLAGS) $(MOUNT_FLAGS) --entrypoint biblio-pipeline $(IMAGE_NAME) --file $(DATASET_FILE) --output $(OUT_DIR)
 
 container-query:
 	@echo "[+] Running query collection and analysis inside Container with GPU acceleration..."
-	$(CONTAINER_ENGINE) run -it --rm $(GPU_FLAGS) $(MOUNT_FLAGS) $(IMAGE_NAME) --query "$(QUERY)" --limit $(LIMIT) --start-year $(START_YEAR) --end-year $(END_YEAR) --output $(OUT_DIR)
+	$(CONTAINER_ENGINE) run -it --rm $(GPU_FLAGS) $(MOUNT_FLAGS) --entrypoint biblio-pipeline $(IMAGE_NAME) --query "$(QUERY)" --limit $(LIMIT) --start-year $(START_YEAR) --end-year $(END_YEAR) --output $(OUT_DIR)
 
 clean:
 	@echo "[+] Removing TeX build logs and auxiliary files..."
