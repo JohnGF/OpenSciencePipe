@@ -5,7 +5,7 @@ from typing import Optional, List
 import polars as pl
 import pandas as pd
 
-from src.core.nlp import BERTopicPipeline
+from src.core.nlp import BERTopicPipeline, detect_bursts_kleinberg
 from src.core.network import NetworkAnalysis
 from src.core.viz import Visualization
 from src.core.countries import CountryAnalysis
@@ -164,6 +164,20 @@ class AnalysisOrchestrator:
                             f"Top Trending Research Focus: '{top_5_cagr.iloc[0]['standardized_word']}' (+{top_5_cagr.iloc[0]['cagr_percent']:.1f}% CAGR)",
                             f"Top 5 Fastest Growing Keywords: {top_5_kw_str}",
                         ]
+
+                        bursts_df = detect_bursts_kleinberg(
+                            kw_df.select(["Year", "standardized_word"]).to_pandas(),
+                            term_col="standardized_word",
+                            year_col="Year",
+                        )
+                        if not bursts_df.empty:
+                            bursts_df.to_csv(os.path.join(self.output_dir, "keywords_bursts.csv"), index=False)
+                            top_3_b = ", ".join([
+                                f"{r['Term']} ({int(r['Start_Year'])}-{int(r['End_Year'])}, w={r['Weight']:.1f})"
+                                for _, r in bursts_df.head(3).iterrows()
+                            ])
+                            bullets.append(f"Kleinberg Keyword Bursts Detected: {len(bursts_df)} (Top: {top_3_b})")
+
                         _print_stage_summary("Keyword CAGR Analysis", bullets, elapsed_sec=time.time() - t_stage)
             except Exception as e:
                 print(f">>> [ERROR] Failed to run keyword CAGR analysis: {e}")
