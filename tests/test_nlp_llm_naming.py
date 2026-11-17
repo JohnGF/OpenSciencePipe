@@ -97,3 +97,44 @@ def test_apply_llm_topic_labels_and_get_research_lines():
 
     rl = pipe.get_research_lines()
     assert list(rl["topic_label"]) == ["Motor Imagery BCI Systems", "1_fmri_bold_cortex"]
+
+
+def test_subcluster_oversized_topics_splits_large_cluster():
+    pipe = BERTopicPipeline(llm_model="llama3.2:3b")
+    pipe.topic_model = _DummyTopicModel()
+    pipe.custom_labels = {0: "Biochar Soil Carbon Production", 1: "Biochar Adsorption"}
+
+    # 45 docs in topic 0 (oversized), 10 docs in topic 1 (not oversized)
+    docs = [f"Doc {i} about biochar soil" for i in range(45)] + [f"Doc {i} about fmri" for i in range(10)]
+    topics = [0] * 45 + [1] * 10
+
+    class _FakeSubModel:
+        def fit_transform(self, sub_docs):
+            return ([0] * 25 + [1] * 20), None
+
+        def get_topic_info(self):
+            return pd.DataFrame([
+                {"Topic": 0, "Name": "0_pyrolysis_temp", "Count": 25},
+                {"Topic": 1, "Name": "1_soil_carbon", "Count": 20},
+            ])
+
+        def get_topic(self, tid):
+            return [("pyrolysis", 0.4), ("biochar", 0.3)] if tid == 0 else [("soil", 0.4), ("carbon", 0.3)]
+
+        def get_representative_docs(self, tid):
+            return ["Sample abstract."]
+
+    responses = iter([
+        _FakeResponse({"response": json.dumps({"label": "Pyrolysis Temperature Effects"})}),
+        _FakeResponse({"response": json.dumps({"label": "Soil Carbon Sequestration"})}),
+    ])
+
+    with patch.object(pipe, "_build_bertopic", return_value=_FakeSubModel()), \
+         patch("urllib.request.urlopen", side_effect=lambda *a, **kw: next(responses)):
+        sub_df = pipe.subcluster_oversized_topics(docs=docs, topics=topics, min_parent_size=40, max_passes=2)
+
+    assert len(sub_df) == 2
+    assert list(sub_df["subtopic_id"]) == ["0.0", "0.1"]
+    assert list(sub_df["subtopic_label"]) == ["Pyrolysis Temperature Effects", "Soil Carbon Sequestration"]
+    assert list(sub_df["pass_depth"]) == [2, 2]
+

@@ -187,6 +187,18 @@ class AnalysisOrchestrator:
                 if not research_lines.empty:
                     research_lines.to_csv(os.path.join(self.output_dir, "topic_research_lines.csv"), index=False)
 
+                subclusters_df = pd.DataFrame()
+                subcluster_threshold = self.config.get("subcluster_threshold", 0)
+                if subcluster_threshold > 0:
+                    subclusters_df = self.nlp.subcluster_oversized_topics(
+                        docs=docs,
+                        topics=topics,
+                        min_parent_size=subcluster_threshold,
+                        max_passes=self.config.get("subcluster_passes", 2),
+                    )
+                    if not subclusters_df.empty:
+                        subclusters_df.to_csv(os.path.join(self.output_dir, "topic_subclusters.csv"), index=False)
+
                 if topic_info is not None:
                     valid_topics = topic_info[topic_info["Topic"] != -1]
                     top_3_t = valid_topics.nlargest(3, "Count")
@@ -197,6 +209,8 @@ class AnalysisOrchestrator:
                         f"Top 3 Dominant Themes: {top_3_str}",
                         f"High-Level Research Lines Generated: {len(research_lines)}"
                     ]
+                    if not subclusters_df.empty:
+                        bullets.append(f"Recursive Sub-Clusters Generated: {len(subclusters_df)}")
                     _print_stage_summary("Topic Modeling (BERTopic)", bullets, elapsed_sec=time.time() - t_stage)
             else:
                 print(">>> [WARNING] Too few abstracts for BERTopic (minimum 10 required). Skipping Stage 3.4.")

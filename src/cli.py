@@ -80,6 +80,8 @@ def main():
     parser.add_argument("--screen-llm", action="store_true", help="Enable Option 2: LLM zero-shot classification")
     parser.add_argument("--llm-model", type=str, default="llama3.2:3b", help="Model name for Ollama LLM screening and topic naming")
     parser.add_argument("--llm-topic-naming", action="store_true", help="Use local Ollama LLM (--llm-model) to generate human-readable BERTopic cluster names")
+    parser.add_argument("--subcluster-threshold", type=int, default=0, help="Minimum cluster size to trigger recursive sub-clustering of oversized BERTopic topics (e.g. 40; 0 disables)")
+    parser.add_argument("--subcluster-passes", type=int, default=2, help="Maximum clustering passes when --subcluster-threshold is enabled (default: 2)")
     parser.add_argument("--include-preprints", action="store_true", help="Include preprints from arXiv and bioRxiv")
 
     # Modular Stage Control Options
@@ -212,6 +214,8 @@ def main():
     config["screen_llm"] = args.screen_llm
     config["llm_model"] = args.llm_model
     config["llm_topic_naming"] = args.llm_topic_naming
+    config["subcluster_threshold"] = args.subcluster_threshold
+    config["subcluster_passes"] = args.subcluster_passes
     config["include_preprints"] = args.include_preprints
 
     if args.stages:

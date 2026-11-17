@@ -69,6 +69,8 @@ class BERTopicPipeline:
         self.ollama_url = ollama_url.rstrip("/")
         self.topic_model = None
         self.custom_labels: Dict[int, str] = {}
+        self._last_docs: List[str] = []
+        self._last_topics: List[int] = []
 
     def preprocess_keywords(self, df: pl.DataFrame, column: str = "Author Keywords") -> pl.DataFrame:
         """Standardizes and explodes keywords as per existing logic."""
@@ -87,41 +89,63 @@ class BERTopicPipeline:
             .alias("standardized_word")
         )
 
+    def _build_bertopic(self, n_docs: int, min_cluster_size: int = 10) -> BERTopic:
+        """Builds a deterministic BERTopic instance sized to the corpus."""
+        from sklearn.feature_extraction.text import CountVectorizer
+
+        min_df_val = 2 if n_docs > 50 else 1
+        vectorizer_model = CountVectorizer(stop_words="english", min_df=min_df_val, ngram_range=(1, 2))
+        n_neighbors = max(2, min(15, n_docs - 1))
+        n_components = max(2, min(5, n_docs - 2))
+
+        if HAS_RAPIDS_CUML:
+            umap_model = UMAP(
+                n_components=n_components,
+                n_neighbors=n_neighbors,
+                min_dist=0.0,
+                metric="cosine",
+                random_state=42,
+            )
+            hdbscan_model = HDBSCAN(
+                min_cluster_size=min_cluster_size,
+                cluster_selection_method="eom",
+                prediction_data=True,
+            )
+        else:
+            from umap import UMAP as CPU_UMAP
+            from hdbscan import HDBSCAN as CPU_HDBSCAN
+
+            umap_model = CPU_UMAP(
+                n_components=n_components,
+                n_neighbors=n_neighbors,
+                min_dist=0.0,
+                metric="cosine",
+                random_state=42,
+            )
+            hdbscan_model = CPU_HDBSCAN(
+                min_cluster_size=min_cluster_size,
+                metric="euclidean",
+                cluster_selection_method="eom",
+                prediction_data=True,
+            )
+
+        return BERTopic(
+            embedding_model=self.model_name,
+            umap_model=umap_model,
+            hdbscan_model=hdbscan_model,
+            vectorizer_model=vectorizer_model,
+            calculate_probabilities=True,
+        )
+
     def fit_model(self, docs: List[str]):
         """Fits BERTopic on a list of documents (abstracts)."""
         device = "cuda" if HAS_TORCH_CUDA else "cpu"
         logging.info(f"BERTopic: Fitting model using {device} (RAPIDS accelerated: {HAS_RAPIDS_CUML})")
-        
-        from sklearn.feature_extraction.text import CountVectorizer
-        min_df_val = 2 if len(docs) > 50 else 1
-        vectorizer_model = CountVectorizer(stop_words="english", min_df=min_df_val, ngram_range=(1, 2))
 
-        if HAS_RAPIDS_CUML:
-            # RAPIDS-accelerated pipeline with fixed deterministic seed and aligned cosine metric
-            umap_model = UMAP(n_components=5, n_neighbors=15, min_dist=0.0, metric="cosine", random_state=42)
-            hdbscan_model = HDBSCAN(min_cluster_size=10, cluster_selection_method="eom", prediction_data=True)
-            self.topic_model = BERTopic(
-                embedding_model=self.model_name, 
-                umap_model=umap_model, 
-                hdbscan_model=hdbscan_model,
-                vectorizer_model=vectorizer_model,
-                calculate_probabilities=True
-            )
-        else:
-            # Standard CPU pipeline with explicit deterministic UMAP
-            from umap import UMAP as CPU_UMAP
-            from hdbscan import HDBSCAN as CPU_HDBSCAN
-            umap_model = CPU_UMAP(n_components=5, n_neighbors=15, min_dist=0.0, metric="cosine", random_state=42)
-            hdbscan_model = CPU_HDBSCAN(min_cluster_size=10, metric="euclidean", cluster_selection_method="eom", prediction_data=True)
-            self.topic_model = BERTopic(
-                embedding_model=self.model_name,
-                umap_model=umap_model,
-                hdbscan_model=hdbscan_model,
-                vectorizer_model=vectorizer_model,
-                calculate_probabilities=True
-            )
-        
+        self.topic_model = self._build_bertopic(len(docs), min_cluster_size=10)
         topics, probs = self.topic_model.fit_transform(docs)
+        self._last_docs = list(docs)
+        self._last_topics = list(topics)
         return topics, probs
 
     def calculate_cagr(self, df: pl.DataFrame, count_col: str = "count", year_col: str = "Year") -> pl.DataFrame:
@@ -276,6 +300,84 @@ class BERTopicPipeline:
             if hasattr(self.topic_model, "set_topic_labels"):
                 self.topic_model.set_topic_labels(labels)
         return labels
+
+    def subcluster_oversized_topics(
+        self,
+        docs: Optional[List[str]] = None,
+        topics: Optional[List[int]] = None,
+        min_parent_size: int = 40,
+        min_share: float = 0.35,
+        max_passes: int = 2,
+    ) -> pd.DataFrame:
+        """Recursively sub-clusters oversized topics up to max_passes (pass 1 is the base fit)."""
+        docs = docs if docs is not None else self._last_docs
+        topics = topics if topics is not None else self._last_topics
+        if not self.topic_model or not docs or not topics or max_passes < 2:
+            return pd.DataFrame()
+
+        total_docs = len(docs)
+        base_info = self.topic_model.get_topic_info()
+        label_col = "CustomName" if "CustomName" in base_info.columns else "Name"
+        parent_labels = {
+            int(r["Topic"]): str(self.custom_labels.get(int(r["Topic"])) or r[label_col])
+            for _, r in base_info.iterrows()
+        }
+
+        rows: List[Dict] = []
+
+        def _recurse(sub_docs: List[str], sub_topics: List[int], parent_id: int, parent_lbl: str, depth: int):
+            if depth > max_passes or len(sub_docs) < 15:
+                return
+            min_cs = max(5, min(10, len(sub_docs) // 8))
+            sub_model = self._build_bertopic(len(sub_docs), min_cluster_size=min_cs)
+            try:
+                child_topics, _ = sub_model.fit_transform(sub_docs)
+            except Exception as e:
+                logging.warning(f"Sub-clustering failed for topic {parent_id} at depth {depth}: {e}")
+                return
+
+            child_info = sub_model.get_topic_info()
+            valid_children = child_info[child_info["Topic"] != -1]
+            if len(valid_children) < 2:
+                return
+
+            for _, crow in valid_children.iterrows():
+                cid = int(crow["Topic"])
+                ccount = int(crow["Count"])
+                words = [w[0] for w in (sub_model.get_topic(cid) or [])[:8]]
+                rep_docs: List[str] = []
+                if hasattr(sub_model, "get_representative_docs"):
+                    try:
+                        rep_docs = sub_model.get_representative_docs(cid) or []
+                    except Exception:
+                        rep_docs = []
+                llm_lbl = self.label_topic_with_llm(words, rep_docs) if self.llm_model else None
+                clabel = llm_lbl or str(crow.get("Name", f"Subtopic {cid}"))
+                rows.append({
+                    "parent_topic_id": parent_id,
+                    "parent_label": parent_lbl,
+                    "subtopic_id": f"{parent_id}.{cid}",
+                    "subtopic_label": clabel,
+                    "keywords": ", ".join(words[:5]),
+                    "count": ccount,
+                    "pass_depth": depth,
+                })
+                if depth < max_passes and ccount >= min_parent_size:
+                    nested_docs = [d for d, t in zip(sub_docs, child_topics) if int(t) == cid]
+                    _recurse(nested_docs, [cid] * len(nested_docs), cid, clabel, depth + 1)
+
+        for _, row in base_info.iterrows():
+            tid = int(row["Topic"])
+            if tid == -1:
+                continue
+            count = int(row["Count"])
+            if count < 15:
+                continue
+            if count >= min_parent_size or (total_docs > 0 and (count / total_docs) >= min_share):
+                subset_docs = [d for d, t in zip(docs, topics) if int(t) == tid]
+                _recurse(subset_docs, [tid] * len(subset_docs), tid, parent_labels.get(tid, f"Topic {tid}"), 2)
+
+        return pd.DataFrame(rows)
 
     def get_research_lines(self, docs: Optional[List[str]] = None, nr_clusters: int = 5) -> pd.DataFrame:
         """Groups topics into broader 'Research Lines' using hierarchical clustering."""
