@@ -10,7 +10,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![NVIDIA RAPIDS](https://img.shields.io/badge/RAPIDS-cuGraph%20%7C%20cuDF%20%7C%20cuML-76B900?logo=nvidia&logoColor=white)](https://rapids.ai/)
 [![Container: Docker & Podman](https://img.shields.io/badge/container-Docker%20%7C%20Podman-2496ED?logo=docker&logoColor=white)](Containerfile)
-[![Test Suite](https://img.shields.io/badge/tests-49%20passed%20(100%25)-brightgreen.svg)](tests/)
+[![Test Suite](https://img.shields.io/badge/tests-62%20collected%20(100%25)-brightgreen.svg)](tests/)
 [![Target Journal](https://img.shields.io/badge/manuscript-Quantitative%20Science%20Studies-orange.svg)](https://direct.mit.edu/qss)
 
 <p align="center">
@@ -342,7 +342,22 @@ uv run pytest -q
 pytest tests/
 ```
 
-All 49 unit and integration tests pass covering async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, and meta-analytic statistical pooling.
+The test suite (`62` collected unit and integration tests) covers async collectors, schema validation, network extraction, disambiguation, EGM matrix generation, meta-analytic statistical pooling, and reproducible `run_config.json` / `--zenodo` workflows.
+
+### Reproducible Runs & Collaborative Merging (`run_config.json`)
+
+Every pipeline run automatically saves a credential-free `<output_dir>/run_config.json` containing the query, year bounds, screening/NLP/network parameters, output dataset path, and per-source collection status (`success`, `missing_key`, `skipped`, `empty`, `error`).
+
+```bash
+# Replay a saved run (or override specific flags such as the year window)
+uv run biblio-pipeline --config outputs/pipeline_results/run_config.json --start-year 2025 --end-year 2026 --output outputs/run_2025_2026
+
+# Collaborator workflow: fetch only missing/key-gated sources (e.g. Scopus/WoS) and merge + deduplicate with the prior dataset
+uv run biblio-pipeline --config author_a/run_config.json --fetch-missing --output outputs/combined
+
+# Or explicitly target/skip sources and merge with one or more local datasets
+uv run biblio-pipeline --config author_a/run_config.json --sources web_of_science,scopus --merge-file author_a/data/publication_dataset.csv --output outputs/combined
+```
 
 ### Reproducing Manuscript Tables (Tables 5–7)
 

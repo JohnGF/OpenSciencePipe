@@ -21,6 +21,12 @@ _CLOUD_UNLOCK_PATH = "/run/user/1000/credentials/api_keys.env"
 PEER_REVIEWED_SOURCES = ["openalex", "semantic_scholar", "crossref", "pubmed", "scopus", "web_of_science", "ieee", "acm"]
 PREPRINT_SOURCES = ["arxiv", "biorxiv"]
 
+SOURCE_KEY_REQUIREMENTS = {
+    "scopus": {"env": "SCOPUS_API_KEY", "flag": "--scopus-api-key"},
+    "web_of_science": {"env": "WOS_API_KEY", "flag": "--wos-api-key"},
+    "ieee": {"env": "IEEE_API_KEY", "flag": "--ieee-api-key"},
+}
+
 
 def _load_credentials() -> None:
     """Load credentials from .env first, then fall back to cloud-unlock tmpfs.
@@ -83,6 +89,17 @@ class UnifiedCollector:
             "arxiv": ArXivCollector(),
             "biorxiv": BioRxivCollector(email=oa_email),
         }
+        self.last_source_status: Dict[str, Dict] = {}
+
+    def has_key_for(self, src_name: str) -> bool:
+        """Return True if the source requires no API key or has one configured."""
+        req = SOURCE_KEY_REQUIREMENTS.get(src_name)
+        if not req:
+            return True
+        collector = self.collectors.get(src_name)
+        if collector is not None and getattr(collector, "api_key", None):
+            return True
+        return bool(os.environ.get(req["env"]))
 
     def fetch_all(self, query: str, limit_per_source: int = 100, sources: Optional[List[str]] = None, 
                   start_year: Optional[int] = None, end_year: Optional[int] = None,
@@ -92,30 +109,47 @@ class UnifiedCollector:
         preprints are excluded by default unless include_preprints=True or --include-preprints is passed.
         """
         all_dfs = []
+        self.last_source_status = {}
         allow_preprints = include_preprints if include_preprints is not None else self.config.get("include_preprints", False)
-        
-        if sources:
-            target_sources = sources
+        configured_sources = sources if sources is not None else self.config.get("sources")
+        skip_sources = {s.strip().lower() for s in (self.config.get("skip_sources") or []) if s}
+
+        if configured_sources:
+            target_sources = [s.strip().lower() for s in configured_sources if s]
         else:
             target_sources = [s for s in self.collectors.keys() if allow_preprints or s not in PREPRINT_SOURCES]
 
+        for s in list(target_sources):
+            if s in skip_sources:
+                self.last_source_status[s] = {"status": "skipped", "count": 0}
+        if skip_sources:
+            target_sources = [s for s in target_sources if s not in skip_sources]
+
         from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        valid_sources = [s for s in target_sources if s in self.collectors]
+        valid_sources = []
         for s in target_sources:
             if s not in self.collectors:
                 logger.warning(f"Source {s} not recognized.")
+                self.last_source_status[s] = {"status": "unknown", "count": 0}
+            elif s in SOURCE_KEY_REQUIREMENTS and not self.has_key_for(s):
+                req = SOURCE_KEY_REQUIREMENTS[s]
+                logger.info(f"Skipping {s}: missing {req['env']}")
+                self.last_source_status[s] = {
+                    "status": "missing_key",
+                    "required_env": req["env"],
+                    "flag": req["flag"],
+                    "count": 0,
+                }
+            else:
+                valid_sources.append(s)
 
         def _fetch_single_source(src_name: str) -> pd.DataFrame:
             logger.info(f"Starting parallel fetch for source: {src_name}")
-            try:
-                collector = self.collectors[src_name]
-                return collector.fetch_papers(
-                    query, limit=limit_per_source, start_year=start_year, end_year=end_year
-                )
-            except Exception as e:
-                logger.error(f"Error in parallel fetch for {src_name}: {e}")
-                return pd.DataFrame()
+            collector = self.collectors[src_name]
+            return collector.fetch_papers(
+                query, limit=limit_per_source, start_year=start_year, end_year=end_year
+            )
 
         with ThreadPoolExecutor(max_workers=min(len(valid_sources), 8) or 1) as executor:
             futures = {
@@ -126,10 +160,14 @@ class UnifiedCollector:
                 src_name = futures[future]
                 try:
                     df = future.result()
-                    if not df.empty:
+                    if df is not None and not df.empty:
                         all_dfs.append(df)
+                        self.last_source_status[src_name] = {"status": "success", "count": len(df)}
                         logger.info(f"Finished parallel fetch for {src_name}: {len(df)} papers retrieved.")
+                    else:
+                        self.last_source_status[src_name] = {"status": "empty", "count": 0}
                 except Exception as e:
+                    self.last_source_status[src_name] = {"status": "error", "error": str(e), "count": 0}
                     logger.error(f"Failed to get result for {src_name}: {e}")
 
         if not all_dfs:

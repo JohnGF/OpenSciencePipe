@@ -257,3 +257,59 @@ def validate_data(df: pd.DataFrame) -> List[PublicationSchema]:
     # Convert dataframe to list of dicts and validate with Pydantic
     records = df.to_dict(orient="records")
     return [PublicationSchema(**record) for record in records]
+
+
+def fetch_zenodo_dataset(
+    zenodo_id_or_doi: str,
+    dest_dir: str = "data/zenodo",
+    filename_hint: Optional[str] = None,
+) -> str:
+    """Download tabular dataset files from a Zenodo record/DOI and return the primary dataset path."""
+    import json
+    import os
+    import urllib.request
+
+    raw = zenodo_id_or_doi.strip()
+    m = re.search(r"(\d+)$", raw.rstrip("/"))
+    if not m:
+        raise ValueError(f"Could not extract Zenodo record ID from '{zenodo_id_or_doi}'")
+    record_id = m.group(1)
+
+    out_dir = os.path.join(dest_dir, f"zenodo_{record_id}")
+    os.makedirs(out_dir, exist_ok=True)
+
+    api_url = f"https://zenodo.org/api/records/{record_id}"
+    req = urllib.request.Request(api_url, headers={"User-Agent": "OpenSciencePipe/1.0"})
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        metadata = json.loads(resp.read().decode("utf-8"))
+
+    tabular_exts = (".csv", ".parquet", ".xlsx")
+    aux_exts = (".txt",)
+    downloaded_tabular = []
+
+    for f_info in metadata.get("files", []):
+        key = f_info.get("key", "")
+        lower = key.lower()
+        if not lower.endswith(tabular_exts + aux_exts):
+            continue
+        dest_path = os.path.join(out_dir, key)
+        if not os.path.exists(dest_path):
+            dl_url = f_info["links"]["self"]
+            dl_req = urllib.request.Request(dl_url, headers={"User-Agent": "OpenSciencePipe/1.0"})
+            with urllib.request.urlopen(dl_req, timeout=60) as r, open(dest_path, "wb") as out_f:
+                out_f.write(r.read())
+        if lower.endswith(tabular_exts):
+            downloaded_tabular.append((dest_path, f_info.get("size", 0)))
+
+    if not downloaded_tabular:
+        raise ValueError(f"No CSV/Parquet/XLSX files found in Zenodo record {record_id}")
+
+    if filename_hint:
+        hint_lower = filename_hint.lower()
+        for path, _ in downloaded_tabular:
+            if hint_lower in os.path.basename(path).lower():
+                return path
+
+    # Default to the largest tabular file (typically the primary corpus export)
+    downloaded_tabular.sort(key=lambda item: item[1], reverse=True)
+    return downloaded_tabular[0][0]

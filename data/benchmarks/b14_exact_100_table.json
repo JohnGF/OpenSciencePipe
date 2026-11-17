@@ -1,0 +1,802 @@
+[
+  {
+    "rank": 1,
+    "wos_citations": 30229,
+    "first_author": "Charlson, ME",
+    "title_and_source": "A new method of classifying prognostic co-morbidity in longitudinal-studies-development and validation Journal of Chronic Diseases",
+    "country": "USA",
+    "year": 1987
+  },
+  {
+    "rank": 2,
+    "wos_citations": 24802,
+    "first_author": "Ware, JE",
+    "title_and_source": "The Mos 36-Item short-form health survey (SF-36). 1. Conceptual-framework and item selection Medical Care",
+    "country": "USA",
+    "year": 1992
+  },
+  {
+    "rank": 3,
+    "wos_citations": 18779,
+    "first_author": "Higgins, JPT",
+    "title_and_source": "Quantifying heterogeneity in a meta-analysis Statistics in Medicine",
+    "country": "England",
+    "year": 2002
+  },
+  {
+    "rank": 4,
+    "wos_citations": 11110,
+    "first_author": "Ware, JE",
+    "title_and_source": "A 12-item short-form health survey\u2014Construction of scales and preliminary tests of reliability and validity Medical Care",
+    "country": "USA",
+    "year": 1996
+  },
+  {
+    "rank": 5,
+    "wos_citations": 11091,
+    "first_author": "von Elm, E",
+    "title_and_source": "The Strengthening the Reporting of Observational Studies in Epidemiology (STROBE) statement: Guidelines for reporting observational studies Preventive Medicine",
+    "country": "Switzerland",
+    "year": 2007
+  },
+  {
+    "rank": 6,
+    "wos_citations": 10754,
+    "first_author": "Schulz, KF",
+    "title_and_source": "CONSORT 2010 Statement: Updated guidelines for reporting parallel group randomised trials Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 2010
+  },
+  {
+    "rank": 7,
+    "wos_citations": 10302,
+    "first_author": "Moher, D",
+    "title_and_source": "Preferred Reporting Items for Systematic Reviews and Meta-Analyses: The PRISMA Statement Journal of Clinical Epidemiology",
+    "country": "Canada",
+    "year": 2009
+  },
+  {
+    "rank": 8,
+    "wos_citations": 7879,
+    "first_author": "Deyo, RA",
+    "title_and_source": "Adapting a clinical comorbidity index for use eith ICD-9-CM administrative databases Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 1992
+  },
+  {
+    "rank": 9,
+    "wos_citations": 7582,
+    "first_author": "Felitti, VJ",
+    "title_and_source": "Relationship of childhood abuse and household dysfunction to many of the leading causes of death in adults\u2014The adverse childhood experiences (ACE) study American Journal of Preventive Medicine",
+    "country": "USA",
+    "year": 1998
+  },
+  {
+    "rank": 10,
+    "wos_citations": 6438,
+    "first_author": "Harrell, FE",
+    "title_and_source": "Multivariable prognostic models: Issues in developing models, evaluating assumptions and adequacy, and measuring and reducing errors Statistics in Medicine",
+    "country": "USA",
+    "year": 1996
+  },
+  {
+    "rank": 11,
+    "wos_citations": 6116,
+    "first_author": "Elixhauser, A",
+    "title_and_source": "Comorbidity measures for use with administrative data Medical Care",
+    "country": "USA",
+    "year": 1998
+  },
+  {
+    "rank": 12,
+    "wos_citations": 5658,
+    "first_author": "Quan, HD",
+    "title_and_source": "Coding algorithms for de\ufb01ning comorbidities in ICD-9-CM and ICD-10 administrative data Medical Care",
+    "country": "Canada",
+    "year": 2005
+  },
+  {
+    "rank": 13,
+    "wos_citations": 5138,
+    "first_author": "Oberdorster, G",
+    "title_and_source": "Nanotoxicology: An emerging discipline evolving from studies of ultra\ufb01ne particles Environmental Health Perspectives",
+    "country": "USA",
+    "year": 2005
+  },
+  {
+    "rank": 14,
+    "wos_citations": 5111,
+    "first_author": "Terwee, CB",
+    "title_and_source": "Quality criteria were proposed for measurement properties of health status questionnaires Journal of Clinical Epidemiology",
+    "country": "Netherland",
+    "year": 2007
+  },
+  {
+    "rank": 15,
+    "wos_citations": 5034,
+    "first_author": "Zou, GY",
+    "title_and_source": "A modi\ufb01ed Poisson regression approach to prospective studies with binary data American Journal of Epidemiology",
+    "country": "Canada",
+    "year": 2004
+  },
+  {
+    "rank": 16,
+    "wos_citations": 4838,
+    "first_author": "McHorney, CA",
+    "title_and_source": "The Mos 36-Item Short-form Health survey (SF-36). 2. Psychometric and clinical-test of validity in measuring physical and mental-health constructs Medical Care",
+    "country": "USA",
+    "year": 1993
+  },
+  {
+    "rank": 17,
+    "wos_citations": 4707,
+    "first_author": "Downs, SH",
+    "title_and_source": "The feasibility of creating a checklist for the assessment of the methodological quality both of randomised and non-randomised studies of health care interventions Journal of Epidemiology and Community Health",
+    "country": "England",
+    "year": 1998
+  },
+  {
+    "rank": 18,
+    "wos_citations": 4636,
+    "first_author": "Garner, JS",
+    "title_and_source": "CDC De\ufb01nitions for nosocomial infections, 1988 American Journal of Infection Control",
+    "country": "USA",
+    "year": 1988
+  },
+  {
+    "rank": 19,
+    "wos_citations": 4451,
+    "first_author": "Pencina, MJ",
+    "title_and_source": "Evaluating the added predictive ability of a new marker: From area under the ROC curve to reclassi\ufb01cation and beyond Statistics in Medicine",
+    "country": "USA",
+    "year": 2008
+  },
+  {
+    "rank": 20,
+    "wos_citations": 4356,
+    "first_author": "Peduzzi, P",
+    "title_and_source": "A simulation study of the number of events per variable in logistic regression analysis Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 1996
+  },
+  {
+    "rank": 21,
+    "wos_citations": 4273,
+    "first_author": "von Elm, E",
+    "title_and_source": "The Strengthening the Reporting of Observational Studies in Epidemiology (STROBE) statement: guidelines for reporting observational studies Journal of Clinical Epidemiology",
+    "country": "Switzerland",
+    "year": 2008
+  },
+  {
+    "rank": 22,
+    "wos_citations": 4143,
+    "first_author": "White, IR",
+    "title_and_source": "Multiple imputation using chained equations: Issues and guidance for practice Statistics in Medicine",
+    "country": "England",
+    "year": 2011
+  },
+  {
+    "rank": 23,
+    "wos_citations": 4068,
+    "first_author": "D\u2019Agostino, RB",
+    "title_and_source": "Propensity score methods for bias reduction in the comparison of a treatment to a non-randomized control group Statistics in Medicine",
+    "country": "USA",
+    "year": 1998
+  },
+  {
+    "rank": 24,
+    "wos_citations": 3962,
+    "first_author": "Charlson, M",
+    "title_and_source": "Validation of a combined comorbidity index Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 1994
+  },
+  {
+    "rank": 25,
+    "wos_citations": 3947,
+    "first_author": "Horan, TC",
+    "title_and_source": "CDC/NHSN surveillance de\ufb01nition of health care-associated infection and criteria for speci\ufb01c types of infections in the acute care setting American Journal of Infection Control",
+    "country": "USA",
+    "year": 2008
+  },
+  {
+    "rank": 26,
+    "wos_citations": 3845,
+    "first_author": "Guyatt, GH",
+    "title_and_source": "GRADE guidelines: 9. Rating up the quality of evidence Journal of Clinical Epidemiology",
+    "country": "Canada",
+    "year": 2011
+  },
+  {
+    "rank": 27,
+    "wos_citations": 3816,
+    "first_author": "Ahlbom, A",
+    "title_and_source": "Guidelines for limiting exposure to time-varying electric, magnetic, and electromagnetic \ufb01elds (up to 300 GHz) Health Physics",
+    "country": "Germany",
+    "year": 1998
+  },
+  {
+    "rank": 28,
+    "wos_citations": 3783,
+    "first_author": "Caspersen, CJ",
+    "title_and_source": "Physical-activity, exercise, and physical-\ufb01tness\u2014de\ufb01nitions and distrinctions for health-related research Public Health Reports",
+    "country": "USA",
+    "year": 1985
+  },
+  {
+    "rank": 29,
+    "wos_citations": 3755,
+    "first_author": "de Onis, M",
+    "title_and_source": "Development of a WHO growth reference for school-aged children and adolescents Bulletin of the World Health Organization",
+    "country": "Switzerland",
+    "year": 2007
+  },
+  {
+    "rank": 30,
+    "wos_citations": 3495,
+    "first_author": "Balshem, H",
+    "title_and_source": "GRADE guidelines: 3. Rating the quality of evidence Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 2011
+  },
+  {
+    "rank": 31,
+    "wos_citations": 3385,
+    "first_author": "McHorney, CA",
+    "title_and_source": "The Mos 36-Item short-form health survey (SF-36). 3. Tests of data quality, scaling assumptions, and reliability across diverse patient groups Medical Care",
+    "country": "USA",
+    "year": 1994
+  },
+  {
+    "rank": 32,
+    "wos_citations": 3380,
+    "first_author": "Willett, WC",
+    "title_and_source": "Reproducibility and validatity of a semiquantitative food requency questionnaire American Journal of Epidemiology",
+    "country": "USA",
+    "year": 1985
+  },
+  {
+    "rank": 33,
+    "wos_citations": 3363,
+    "first_author": "Guillemin, F",
+    "title_and_source": "Cross-cultural adaptation of health-related quality-of-life mesures\u2014literatures\u2014review and proposed guidelines Journal of Clinical Epidemiology",
+    "country": "Canada",
+    "year": 1993
+  },
+  {
+    "rank": 34,
+    "wos_citations": 3361,
+    "first_author": "Bergner, M",
+    "title_and_source": "The sickness impact pro\ufb01le\u2014development and \ufb01nal revision of a health-status measure Medical Care",
+    "country": "USA",
+    "year": 1981
+  },
+  {
+    "rank": 35,
+    "wos_citations": 3246,
+    "first_author": "Miles, AA",
+    "title_and_source": "The estimation of the bactericidal power of the blood Journal of Hygiene",
+    "country": "Canada",
+    "year": 1938
+  },
+  {
+    "rank": 36,
+    "wos_citations": 3223,
+    "first_author": "Parmar, MKB",
+    "title_and_source": "Extracting summary statistics to perform meta-analyses of the published literature for survival endpoints Statistics in Medicine",
+    "country": "Italy",
+    "year": 1998
+  },
+  {
+    "rank": 37,
+    "wos_citations": 3198,
+    "first_author": "Daughton, CG",
+    "title_and_source": "Pharmaceuticals and personal care products in the environment: Agents of subtle change? Environmental Health Perspectives",
+    "country": "USA",
+    "year": 1999
+  },
+  {
+    "rank": 38,
+    "wos_citations": 3174,
+    "first_author": "Herdman, M",
+    "title_and_source": "Development and preliminary testing of the new \ufb01ve-level version of EQ-5D (EQ-5D-5L) Quality of Life Research",
+    "country": "Spain",
+    "year": 2011
+  },
+  {
+    "rank": 39,
+    "wos_citations": 3162,
+    "first_author": "Dolan, P",
+    "title_and_source": "Modeling valuations for EuroQol health states Medical Care",
+    "country": "England",
+    "year": 1997
+  },
+  {
+    "rank": 40,
+    "wos_citations": 3155,
+    "first_author": "Hudak, PL",
+    "title_and_source": "Development of an upper extremity outcome measure: The DASH (Disabilities of the Arm, Shoulder, and Head) American Journal of Industrial Medicine",
+    "country": "Canada",
+    "year": 1996
+  },
+  {
+    "rank": 41,
+    "wos_citations": 3133,
+    "first_author": "Berkman, LF",
+    "title_and_source": "Social networks, host-resistance, and mortality\u20149- year follou-up-study of alameda county residents American Journal of Epidemiology",
+    "country": "USA",
+    "year": 1979
+  },
+  {
+    "rank": 42,
+    "wos_citations": 3079,
+    "first_author": "Morisky, DE",
+    "title_and_source": "Concurrent and predictive-validity of a self-reported measure of medication adherence Medical Care",
+    "country": "USA",
+    "year": 1986
+  },
+  {
+    "rank": 43,
+    "wos_citations": 3039,
+    "first_author": "Clarke, DH",
+    "title_and_source": "Techniques for hemagglutination and hemagglutination-inhibition with arthropod-borne viruses American Journal of Tropical Medicine and Hygiene",
+    "country": "Ireland",
+    "year": 1958
+  },
+  {
+    "rank": 44,
+    "wos_citations": 3028,
+    "first_author": "Israel, BA",
+    "title_and_source": "Review of community-based research: Assessing partnership approaches to improve public health Annual Review of Public Health",
+    "country": "USA",
+    "year": 1998
+  },
+  {
+    "rank": 45,
+    "wos_citations": 3007,
+    "first_author": "Robins, JM",
+    "title_and_source": "Marginal structural models and causal inference in epidemiology Epidemiology",
+    "country": "USA",
+    "year": 2000
+  },
+  {
+    "rank": 46,
+    "wos_citations": 2976,
+    "first_author": "Andresen, EM",
+    "title_and_source": "Screening for depression in well older adults\u2014evaluation of a short-form of the CES-D American Journal of Preventive Medicine",
+    "country": "USA",
+    "year": 1994
+  },
+  {
+    "rank": 47,
+    "wos_citations": 2946,
+    "first_author": "Varni, JW",
+    "title_and_source": "PedsQL (TM) 4.0: Reliability and validity of the pediatric quality of life Inventory (TM) Version 4.0 generic core scales in healthy and patient populations Medical Care",
+    "country": "USA",
+    "year": 2001
+  },
+  {
+    "rank": 48,
+    "wos_citations": 2917,
+    "first_author": "Mangram, AJ",
+    "title_and_source": "Guideline for Prevention of Surgical Site Infection, 1999 Infection Control and Hospital Epidemiology",
+    "country": "USA",
+    "year": 1999
+  },
+  {
+    "rank": 49,
+    "wos_citations": 2883,
+    "first_author": "Kroenke, K",
+    "title_and_source": "The Patient Health Questionnaire-2\u2014Validity of a two-item depression screener Medical Care",
+    "country": "USA",
+    "year": 2003
+  },
+  {
+    "rank": 50,
+    "wos_citations": 2878,
+    "first_author": "Glasgow, RE",
+    "title_and_source": "Evaluating the public health impact of health promotion interventions: The RE-AIM framework American Journal of Public Health",
+    "country": "USA",
+    "year": 1999
+  },
+  {
+    "rank": 51,
+    "wos_citations": 2849,
+    "first_author": "Norman, GR",
+    "title_and_source": "Interpretation of changes in health-related quality of life\u2014The remarkable universality of half a standard deviation Medical Care",
+    "country": "Canada",
+    "year": 2003
+  },
+  {
+    "rank": 52,
+    "wos_citations": 2848,
+    "first_author": "Newcombe, RG",
+    "title_and_source": "Interval estimation for the difference between independent proportions: Comparison of eleven methods Statistics in Medicine",
+    "country": "Wales",
+    "year": 1998
+  },
+  {
+    "rank": 53,
+    "wos_citations": 2743,
+    "first_author": "Ludvigsson, JF",
+    "title_and_source": "External review and validation of the Swedish national inpatient register BMC Public Health",
+    "country": "Sweden",
+    "year": 2011
+  },
+  {
+    "rank": 54,
+    "wos_citations": 2714,
+    "first_author": "Kim, HJ",
+    "title_and_source": "Permutation tests for joinpoint regression with applications to cancer rates Statistics in Medicine",
+    "country": "USA",
+    "year": 2000
+  },
+  {
+    "rank": 55,
+    "wos_citations": 2714,
+    "first_author": "Colborn, T",
+    "title_and_source": "Delepmental effects of endocrine-disrupting chemicals in wildlife and humans Environmental Health Perspectives",
+    "country": "USA",
+    "year": 1993
+  },
+  {
+    "rank": 56,
+    "wos_citations": 2688,
+    "first_author": "Resnikoff, S",
+    "title_and_source": "Global data on visual impairment in the year 2002 Bulletin of the World Health Organitzation",
+    "country": "Switzerland",
+    "year": 2004
+  },
+  {
+    "rank": 57,
+    "wos_citations": 2592,
+    "first_author": "Van den Berg, M",
+    "title_and_source": "Toxic equivalency factors (TEFs) for PCBs, PCDDs, PCDFs for humans and wildlife Environmental Health Perspectives",
+    "country": "Netherland",
+    "year": 1998
+  },
+  {
+    "rank": 58,
+    "wos_citations": 2589,
+    "first_author": "Lynge, E",
+    "title_and_source": "The Danish National Patient Register Scandinavian Journal of Public Health",
+    "country": "Denmark",
+    "year": 2011
+  },
+  {
+    "rank": 59,
+    "wos_citations": 2574,
+    "first_author": "Williams, OD",
+    "title_and_source": "The atherosclerosis risk in communities (ARIC) study\u2014Deseign and objectives American Journal of Epidemiology",
+    "country": "USA",
+    "year": 1989
+  },
+  {
+    "rank": 60,
+    "wos_citations": 2517,
+    "first_author": "Willett, W",
+    "title_and_source": "Total energy-intake\u2014implications for epidemiologic analyses American Journal of Epidemiology",
+    "country": "USA",
+    "year": 1986
+  },
+  {
+    "rank": 61,
+    "wos_citations": 2485,
+    "first_author": "Wang, CY",
+    "title_and_source": "Immediate Psychological Responses and Associated Factors during the Initial Stage of the 2019 Coronavirus Disease (COVID-19) Epidemic among the General Population in China International Journal of Environmental Research and Public Health",
+    "country": "China",
+    "year": 2020
+  },
+  {
+    "rank": 62,
+    "wos_citations": 2470,
+    "first_author": "FerroLuzzi, A",
+    "title_and_source": "Physical status: The use and interpretation of anthropometry\u2014Introduction Physical Status: The use and Interpretation of Anthropometry",
+    "country": "USA",
+    "year": 1995
+  },
+  {
+    "rank": 63,
+    "wos_citations": 2460,
+    "first_author": "Austin, PC",
+    "title_and_source": "Balance diagnostics for comparing the distribution of baseline covariates between treatment groups in propensity-score matched samples Statistics in Medicine",
+    "country": "Canada",
+    "year": 2009
+  },
+  {
+    "rank": 64,
+    "wos_citations": 2452,
+    "first_author": "Pedersen, CB",
+    "title_and_source": "The Danish Civil Registration System Scandinavian Journal of Public Health",
+    "country": "Denmark",
+    "year": 2011
+  },
+  {
+    "rank": 65,
+    "wos_citations": 2435,
+    "first_author": "Cai, ZJ",
+    "title_and_source": "WHO expert committee on drug dependence\u2014Thirty-\ufb01rst report\u2014Introduction WHO Expert Committe on Drug Dependec\u201431 St Report",
+    "country": "China",
+    "year": 1999
+  },
+  {
+    "rank": 66,
+    "wos_citations": 2413,
+    "first_author": "Baumgartner, RN",
+    "title_and_source": "Epidemiology of sarcopenia among the elderly in New Mexico American Journal of Epidemiology",
+    "country": "USA",
+    "year": 1998
+  },
+  {
+    "rank": 67,
+    "wos_citations": 2356,
+    "first_author": "Quan, HD",
+    "title_and_source": "Updating and Validating the Charlson Comorbidity Index and Score for Risk Adjustment in Hospital Discharge Abstracts Using Data From 6 Countries American Journal of Epidemiology",
+    "country": "Canada",
+    "year": 2011
+  },
+  {
+    "rank": 68,
+    "wos_citations": 2304,
+    "first_author": "Bild, DE",
+    "title_and_source": "Multi-ethnic study of atherosclerosis: Objectives and design American Journal of Epidemiology",
+    "country": "USA",
+    "year": 2002
+  },
+  {
+    "rank": 69,
+    "wos_citations": 2271,
+    "first_author": "Steyerberg, EW",
+    "title_and_source": "Assessing the Performance of Prediction Models A Framework for Traditional and Novel Measures Epidemiology",
+    "country": "Netherland",
+    "year": 2010
+  },
+  {
+    "rank": 70,
+    "wos_citations": 2270,
+    "first_author": "Mukaka, MM",
+    "title_and_source": "Statistics Corner: A guide to appropriate use of Correlation coefficient in medical research Malawi Medical Journal",
+    "country": "England",
+    "year": 2012
+  },
+  {
+    "rank": 71,
+    "wos_citations": 2255,
+    "first_author": "Workowski, KA",
+    "title_and_source": "Sexually Transmitted Diseases Treatment Guidelines, 2015 MMWR Recommendations and Reports",
+    "country": "USA",
+    "year": 2015
+  },
+  {
+    "rank": 72,
+    "wos_citations": 2255,
+    "first_author": "Peppard, PE",
+    "title_and_source": "Increased Prevalence of Sleep-Disordered Breathing in Adults American Journal of Epidemiology",
+    "country": "USA",
+    "year": 2013
+  },
+  {
+    "rank": 73,
+    "wos_citations": 2220,
+    "first_author": "Skevington, SM",
+    "title_and_source": "The World Health Organization\u2019s WHOQOL-BREF quality of life assessment: Psychometric properties and results of the international \ufb01eld trial\u2014A report from the WHOQOL group Quality of Life Research",
+    "country": "England",
+    "year": 2004
+  },
+  {
+    "rank": 74,
+    "wos_citations": 2181,
+    "first_author": "Woolf, AD",
+    "title_and_source": "Burden of major musculoskeletal conditions Bulletin of the World Health Organitzation",
+    "country": "England",
+    "year": 2003
+  },
+  {
+    "rank": 75,
+    "wos_citations": 2154,
+    "first_author": "Cohen, SH",
+    "title_and_source": "Clinical Practice Guidelines for Clostridium dif\ufb01cile Infection in Adults: 2010 Update by the Society for Healthcare Epidemiology of America (SHEA) and the Infectious Diseases Society of America (IDSA) Infection Control and Hospital Epidemiology",
+    "country": "USA",
+    "year": 2010
+  },
+  {
+    "rank": 76,
+    "wos_citations": 2143,
+    "first_author": "Gooley, TA",
+    "title_and_source": "Estimation of failure probabilities in the presence of competing risks: New representations of old estimators Statistics in Medicine",
+    "country": "USA",
+    "year": 1999
+  },
+  {
+    "rank": 77,
+    "wos_citations": 2135,
+    "first_author": "Cella, D",
+    "title_and_source": "The Patient-Reported Outcomes Measurement Information System (PROMIS) developed and tested its \ufb01rst wave of adult self-reported health outcome item banks: 2005\u20132008 Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 2010
+  },
+  {
+    "rank": 78,
+    "wos_citations": 2132,
+    "first_author": "Greenland, S",
+    "title_and_source": "Causal diagrams for epidemiologic research Epidemiology",
+    "country": "USA",
+    "year": 1999
+  },
+  {
+    "rank": 79,
+    "wos_citations": 2125,
+    "first_author": "Klepeis, NE",
+    "title_and_source": "The National Human Activity Pattern Survey (NHAPS): a resource for assessing exposure to environmental pollutants Journal of Exposure Analysis and Environmental Epidemiology",
+    "country": "USA",
+    "year": 2001
+  },
+  {
+    "rank": 80,
+    "wos_citations": 2093,
+    "first_author": "Smith, GD",
+    "title_and_source": "\u2018Mendelian randomization\u2019: can genetic epidemiology contribute to understanding environmental determinants of disease? International Journal of Epidemiology",
+    "country": "England",
+    "year": 2003
+  },
+  {
+    "rank": 81,
+    "wos_citations": 2082,
+    "first_author": "Cardo, D",
+    "title_and_source": "National Nosocomial Infections Surveillance (NNIS) System Report, data summary from January 1992 through June 2004, issued October 2004 American Journal of Infection Control",
+    "country": "USA",
+    "year": 2004
+  },
+  {
+    "rank": 82,
+    "wos_citations": 2010,
+    "first_author": "Dowell, D",
+    "title_and_source": "CDC Guideline for Prescribing Opioids for Chronic Pain\u2014United States, 2016 MMWR Recommendations and Reports",
+    "country": "USA",
+    "year": 2016
+  },
+  {
+    "rank": 83,
+    "wos_citations": 1998,
+    "first_author": "Rose, G",
+    "title_and_source": "Sick individuals and sick populations International Journal of Epidemiology",
+    "country": "England",
+    "year": 1985
+  },
+  {
+    "rank": 84,
+    "wos_citations": 1997,
+    "first_author": "Vittinghoff, E",
+    "title_and_source": "Relaxing the rule of ten events per variable in logistic and Cox regression American Journal of Epidemiology",
+    "country": "USA",
+    "year": 2007
+  },
+  {
+    "rank": 85,
+    "wos_citations": 1980,
+    "first_author": "Washburn, RA",
+    "title_and_source": "The physical-activity scale for the elderly (PASE)\u2014Development and evaluation Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 1993
+  },
+  {
+    "rank": 86,
+    "wos_citations": 1969,
+    "first_author": "Guh, DP",
+    "title_and_source": "The incidence of co-morbidities related to obesity and overweight: A systematic review and meta-analysis BMC Public Health",
+    "country": "Canada",
+    "year": 2009
+  },
+  {
+    "rank": 87,
+    "wos_citations": 1968,
+    "first_author": "Baio, J",
+    "title_and_source": "Prevalence of Autism Spectrum Disorder Among Children Aged 8 Years\u2014Autism and Developmental Disabilities Monitoring Network, 11 Sites, United States, 2014 MMWR Surveillance Summaries",
+    "country": "USA",
+    "year": 2018
+  },
+  {
+    "rank": 88,
+    "wos_citations": 1960,
+    "first_author": "Torre, LA",
+    "title_and_source": "Global Cancer Incidence and Mortality Rates and Trends-An Update Cancer Epidemiology Biomarkers & Prevention",
+    "country": "USA",
+    "year": 2016
+  },
+  {
+    "rank": 89,
+    "wos_citations": 1932,
+    "first_author": "Sterne, JAC",
+    "title_and_source": "Funnel plots for detecting bias in meta-analysis: Guidelines on choice of axis Journal of Clinical Epidemiology",
+    "country": "England",
+    "year": 2001
+  },
+  {
+    "rank": 90,
+    "wos_citations": 1927,
+    "first_author": "Gandek, B",
+    "title_and_source": "Cross-validation of item selection and scoring for the SF-12 Health Survey in nine countries: Results from the IQOLA Project Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 1998
+  },
+  {
+    "rank": 91,
+    "wos_citations": 1909,
+    "first_author": "Thompson, SG",
+    "title_and_source": "How should meta-regression analyses be undertaken and interpreted? Statistics in Medicine",
+    "country": "England",
+    "year": 2002
+  },
+  {
+    "rank": 92,
+    "wos_citations": 1906,
+    "first_author": "Slovic, P",
+    "title_and_source": "Risk as analysis and risk as feelings: Some thoughts about affect, reason, risk, and rationality Risk Analysis",
+    "country": "USA",
+    "year": 2004
+  },
+  {
+    "rank": 93,
+    "wos_citations": 1885,
+    "first_author": "Wang, Y",
+    "title_and_source": "The obesity epidemic in the United States\u2014Gender, age, socioeconomic, Racial/Ethnic, and geographic characteristics: A systematic review and meta-regression analysis Epidemiology Review",
+    "country": "USA",
+    "year": 2007
+  },
+  {
+    "rank": 94,
+    "wos_citations": 1876,
+    "first_author": "Say, L",
+    "title_and_source": "Global causes of maternal death: a WHO systematic analysis Lancet Global Health",
+    "country": "Switzerland",
+    "year": 2014
+  },
+  {
+    "rank": 95,
+    "wos_citations": 1871,
+    "first_author": "Rice, D",
+    "title_and_source": "Critical periods of vulnerability for the developing nervous system: Evidence from humans and animal models Environmental Health Perspectives",
+    "country": "USA",
+    "year": 2000
+  },
+  {
+    "rank": 96,
+    "wos_citations": 1868,
+    "first_author": "Mokkink, LB",
+    "title_and_source": "The COSMIN checklist for assessing the methodological quality of studies on measurement properties of health status measurement instruments: an international Delphi study Quality of Life Research",
+    "country": "Netherland",
+    "year": 2010
+  },
+  {
+    "rank": 97,
+    "wos_citations": 1864,
+    "first_author": "Reitsma, JB",
+    "title_and_source": "Bivariate analysis of sensitivity and speci\ufb01city produces informative summary measures in diagnostic reviews Journal of Clinical Epidemiology",
+    "country": "Netherland",
+    "year": 2005
+  },
+  {
+    "rank": 98,
+    "wos_citations": 1856,
+    "first_author": "Jemal, A;",
+    "title_and_source": "Global Patterns of Cancer Incidence and Mortality Rates and Trends Cancer Epidemiology Biomarkers & Prevention",
+    "country": "USA",
+    "year": 2010
+  },
+  {
+    "rank": 99,
+    "wos_citations": 1848,
+    "first_author": "Feinstein, AR",
+    "title_and_source": "High agreement but low Kappa. 1. The problem of 2 paradoxes Journal of Clinical Epidemiology",
+    "country": "USA",
+    "year": 1990
+  },
+  {
+    "rank": 100,
+    "wos_citations": 1846,
+    "first_author": "Hochberg, Y",
+    "title_and_source": "More powerful procedures for multiple signi\ufb01cance testing Statistics in Medicine",
+    "country": "Israel",
+    "year": 1990
+  }
+]

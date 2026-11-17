@@ -50,7 +50,7 @@ BENCHMARKS = [
     ("B03", "Modified Biochar Heavy Metals", "Carbon Research", "benchmark_biochar_citespace"),
     ("B04", "Blockchain Technology in Business", "Sustainability", "benchmark_blockchain_vosviewer"),
     ("B05", "ChatGPT in Medical Research", "Medical Sciences", "benchmark_chatgpt_medicine"),
-    ("B06", "Tooth Auto-Transplantation", "Clin. Exp. Dental Res.", "benchmark_dentistry_esi_top"),
+    ("B06", "Top Papers in Dentistry (ESI)", "Clin. Exp. Dental Res.", "benchmark_dentistry_esi_top"),
     ("B07", "Digital Transformation Trends", "SAGE Open", "benchmark_digital_transformation_kraus2021"),
     ("B08", "Distance Learning Longitudinal", "Int. J. Learn. Teach. Ed.", "benchmark_distance_learning_landscape"),
     ("B09", "Decadal Electrophysiology", "OpenAlex Graph", "benchmark_eeg_neuroscience"),

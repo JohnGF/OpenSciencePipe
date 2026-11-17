@@ -1,7 +1,9 @@
 import logging
 import argparse
+import json
 import os
 import sys
+from datetime import datetime, timezone
 
 from src.orchestrators.pipeline_manager import PipelineManager
 
@@ -47,16 +49,225 @@ def _load_dotenv_if_exists(dotenv_path: str = ".env"):
             except Exception:
                 pass
 
+_RUN_CONFIG_KEYS = (
+    "query",
+    "query_file",
+    "file",
+    "zenodo",
+    "merge_file",
+    "refs_file",
+    "sources",
+    "skip_sources",
+    "limit",
+    "start_year",
+    "end_year",
+    "output",
+    "mode",
+    "stages",
+    "include_regex",
+    "exclude_regex",
+    "criteria_file",
+    "target_prompt",
+    "screen_embeddings",
+    "embedding_threshold",
+    "screen_llm",
+    "llm_model",
+    "llm_topic_naming",
+    "subcluster_threshold",
+    "subcluster_passes",
+    "include_preprints",
+    "top_per_community",
+    "min_publications",
+    "skip_nlp",
+    "skip_network",
+    "skip_cagr",
+    "skip_country",
+    "skip_percolation",
+    "skip_llm",
+    "skip_collection",
+    "meta_analysis",
+    "picos_config",
+    "project_dir",
+)
+
+
+def _load_run_config(config_path: str) -> dict:
+    """Load a saved run_config.json file and return argparse-compatible defaults."""
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        raise ValueError(f"Expected JSON object in {config_path}")
+
+    defaults = {}
+    for key in _RUN_CONFIG_KEYS:
+        if key in data and data[key] is not None:
+            val = data[key]
+            if key in ("stages", "sources", "skip_sources") and isinstance(val, list):
+                val = ",".join(str(s) for s in val)
+            defaults[key] = val
+    return defaults
+
+
+def _load_run_meta(config_path: str) -> dict:
+    """Load metadata fields (source_status, dataset_file) from a saved run_config.json."""
+    with open(config_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, dict):
+        return {}
+    return {
+        "source_status": data.get("source_status") or {},
+        "dataset_file": data.get("dataset_file"),
+    }
+
+
+def _save_run_config(
+    output_dir: str,
+    args: argparse.Namespace,
+    active_query: str = None,
+    source_status: dict = None,
+    dataset_file: str = None,
+) -> str:
+    """Persist non-secret run settings and source status to <output_dir>/run_config.json."""
+    os.makedirs(output_dir, exist_ok=True)
+    config_path = os.path.join(output_dir, "run_config.json")
+
+    payload = {}
+    for key in _RUN_CONFIG_KEYS:
+        val = getattr(args, key, None)
+        if key == "query" and active_query is not None:
+            val = active_query
+        elif key in ("stages", "sources", "skip_sources") and isinstance(val, str):
+            val = [s.strip().lower() for s in val.split(",") if s.strip()]
+        payload[key] = val
+
+    if source_status is not None:
+        payload["source_status"] = source_status
+    if dataset_file is not None:
+        payload["dataset_file"] = dataset_file
+
+    payload["created_at"] = datetime.now(timezone.utc).isoformat()
+    payload["reproduce_command"] = f"biblio-pipeline --config {config_path}"
+
+    with open(config_path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    return config_path
+
+
+def _merge_and_deduplicate_files(file_paths: list, output_dir: str, collector) -> str:
+    """Merge multiple CSV/Parquet publication files and deduplicate by DOI/title."""
+    import pandas as pd
+
+    col_aliases = {
+        "doi": "DOI",
+        "title": "Title",
+        "authors": "Authors",
+        "year": "Year",
+        "abstract": "Abstract",
+        "affiliations": "Affiliations",
+        "cite_count": "Cite Count",
+        "source": "Source",
+        "keywords": "Author Keywords",
+    }
+
+    frames = []
+    for path in file_paths:
+        if not path or not os.path.exists(path):
+            raise FileNotFoundError(f"Merge input file not found: {path}")
+        if path.lower().endswith(".parquet"):
+            df = pd.read_parquet(path)
+        else:
+            df = pd.read_csv(path)
+        if df is not None and not df.empty:
+            rename_map = {src: dst for src, dst in col_aliases.items() if src in df.columns and dst not in df.columns}
+            if rename_map:
+                df = df.rename(columns=rename_map)
+            for req in ("DOI", "Title"):
+                if req not in df.columns:
+                    df[req] = ""
+            frames.append(df)
+
+    if not frames:
+        raise ValueError("No records found across input files to merge.")
+
+    merged = pd.concat(frames, ignore_index=True)
+    deduped = collector.deduplicate_dataframe(merged)
+
+    data_dir = os.path.join(output_dir, "data")
+    os.makedirs(data_dir, exist_ok=True)
+    merged_path = os.path.join(data_dir, "merged_dataset.csv")
+    deduped.to_csv(merged_path, index=False)
+    print(f"[INFO] Merged {len(frames)} dataset(s) ({len(merged)} -> {len(deduped)} unique records) to {merged_path}")
+    return merged_path
+
+
+def _plan_missing_sources(run_meta: dict, args: argparse.Namespace, manager) -> tuple:
+    """Summarize prior source_status and decide whether to fetch only missing sources."""
+    prev_status = run_meta.get("source_status") or {}
+    prev_dataset = run_meta.get("dataset_file")
+    if not prev_status:
+        return ("normal", None, {})
+
+    succeeded = [f"{s} ({info.get('count', 0)})" for s, info in prev_status.items() if info.get("status") == "success"]
+    non_success = {s: info for s, info in prev_status.items() if info.get("status") != "success"}
+
+    print("\n=== SAVED RUN SOURCE SUMMARY ===")
+    print("  Succeeded :", ", ".join(succeeded) if succeeded else "none")
+    if non_success:
+        details = [f"{s} [{info.get('status')}]" for s, info in non_success.items()]
+        print("  Incomplete:", ", ".join(details))
+
+    collector = manager.data_orch.collector
+    fetchable_missing = [s for s, info in non_success.items() if info.get("status") != "unknown" and collector.has_key_for(s)]
+    still_needs_key = [s for s, info in non_success.items() if info.get("status") != "unknown" and not collector.has_key_for(s)]
+
+    if still_needs_key:
+        from src.core.collection import SOURCE_KEY_REQUIREMENTS
+        print("\n[INFO] Some missing sources still require API keys before they can be fetched:")
+        for s in still_needs_key:
+            req = SOURCE_KEY_REQUIREMENTS.get(s, {})
+            print(f"  - {s}: set {req.get('env')} (or pass {req.get('flag')})")
+        print("  Run `biblio-pipeline --setup-keys` to configure keys, then re-run with `--config <path> --fetch-missing`.\n")
+
+    explicit_override = bool(args.sources or args.skip_sources or args.file)
+    should_fetch_missing = False
+    if args.fetch_missing:
+        if not fetchable_missing:
+            print("[INFO] No fetchable missing sources remain (either all succeeded or required keys are still missing).")
+            return ("done", prev_dataset, prev_status)
+        should_fetch_missing = True
+    elif fetchable_missing and not explicit_override and sys.stdin.isatty():
+        answer = input(
+            f"Fetch only the {len(fetchable_missing)} missing source(s) ({', '.join(fetchable_missing)}) "
+            f"and merge with existing data? [y/N]: "
+        ).strip().lower()
+        should_fetch_missing = answer in ("y", "yes")
+
+    if should_fetch_missing:
+        manager.config["sources"] = fetchable_missing
+        manager.data_orch.config["sources"] = fetchable_missing
+        manager.data_orch.collector.config["sources"] = fetchable_missing
+        print(f"[INFO] Fetching only missing source(s): {', '.join(fetchable_missing)}")
+        return ("fetch_missing", prev_dataset, prev_status)
+
+    return ("normal", None, prev_status)
+
+
 def main():
     _load_dotenv_if_exists()
     parser = argparse.ArgumentParser(
         description="Bibliometric Research & PRISMA Systematic Review Pipeline CLI",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+    parser.add_argument("--config", type=str, help="Path to a saved run_config.json file to reproduce or override a previous run")
+    parser.add_argument("--fetch-missing", action="store_true", help="With --config, fetch only sources that were missing/failed/key-gated and merge with the previous dataset")
     parser.add_argument("--file", type=str, help="Path to local CSV/Parquet file")
+    parser.add_argument("--zenodo", type=str, help="Zenodo record ID, URL, or DOI (e.g. '10.5281/zenodo.24269215') to download and run directly")
+    parser.add_argument("--merge-file", nargs="+", type=str, help="Additional CSV/Parquet dataset(s) to merge and deduplicate with the current run (e.g. from a collaborator with different API access)")
     parser.add_argument("--refs-file", type=str, help="Path to external references CSV file")
     parser.add_argument("--query", type=str, help="Search query for autonomous collection")
     parser.add_argument("--query-file", type=str, help="Path to text file containing search query")
+    parser.add_argument("--sources", type=str, help="Comma-separated list of API sources to fetch (e.g. 'web_of_science,scopus')")
+    parser.add_argument("--skip-sources", type=str, help="Comma-separated list of API sources to skip (e.g. 'openalex,crossref')")
     parser.add_argument("--limit", type=int, default=100, help="Limit per source for collection")
     parser.add_argument("--start-year", type=int, help="Start year for collection")
     parser.add_argument("--end-year", type=int, help="End year for collection")
@@ -69,6 +280,7 @@ def main():
     parser.add_argument("--scopus-api-key", type=str, help="API Key for Elsevier Scopus")
     parser.add_argument("--scopus-inst-token", type=str, help="Institutional Token for Scopus (optional)")
     parser.add_argument("--wos-api-key", type=str, help="API Key for Web of Science")
+    parser.add_argument("--ieee-api-key", type=str, help="API Key for IEEE Xplore")
 
     # Paper Screening & Systematic Review Filtering Options
     parser.add_argument("--include-regex", "--include-pattern", type=str, help="Grep/regex pattern(s) that MUST be present for study inclusion (e.g. 'algorithm|circuit|qubit')")
@@ -119,6 +331,16 @@ def main():
     parser.add_argument("--institution", type=str, help="Target institution for bibliometrics (e.g. 'Universidade de Lisboa')")
     parser.add_argument("--faculty", type=str, help="Sub-unit or faculty name (e.g. 'Faculdade de Ciências')")
     parser.add_argument("--year", type=int, default=2023, help="Publication year for institutional analysis")
+
+    pre_parser = argparse.ArgumentParser(add_help=False)
+    pre_parser.add_argument("--config", type=str)
+    pre_args, _ = pre_parser.parse_known_args()
+    run_meta = {}
+    if pre_args.config:
+        if not os.path.exists(pre_args.config):
+            parser.error(f"Config file not found: {pre_args.config}")
+        parser.set_defaults(**_load_run_config(pre_args.config))
+        run_meta = _load_run_meta(pre_args.config)
 
     args = parser.parse_args()
 
@@ -204,6 +426,7 @@ def main():
     if args.scopus_api_key: config["scopus_api_key"] = args.scopus_api_key
     if args.scopus_inst_token: config["scopus_inst_token"] = args.scopus_inst_token
     if args.wos_api_key: config["wos_api_key"] = args.wos_api_key
+    if args.ieee_api_key: config["ieee_api_key"] = args.ieee_api_key
 
     config["include_regex"] = args.include_regex
     config["exclude_regex"] = args.exclude_regex
@@ -220,6 +443,10 @@ def main():
 
     if args.stages:
         config["stages"] = [s.strip().lower() for s in args.stages.split(",")]
+    if args.sources:
+        config["sources"] = [s.strip().lower() for s in args.sources.split(",") if s.strip()]
+    if args.skip_sources:
+        config["skip_sources"] = [s.strip().lower() for s in args.skip_sources.split(",") if s.strip()]
     config["top_per_community"] = args.top_per_community
     config["min_publications"] = args.min_publications
     config["skip_nlp"] = args.skip_nlp
@@ -281,16 +508,78 @@ def main():
             return
 
         logger.info("=== PHASE 2: PIPELINE ANALYSIS ===")
+        saved_cfg = _save_run_config(results_dir, args, active_query=locals().get("project_query", active_query))
+        logger.info(f"Saved reproducible run config to {saved_cfg}")
         manager.run(dataset_file, refs_path=args.refs_file)
 
         logger.info("=== PROJECT EXECUTION COMPLETE ===")
         return
 
-    if active_query:
+    explicit_file = any(a == "--file" or a.startswith("--file=") for a in sys.argv[1:])
+    explicit_zenodo = any(a == "--zenodo" or a.startswith("--zenodo=") for a in sys.argv[1:])
+    explicit_query = any(
+        a in ("--query", "--query-file") or a.startswith("--query=") or a.startswith("--query-file=")
+        for a in sys.argv[1:]
+    )
 
-        manager.run_with_query(active_query, limit=args.limit, start_year=args.start_year, end_year=args.end_year)
-    elif args.file:
-        manager.run(args.file, refs_path=args.refs_file)
+    if args.file and (explicit_file or (not active_query and not explicit_zenodo)) and not explicit_query:
+        saved_cfg = _save_run_config(args.output, args)
+        print(f"[INFO] Saved reproducible run config to {saved_cfg}")
+        target_file = args.file
+        if args.merge_file:
+            target_file = _merge_and_deduplicate_files([args.file] + args.merge_file, args.output, manager.data_orch.collector)
+        manager.run(target_file, refs_path=args.refs_file)
+    elif args.zenodo and not explicit_query:
+        from src.core.ingestion import fetch_zenodo_dataset
+        saved_cfg = _save_run_config(args.output, args)
+        print(f"[INFO] Saved reproducible run config to {saved_cfg}")
+        target_file = fetch_zenodo_dataset(args.zenodo)
+        print(f"[INFO] Fetched Zenodo dataset: {target_file}")
+        if args.merge_file:
+            target_file = _merge_and_deduplicate_files([target_file] + args.merge_file, args.output, manager.data_orch.collector)
+        manager.run(target_file, refs_path=args.refs_file)
+    elif active_query:
+        plan_mode, prev_dataset, prev_status = _plan_missing_sources(run_meta, args, manager)
+        if plan_mode == "done":
+            return
+        saved_cfg = _save_run_config(args.output, args, active_query=active_query)
+        print(f"[INFO] Saved reproducible run config to {saved_cfg}")
+
+        extra_merge = list(args.merge_file or [])
+        if plan_mode == "fetch_missing" and prev_dataset and os.path.exists(prev_dataset):
+            extra_merge.insert(0, prev_dataset)
+
+        if extra_merge:
+            manager.profiler.start("1. Data Collection (APIs)")
+            collected_path = manager.data_orch.collect_data(
+                active_query, limit=args.limit, start_year=args.start_year, end_year=args.end_year
+            )
+            manager.profiler.stop("1. Data Collection (APIs)")
+            merge_inputs = ([collected_path] if collected_path else []) + extra_merge
+            merged_path = _merge_and_deduplicate_files(merge_inputs, args.output, manager.data_orch.collector)
+            manager.run(merged_path, refs_path=args.refs_file)
+        else:
+            manager.run_with_query(active_query, limit=args.limit, start_year=args.start_year, end_year=args.end_year)
+
+        new_status = getattr(manager.data_orch.collector, "last_source_status", None)
+        if isinstance(new_status, dict):
+            combined_status = dict(prev_status)
+            combined_status.update(new_status)
+        else:
+            combined_status = prev_status or None
+        pub_dataset = os.path.join(args.output, "data", "publication_dataset.csv")
+        _save_run_config(
+            args.output,
+            args,
+            active_query=active_query,
+            source_status=combined_status,
+            dataset_file=pub_dataset if os.path.exists(pub_dataset) else prev_dataset,
+        )
+    elif args.merge_file:
+        saved_cfg = _save_run_config(args.output, args)
+        print(f"[INFO] Saved reproducible run config to {saved_cfg}")
+        merged_path = _merge_and_deduplicate_files(args.merge_file, args.output, manager.data_orch.collector)
+        manager.run(merged_path, refs_path=args.refs_file)
     else:
         parser.print_help()
 
