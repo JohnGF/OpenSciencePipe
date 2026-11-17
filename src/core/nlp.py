@@ -201,7 +201,7 @@ class BERTopicPipeline:
         self,
         keywords: List[str],
         representative_docs: Optional[List[str]] = None,
-        timeout: int = 30,
+        timeout: int = 90,
     ) -> Optional[str]:
         """Generates a concise 3-6 word topic label via a local Ollama endpoint, or returns None on failure."""
         if not self.llm_model or not keywords:
