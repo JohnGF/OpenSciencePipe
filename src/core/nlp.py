@@ -344,7 +344,7 @@ class BERTopicPipeline:
             for _, crow in valid_children.iterrows():
                 cid = int(crow["Topic"])
                 ccount = int(crow["Count"])
-                words = [w[0] for w in (sub_model.get_topic(cid) or [])[:8]]
+                words = [w[0] for w in (sub_model.get_topic(cid) or [])[:10]]
                 rep_docs: List[str] = []
                 if hasattr(sub_model, "get_representative_docs"):
                     try:
@@ -358,7 +358,7 @@ class BERTopicPipeline:
                     "parent_label": parent_lbl,
                     "subtopic_id": f"{parent_id}.{cid}",
                     "subtopic_label": clabel,
-                    "keywords": ", ".join(words[:5]),
+                    "keywords": ", ".join(words[:10]),
                     "count": ccount,
                     "pass_depth": depth,
                 })
