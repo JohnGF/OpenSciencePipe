@@ -42,7 +42,9 @@ class AnalysisOrchestrator:
 
         theme = self.config.get("theme", "whitegrid")
         self.viz = Visualization(style=theme)
-        self.nlp = BERTopicPipeline()
+        llm_model = self.config.get("llm_model", "llama3.2:3b") if self.config.get("llm_topic_naming", False) else None
+        ollama_url = self.config.get("ollama_url", "http://localhost:11434")
+        self.nlp = BERTopicPipeline(llm_model=llm_model, ollama_url=ollama_url)
         self.network = NetworkAnalysis()
         self.country_analyzer = CountryAnalysis()
         self.citation_analyzer = CitationsAnalysis()
@@ -174,6 +176,8 @@ class AnalysisOrchestrator:
             docs = df["Abstract"].drop_nulls().to_list()
             if len(docs) >= 10:
                 topics, probs = self.nlp.fit_model(docs)
+                if self.config.get("llm_topic_naming", False):
+                    self.nlp.apply_llm_topic_labels()
                 topic_info = self.nlp.get_topics()
                 if topic_info is not None:
                     topic_info.to_csv(os.path.join(self.output_dir, "topic_info.csv"), index=False)
@@ -186,7 +190,7 @@ class AnalysisOrchestrator:
                 if topic_info is not None:
                     valid_topics = topic_info[topic_info["Topic"] != -1]
                     top_3_t = valid_topics.nlargest(3, "Count")
-                    top_3_str = "; ".join([f"Topic {r['Topic']} ({r['Name'][:30]}...): {r['Count']} papers" for _, r in top_3_t.iterrows()])
+                    top_3_str = "; ".join([f"Topic {r['Topic']} ({(r.get('CustomName') or r['Name'])[:30]}...): {r['Count']} papers" for _, r in top_3_t.iterrows()])
                     bullets = [
                         f"Abstracts Modeled: {len(docs):,}",
                         f"Discovered Distinct Topics: {len(valid_topics)}",

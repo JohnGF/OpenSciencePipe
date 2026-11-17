@@ -56,10 +56,19 @@ DEFAULT_TERM_MAPPING = {
 }
 
 class BERTopicPipeline:
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2", term_mapping: Optional[Dict] = None):
+    def __init__(
+        self,
+        model_name: str = "all-MiniLM-L6-v2",
+        term_mapping: Optional[Dict] = None,
+        llm_model: Optional[str] = None,
+        ollama_url: str = "http://localhost:11434",
+    ):
         self.model_name = model_name
         self.term_mapping = term_mapping or DEFAULT_TERM_MAPPING
+        self.llm_model = llm_model
+        self.ollama_url = ollama_url.rstrip("/")
         self.topic_model = None
+        self.custom_labels: Dict[int, str] = {}
 
     def preprocess_keywords(self, df: pl.DataFrame, column: str = "Author Keywords") -> pl.DataFrame:
         """Standardizes and explodes keywords as per existing logic."""
@@ -179,13 +188,94 @@ class BERTopicPipeline:
 
             # Map topic IDs to Topic Names for better readability
             topic_info = self.topic_model.get_topic_info()
-            topic_name_map = dict(zip(topic_info['Topic'], topic_info['Name']))
+            label_col = "CustomName" if "CustomName" in topic_info.columns else "Name"
+            topic_name_map = dict(zip(topic_info["Topic"], topic_info[label_col]))
 
             matrix.index = matrix.index.map(lambda x: topic_name_map.get(x, f"Topic {x}"))
             return matrix
         except Exception as e:
             logging.error(f"Failed to generate topic-keyword correlation: {e}")
             return pd.DataFrame()
+
+    def label_topic_with_llm(
+        self,
+        keywords: List[str],
+        representative_docs: Optional[List[str]] = None,
+        timeout: int = 30,
+    ) -> Optional[str]:
+        """Generates a concise 3-6 word topic label via a local Ollama endpoint, or returns None on failure."""
+        if not self.llm_model or not keywords:
+            return None
+
+        import json
+        import urllib.request
+
+        docs_snippet = "\n".join(
+            f"- {doc[:300].replace(chr(10), ' ')}"
+            for doc in (representative_docs or [])[:3]
+            if doc
+        )
+        prompt = (
+            "Generate a concise, domain-accurate 3 to 6 word scientific topic title "
+            "for a bibliometric cluster described by the following keywords"
+            + (" and representative abstracts.\n" if docs_snippet else ".\n")
+            + f"\nKeywords: {', '.join(keywords[:8])}\n"
+            + (f"Sample abstracts:\n{docs_snippet}\n" if docs_snippet else "")
+            + '\nReturn ONLY valid JSON: {"label": "<3 to 6 word title>"}'
+        )
+
+        payload = json.dumps({
+            "model": self.llm_model,
+            "prompt": prompt,
+            "format": "json",
+            "stream": False,
+            "options": {"temperature": 0.0},
+        }).encode("utf-8")
+
+        try:
+            req = urllib.request.Request(
+                f"{self.ollama_url}/api/generate",
+                data=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                if resp.status == 200:
+                    body = json.loads(resp.read().decode("utf-8"))
+                    parsed = json.loads(body.get("response", "{}"))
+                    label = str(parsed.get("label", "")).strip()
+                    if label:
+                        return label
+        except Exception as e:
+            logging.warning(f"LLM topic labeling failed (falling back to c-TF-IDF): {e}")
+
+        return None
+
+    def apply_llm_topic_labels(self) -> Dict[int, str]:
+        """Labels all non-outlier topics using the configured Ollama model and updates BERTopic custom labels."""
+        if not self.topic_model or not self.llm_model:
+            return {}
+
+        topic_info = self.topic_model.get_topic_info()
+        labels: Dict[int, str] = {}
+        for _, row in topic_info.iterrows():
+            topic_id = int(row["Topic"])
+            if topic_id == -1:
+                continue
+            words = [w[0] for w in (self.topic_model.get_topic(topic_id) or [])[:8]]
+            rep_docs: List[str] = []
+            if hasattr(self.topic_model, "get_representative_docs"):
+                try:
+                    rep_docs = self.topic_model.get_representative_docs(topic_id) or []
+                except Exception:
+                    rep_docs = []
+            label = self.label_topic_with_llm(words, rep_docs)
+            labels[topic_id] = label if label else str(row.get("Name", f"Topic {topic_id}"))
+
+        if labels:
+            self.custom_labels = labels
+            if hasattr(self.topic_model, "set_topic_labels"):
+                self.topic_model.set_topic_labels(labels)
+        return labels
 
     def get_research_lines(self, docs: Optional[List[str]] = None, nr_clusters: int = 5) -> pd.DataFrame:
         """Groups topics into broader 'Research Lines' using hierarchical clustering."""
@@ -203,10 +293,15 @@ class BERTopicPipeline:
                 
                 # Get the top keywords for this topic
                 words = [w[0] for w in self.topic_model.get_topic(topic_id)[:5]]
+                topic_label = (
+                    row.get("CustomName")
+                    or self.custom_labels.get(topic_id)
+                    or row.get("Name", f"Topic {topic_id}")
+                )
                 
                 research_lines.append({
                     "topic_id": topic_id,
-                    "topic_label": row.get('Name', f"Topic {topic_id}"),
+                    "topic_label": topic_label,
                     "keywords": ", ".join(words),
                     "count": row.get('Count', 0),
                 })
