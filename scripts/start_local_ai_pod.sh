@@ -38,8 +38,13 @@ fi
 
 # 1. Create shared network pod if it doesn't already exist
 if ! podman pod exists "$POD_NAME" 2>/dev/null; then
-    echo "Creating Podman pod '${POD_NAME}' (Ports: 8000, 11434)..."
-    podman pod create --name "$POD_NAME" -p 8000:8000 -p 11434:11434
+    if ss -ltn 2>/dev/null | grep -qE ':8000\b'; then
+        echo "Port 8000 is already in use; creating Podman pod '${POD_NAME}' on port 11434 only..."
+        podman pod create --name "$POD_NAME" -p 11434:11434
+    else
+        echo "Creating Podman pod '${POD_NAME}' (Ports: 8000, 11434)..."
+        podman pod create --name "$POD_NAME" -p 8000:8000 -p 11434:11434
+    fi
 else
     echo "Pod '${POD_NAME}' already exists."
 fi
@@ -79,10 +84,11 @@ echo ""
 echo " Run an end-to-end analysis with Local AIs only (BERTopic + LLM Buckets):"
 echo ""
 echo "   podman run --pod ${POD_NAME} $GPU_FLAGS --rm -it \\"
-echo "     -v \$(pwd):/app:z opensciencepipe \\"
+echo "     -v \$(pwd):/app:z biblio-pipeline \\"
 echo "     biblio-pipeline --query \"brain-computer interface\" \\"
 echo "                     --mode systematic \\"
 echo "                     --screen-llm \\"
+echo "                     --llm-topic-naming \\"
 echo "                     --llm-model ${MODEL_NAME}"
 echo ""
 echo " To stop the local AI pod when finished:"

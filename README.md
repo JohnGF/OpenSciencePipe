@@ -81,6 +81,7 @@ Launch the unified pod with one command:
 .venv/bin/biblio-pipeline --file data/publications.csv \
                           --mode systematic \
                           --screen-llm \
+                          --llm-topic-naming \
                           --llm-model llama3.2:3b \
                           --output outputs/my_topics
 
@@ -88,15 +89,17 @@ Launch the unified pod with one command:
 uv run biblio-pipeline --file data/publications.csv \
                        --mode systematic \
                        --screen-llm \
+                       --llm-topic-naming \
                        --llm-model llama3.2:3b \
                        --output outputs/my_topics
 
 # 2B. Or run inside the pod using the container:
 podman run --pod openscience-ai-pod --device nvidia.com/gpu=all --rm -it \
-  -v $(pwd):/app:z localhost/opensciencepipe \
+  -v $(pwd):/app:z localhost/biblio-pipeline \
   biblio-pipeline --file data/publications.csv \
                   --mode systematic \
                   --screen-llm \
+                  --llm-topic-naming \
                   --llm-model llama3.2:3b \
                   --output outputs/my_topics
 
