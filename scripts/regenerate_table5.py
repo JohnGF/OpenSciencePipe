@@ -146,7 +146,7 @@ def main():
                 for aff in df_corpus["Affiliations"].dropna():
                     for country in extract_countries(str(aff)):
                         c_counts[norm_country(country)] += 1
-            pipe_top5 = [c for c, _ in c_counts.most_common(5)]
+            pipe_top5 = [c for c, _ in sorted(c_counts.items(), key=lambda x: (-x[1], x[0]))[:5]]
             p_hits = len(set(pipe_top5) & set(gt_top5))
             n_hits = len(NAIVE_GLOBAL_TOP5 & set(gt_top5))
             pipe_pct = (p_hits / len(gt_top5)) * 100.0

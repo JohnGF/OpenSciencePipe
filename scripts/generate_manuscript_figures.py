@@ -151,7 +151,7 @@ def build_cr_country_bars_figure():
             for aff in df_c["Affiliations"].dropna():
                 for country in extract_countries(str(aff)):
                     counts[norm_country(country)] += 1
-        pipe_top5 = [c for c, _ in counts.most_common(5)]
+        pipe_top5 = [c for c, _ in sorted(counts.items(), key=lambda x: (-x[1], x[0]))[:5]]
         c_labels.append(bid)
         pipe_ov.append(100.0 * len(set(pipe_top5) & set(gt_top5)) / len(gt_top5))
         naive_ov.append(100.0 * len(NAIVE_GLOBAL_TOP5 & set(gt_top5)) / len(gt_top5))

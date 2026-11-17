@@ -194,7 +194,7 @@ def extract_countries(affiliation: str) -> List[str]:
                         countries_found.add(lower_to_common[cand.lower()])
                         break
 
-    return list(countries_found)
+    return sorted(countries_found)
 
 
 def generate_pdf_name(row: dict) -> str:
