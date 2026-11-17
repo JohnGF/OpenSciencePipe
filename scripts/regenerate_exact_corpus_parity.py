@@ -106,15 +106,20 @@ def eval_zenodo_llm_testing():
     vec = CountVectorizer(stop_words="english", ngram_range=(1, 2), min_df=2)
     X = vec.fit_transform(docs)
     vocab = np.array(vec.get_feature_names_out())
-    k_lda = len(valid_topics)
-    tds, aris, nmis = [], [], []
-    for seed in range(42, 47):
-        lda = LatentDirichletAllocation(n_components=k_lda, random_state=seed, max_iter=20, learning_method="batch")
-        pred = lda.fit_transform(X).argmax(axis=1)
-        words = [w for comp in lda.components_ for w in vocab[np.argsort(comp)[-10:]]]
-        tds.append(len(set(words)) / (k_lda * 10))
-        aris.append(adjusted_rand_score(gt_labels, pred[gt_mask]))
-        nmis.append(normalized_mutual_info_score(gt_labels, pred[gt_mask]))
+
+    def _run_lda(k_lda: int):
+        tds, aris, nmis = [], [], []
+        for seed in range(42, 47):
+            lda = LatentDirichletAllocation(n_components=k_lda, random_state=seed, max_iter=20, learning_method="batch")
+            pred = lda.fit_transform(X).argmax(axis=1)
+            words = [w for comp in lda.components_ for w in vocab[np.argsort(comp)[-10:]]]
+            tds.append(len(set(words)) / (k_lda * 10))
+            aris.append(adjusted_rand_score(gt_labels, pred[gt_mask]))
+            nmis.append(normalized_mutual_info_score(gt_labels, pred[gt_mask]))
+        return float(np.mean(tds)), float(np.mean(aris)), float(np.mean(nmis))
+
+    td_lda, ari_lda, nmi_lda = _run_lda(len(valid_topics))
+    td_lda4, ari_lda4, nmi_lda4 = _run_lda(4)
 
     return {
         "n": len(df),
@@ -123,9 +128,12 @@ def eval_zenodo_llm_testing():
         "outliers": outliers_pct,
         "ari_bt": ari_bt,
         "nmi_bt": nmi_bt,
-        "td_lda": float(np.mean(tds)),
-        "ari_lda": float(np.mean(aris)),
-        "nmi_lda": float(np.mean(nmis)),
+        "td_lda": td_lda,
+        "ari_lda": ari_lda,
+        "nmi_lda": nmi_lda,
+        "td_lda4": td_lda4,
+        "ari_lda4": ari_lda4,
+        "nmi_lda4": nmi_lda4,
     }
 
 

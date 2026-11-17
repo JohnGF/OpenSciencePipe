@@ -291,7 +291,7 @@ def main():
         "\\hline",
         "& & & \\multicolumn{3}{c}{\\textbf{Classical LDA (Blei et al., 2003)}} & \\multicolumn{3}{c}{\\textbf{OpenSciencePipe (BERTopic + HDBSCAN)}} \\\\",
         "\\cline{4-6} \\cline{7-9}",
-        "\\textbf{Benchmark Investigation} & \\textbf{Docs ($N_{\\text{abs}}$)} & \\textbf{$K_{\\text{pub}}$} & \\textbf{Rec. (All)} & \\textbf{Rec. (Matched-$N$)} & \\textbf{TD} & \\textbf{Recovered} & \\textbf{TD} & \\textbf{Outliers} \\\\",
+        "\\textbf{Benchmark Investigation} & \\textbf{Docs ($N_{\\text{all}}$)} & \\textbf{$K_{\\text{pub}}$} & \\textbf{Rec. (All)} & \\textbf{Rec. (Matched-$N$)} & \\textbf{TD} & \\textbf{Recovered} & \\textbf{TD} & \\textbf{Outliers} \\\\",
         "\\hline",
     ]
     for r in panel_a:

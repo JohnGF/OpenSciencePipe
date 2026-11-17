@@ -191,7 +191,7 @@ def main():
         "\\begin{table*}[t]",
         "\\centering",
         "\\small",
-        "\\caption{BERTopic \\& cuGraph Structural Clustering Quality Across Evaluated Scientometric Benchmark Corpora}",
+        "\\caption{Stage~1 BERTopic \\& cuGraph Structural Clustering Quality Across Open-API Scientometric Benchmark Harvests}",
         "\\label{tab:validation_thematic_clustering}",
         "\\resizebox{\\textwidth}{!}{%",
         "\\begin{tabular}{llp{2.6cm}ccccccc}",
@@ -215,9 +215,12 @@ def main():
             f"mean topic coherence is $\\overline{{C}}_{{\\text{{NPMI}}}} = {np.mean(npmis):.2f}$ (median {np.median(npmis):.2f}), "
             f"and mean density outlier isolation rate is {np.mean(outs):.1f}\\% (median {np.median(outs):.1f}\\%, range {min(outs):.1f}\\%--{max(outs):.1f}\\%). "
             f"$N$ reports total harvested records; $N_{{\\text{{abs}}}}$ (in parentheses when smaller) reports the subset with non-empty abstracts entering BERTopic. "
-            f"Top-$K$ nation overlap covers the {len(pipes)} domain benchmarks publishing national rankings ($K=5$; "
+            f"Top-$K$ nation overlap covers the {len(pipes)} domain benchmarks publishing national rankings ($K=5$; ``--'' indicates no published country ranking; "
             f"pipeline: range {min(pipes):.1f}\\%--{max(pipes):.1f}\\%, mean {np.mean(pipes):.1f}\\%, median {np.median(pipes):.1f}\\% vs.\\ "
-            f"naive OpenAlex global top-5 baseline [USA, China, UK, Germany, Japan]: mean {np.mean(naives):.1f}\\%, median {np.median(naives):.1f}\\%)."
+            f"naive OpenAlex global top-5 baseline [USA, China, UK, Germany, Japan]: mean {np.mean(naives):.1f}\\%, median {np.median(naives):.1f}\\%). "
+            f"Lower scores reflect three structural factors: (1) negative $C_{{\\text{{NPMI}}}}$ on B06 ($-0.1378$) arises from specialized dental/clinical c-TF-IDF terms with low pairwise co-occurrence in compact abstracts ($N_{{\\text{{abs}}}}=143$); "
+            f"(2) elevated Topic~$-1$ outlier rates on B07 ($48.9\\%$), B08 ($56.5\\%$), and B17 ($47.9\\%$) occur when fixed $m_{{\\text{{cl}}}}=10$ isolates sparse boundary documents in heterogeneous or multi-period corpora; "
+            f"and (3) $20.0\\%$ nation overlap on B01 and B18--B20 reflects Stage~1 open-API sampling divergence from proprietary WoS/Scopus exports plus missing affiliation metadata (see Section~\\ref{{sec:results}} for Stage~2 exact-corpus parity)."
         ),
         "\\end{table*}",
     ])
