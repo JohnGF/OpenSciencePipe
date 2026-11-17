@@ -1,8 +1,8 @@
 cff-version: 1.2.0
 message: "If you use this software in your research, please cite both the software and the accompanying manuscript."
 title: "OpenSciencePipe: An End-to-End Computational Framework for Automated Bibliometric Science Mapping"
-version: 1.1.0
-doi: "10.5281/zenodo.24295390"
+version: 1.1.1
+doi: "10.5281/zenodo.24322866"
 date-released: 2026-11-17
 url: "https://github.com/JohnGF/OpenSciencePipe"
 repository-code: "https://github.com/JohnGF/OpenSciencePipe"
