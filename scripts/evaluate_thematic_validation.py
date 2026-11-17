@@ -255,7 +255,7 @@ def evaluate_benchmark_alignment(threshold: float = 0.10):
         f.write(
             f"\\vspace{{2pt}}\\par\\raggedright\\scriptsize\\textit{{Note:}} Evaluates the {len(evaluated_benchmarks)} benchmarks with verbatim published cluster definitions stored in \\texttt{{data/benchmarks/*.json}} "
             f"({total_pub} published clusters total). At Jaccard threshold $\\tau = {threshold:.2f}$, OpenSciencePipe recovers "
-            f"{total_m2o}/{total_pub} ({100*total_m2o/total_pub:.1f}\\%) under many-to-one assignment and "
+            f"{total_m2o}/{total_pub} ({100*total_m2o/total_pub:.1f}\\%) under argmax-per-topic assignment and "
             f"{total_hung}/{total_pub} ({100*total_hung/total_pub:.1f}\\%) under one-to-one Hungarian matching "
             f"(permutation baseline: {np.mean(perm_hung_scores):.1f}\\% $\\pm$ {np.std(perm_hung_scores):.1f}\\%).\n"
         )
