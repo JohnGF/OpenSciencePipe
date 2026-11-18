@@ -27,8 +27,16 @@ biblio-pipeline --query "brain-computer interface"
 
 ## Quick Start (Run in Seconds)
 
-### Step 0: API Credentials Setup (Optional, 30 Seconds)
-OpenSciencePipe queries open scholarly literature (OpenAlex, Crossref, PubMed) out of the box with zero configuration. To unlock maximum harvesting throughput via dedicated polite pools (up to 10 req/s), set your contact email:
+### Step 0: API Credentials Setup (2 Minutes — Don't Skip the OpenAlex Key)
+OpenSciencePipe queries open scholarly literature (OpenAlex, Crossref, PubMed). Crossref and PubMed work without any setup, but **OpenAlex now needs a free API key**: without one, every request from your IP shares a tiny anonymous daily budget, and runs fail with `401 Unauthorized` after a page or two.
+
+1. **OpenAlex key (free, $1/day of credit):** sign in at [openalex.org/settings/api-key](https://openalex.org/settings/api-key) (login is an emailed link) and copy the key.
+2. Put it, plus a contact email, in `.env`:
+   ```bash
+   OPENALEX_API_KEY="your_key"
+   OPENALEX_EMAIL="you@example.com"
+   ```
+3. Optional free keys that raise other rate limits: [Semantic Scholar](https://www.semanticscholar.org/product/api#api-key-form) (`SS_API_KEY`), [NCBI/PubMed](https://account.ncbi.nlm.nih.gov/settings/) (`PUBMED_API_KEY`).
 
 ```bash
 # Guided interactive onboarding wizard:

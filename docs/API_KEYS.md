@@ -30,7 +30,7 @@ biblio-pipeline --check-keys
 
 | Provider | Access Model | Rate Limits | Required Config | Signup / Request Link |
 | :--- | :--- | :--- | :--- | :--- |
-| **OpenAlex** | Open & Free | 10 req/s (polite) | `OPENALEX_EMAIL` | No signup needed. Use any valid contact email. |
+| **OpenAlex** | Free key required | $1/day credit per key (anonymous: tiny shared per-IP budget) | `OPENALEX_API_KEY`<br>`OPENALEX_EMAIL` | [OpenAlex API key](https://openalex.org/settings/api-key) (free; sign in via emailed link) |
 | **Crossref** | Open & Free | 50 req/s (polite) | `CROSSREF_EMAIL` | No signup needed. Use any valid contact email. |
 | **PubMed (NCBI)** | Open & Free | 3 req/s (public)<br>10 req/s (key) | `PUBMED_API_KEY` | [NCBI API Key](https://ncbiinsights.ncbi.nlm.nih.gov/2017/11/02/new-api-keys-for-the-e-utilities/) |
 | **Semantic Scholar** | Open & Free | Shared (public)<br>100 req/min (key) | `SS_API_KEY` | [Semantic Scholar API](https://www.semanticscholar.org/product/api#api-key-form) |
@@ -54,6 +54,9 @@ cp .env.example .env
 ### Template Example (`.env`):
 
 ```bash
+# OpenAlex API key (REQUIRED for OpenAlex: https://openalex.org/settings/api-key)
+OPENALEX_API_KEY=""
+
 # Contact email for OpenAlex & Crossref polite pools (RECOMMENDED)
 OPENALEX_EMAIL="user@example.com"
 CROSSREF_EMAIL="user@example.com"
@@ -74,10 +77,16 @@ SPRINGER_API_KEY=""
 
 ## 4. How to Obtain API Keys
 
-### OpenAlex & Crossref (Recommended, 100% Free)
-- OpenAlex and Crossref do **not** require API keys or developer accounts.
-- By sending a valid email address in the request header, OpenAlex and Crossref route your requests into their dedicated "polite pools," unlocking significantly higher speed and reliability.
-- Set `OPENALEX_EMAIL="user@example.com"` in `.env`.
+### OpenAlex (Free API Key — Required)
+- Since 2026 OpenAlex requires an API key. Without one, all requests from your IP share a tiny anonymous daily budget and harvesting stops with `401 Unauthorized` after a page or two.
+1. Sign in at [openalex.org/settings/api-key](https://openalex.org/settings/api-key) (login is a link emailed to you; new accounts are created the same way).
+2. Copy the key and set `OPENALEX_API_KEY="..."` in `.env` (or export it in your shell / password manager).
+3. A free key comes with $1/day of credit, plenty for a few thousand records per run. Docs: [docs.openalex.org](https://docs.openalex.org/).
+
+### Crossref (100% Free, No Key)
+- Crossref does **not** require an API key or developer account.
+- Sending a valid email address routes your requests into the "polite pool", which is faster and more reliable.
+- Set `CROSSREF_EMAIL="user@example.com"` (and `OPENALEX_EMAIL`) in `.env`.
 
 ### Semantic Scholar
 1. Go to the [Semantic Scholar API Key Form](https://www.semanticscholar.org/product/api#api-key-form).
