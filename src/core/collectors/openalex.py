@@ -10,7 +10,10 @@ logger = logging.getLogger(__name__)
 class OpenAlexCollector:
     BASE_URL = "https://api.openalex.org/works"
 
-    def __init__(self, email: Optional[str] = None):
+    def __init__(self, email: Optional[str] = None, api_key: Optional[str] = None):
+        import os
+        # OpenAlex requires an API key since 2026 (anonymous calls share a tiny per-IP budget)
+        self.api_key = api_key or os.environ.get("OPENALEX_API_KEY") or os.environ.get("AIOPENALEX")
         self.headers = {"User-Agent": f"BibliometricPipeline/1.0 (mailto:{email or 'john@example.com'})"}
         if email:
             self.headers["mailto"] = email
@@ -74,6 +77,8 @@ class OpenAlexCollector:
                 "cursor": cursor,
                 "select": "title,abstract_inverted_index,authorships,publication_year,doi,ids,keywords,concepts,cited_by_count,referenced_works",
             }
+            if self.api_key:
+                params["api_key"] = self.api_key
             if search_param:
                 params["search"] = search_param
             if filters:
@@ -124,7 +129,7 @@ class OpenAlexCollector:
                 reraise=True
             )
             def _fetch():
-                response = httpx.get(url, headers=self.headers, timeout=15.0)
+                response = httpx.get(url, params={"api_key": self.api_key} if self.api_key else None, headers=self.headers, timeout=15.0)
                 if response.status_code == 404:
                     return None
                 response.raise_for_status()

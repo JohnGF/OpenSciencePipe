@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from typing import List, Optional, Dict
 import logging
@@ -232,6 +233,17 @@ class UnifiedCollector:
         merged_df["normalized_doi"] = merged_df["DOI"].apply(normalize_doi)
         merged_df["normalized_title"] = merged_df["Title"].apply(normalize_title)
 
+        def _cell_is_empty(v) -> bool:
+            # list/array cells (e.g. authors, keywords) can't go through pd.isna / == ""
+            if v is None:
+                return True
+            if isinstance(v, (list, tuple, np.ndarray)):
+                return len(v) == 0
+            try:
+                return bool(pd.isna(v)) or v == ""
+            except (TypeError, ValueError):
+                return False
+
         # Merge matching rows
         def merge_group(group: pd.DataFrame) -> pd.Series:
             merged = group.iloc[0].copy()
@@ -241,8 +253,8 @@ class UnifiedCollector:
                     val = row[col]
                     curr = merged[col]
                     
-                    is_curr_empty = pd.isna(curr) or curr == "" or curr is None or (isinstance(curr, list) and not curr)
-                    is_val_present = not pd.isna(val) and val != "" and val is not None and not (isinstance(val, list) and not val)
+                    is_curr_empty = _cell_is_empty(curr)
+                    is_val_present = not _cell_is_empty(val)
                     
                     if is_curr_empty and is_val_present:
                         merged[col] = val
